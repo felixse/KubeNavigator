@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="KubeNavigator.Views.ItemListView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="using:CommunityToolkit.WinUI.Behaviors"
+    xmlns:communityConverters="using:CommunityToolkit.WinUI.Converters"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:converters="using:KubeNavigator.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helm="using:KubeNavigator.ViewModels.Helm"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:local="using:KubeNavigator.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:resourceViewModels="using:KubeNavigator.ViewModels.Resources"
+    xmlns:templateselectors="using:KubeNavigator.TemplateSelectors"
+    xmlns:viewmodels="using:KubeNavigator.ViewModels"
+    x:Name="Root"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <templateselectors:NamespaceFilterTemplateSelector x:Key="NamespaceFilterTemplateSelector">
+            <templateselectors:NamespaceFilterTemplateSelector.AllNamespacesTemplate>
+                <DataTemplate x:DataType="viewmodels:AllNamespacesFilter">
+                    <TextBlock Text="All Namespaces" />
+                </DataTemplate>
+            </templateselectors:NamespaceFilterTemplateSelector.AllNamespacesTemplate>
+            <templateselectors:NamespaceFilterTemplateSelector.NamespaceTemplate>
+                <DataTemplate x:DataType="viewmodels:NamespaceFilter">
+                    <TextBlock>
+                        <Run Text="Namespace: " />
+                        <Run Text="{x:Bind Name}" />
+                    </TextBlock>
+                </DataTemplate>
+            </templateselectors:NamespaceFilterTemplateSelector.NamespaceTemplate>
+        </templateselectors:NamespaceFilterTemplateSelector>
+        <templateselectors:TableTemplateSelector x:Key="TableTemplateSelector">
+            <templateselectors:TableTemplateSelector.KubernetesResourceTemplate>
+                <DataTemplate x:DataType="resourceViewModels:KubernetesResourceViewModel">
+                    <controls:DataRow
+                        HorizontalAlignment="Left"
+                        Background="Transparent"
+                        ContextFlyout="{x:Bind Converter={StaticResource ListItemToMenuConverter}}">
+                        <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Namespace}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Age, Mode=OneWay}" />
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:TableTemplateSelector.KubernetesResourceTemplate>
+            <templateselectors:TableTemplateSelector.ForwardedPortTemplate>
+                <DataTemplate x:DataType="viewmodels:ForwardedPortViewModel">
+                    <controls:DataRow HorizontalAlignment="Left" Background="Transparent">
+                        <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Pod.Name}" />
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:TableTemplateSelector.ForwardedPortTemplate>
+            <templateselectors:TableTemplateSelector.HelmReleaseTemplate>
+                <DataTemplate x:DataType="helm:HelmReleaseViewModel">
+                    <controls:DataRow HorizontalAlignment="Left" Background="Transparent">
+                        <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Namespace}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Chart}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Revision}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Version}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind AppVersion}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Status}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Updated}" />
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:TableTemplateSelector.HelmReleaseTemplate>
+        </templateselectors:TableTemplateSelector>
+        <templateselectors:TableHeaderTemplateSelector x:Key="TableHeaderTemplateSelector">
+            <templateselectors:TableHeaderTemplateSelector.KubernetesResourceTemplate>
+                <DataTemplate x:DataType="viewmodels:KubernetesResourceTypeListViewModel">
+                    <controls:DataTable ColumnSpacing="16">
+                        <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
+                            <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
+                        </controls:DataColumn>
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Name"
+                            DesiredWidth="Auto" />
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Namespace"
+                            DesiredWidth="Auto" />
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Age"
+                            DesiredWidth="Auto" />
+                    </controls:DataTable>
+                </DataTemplate>
+            </templateselectors:TableHeaderTemplateSelector.KubernetesResourceTemplate>
+            <templateselectors:TableHeaderTemplateSelector.ForwardedPortTemplate>
+                <DataTemplate x:DataType="viewmodels:PortForwardsViewModel">
+                    <controls:DataTable ColumnSpacing="16">
+                        <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
+                            <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
+                        </controls:DataColumn>
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Pod Name"
+                            DesiredWidth="Auto" />
+                    </controls:DataTable>
+                </DataTemplate>
+            </templateselectors:TableHeaderTemplateSelector.ForwardedPortTemplate>
+            <templateselectors:TableHeaderTemplateSelector.HelmReleaseTemplate>
+                <DataTemplate x:DataType="helm:HelmReleasesViewModel">
+                    <controls:DataTable ColumnSpacing="16">
+                        <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
+                            <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
+                        </controls:DataColumn>
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Name"
+                            DesiredWidth="Auto" />
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Namespace"
+                            DesiredWidth="Auto" />
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Chart"
+                            DesiredWidth="Auto" />
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Revision"
+                            DesiredWidth="Auto" />
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Version"
+                            DesiredWidth="Auto" />
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="App Version"
+                            DesiredWidth="Auto" />
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Status"
+                            DesiredWidth="Auto" />
+                        <controls:DataColumn
+                            CanResize="True"
+                            Content="Updated"
+                            DesiredWidth="Auto" />
+                    </controls:DataTable>
+                </DataTemplate>
+            </templateselectors:TableHeaderTemplateSelector.HelmReleaseTemplate>
+        </templateselectors:TableHeaderTemplateSelector>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Margin="8,0,0,0"
+                VerticalAlignment="Center"
+                Style="{ThemeResource SubtitleTextBlockStyle}"
+                Text="{x:Bind ViewModel.Title}" />
+
+            <CommandBar Grid.Column="1" DefaultLabelPosition="Collapsed">
+                <AppBarButton
+                    Width="36"
+                    Command="{x:Bind ViewModel.DeleteSelectedItemsCommand}"
+                    Icon="Delete"
+                    ToolTipService.ToolTip="Delete" />
+                <AppBarButton
+                    Width="36"
+                    Icon="Add"
+                    ToolTipService.ToolTip="Add" />
+            </CommandBar>
+            <TextBlock
+                Grid.Column="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                <Run Text="{x:Bind ViewModel.Items.Count, Mode=OneWay}" />
+                <Run Text="item(s)" />
+            </TextBlock>
+            <StackPanel
+                Grid.Column="3"
+                Orientation="Horizontal"
+                Spacing="8">
+                <ComboBox
+                    MinWidth="240"
+                    VerticalAlignment="Center"
+                    ItemTemplateSelector="{StaticResource NamespaceFilterTemplateSelector}"
+                    ItemsSource="{x:Bind ViewModel.NamespaceFilters, Mode=OneWay}"
+                    SelectedItem="{x:Bind ViewModel.Workspace.SelectedNamespaceFilter, Mode=TwoWay}"
+                    Visibility="{x:Bind ViewModel.IsNamespaceScoped, Converter={StaticResource TrueToVisibleConverter}}" />
+                <TextBox
+                    Width="220"
+                    Height="32"
+                    PlaceholderText="Search..."
+                    Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </Grid>
+        <ListView
+            Grid.Row="1"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="4"
+            ItemTemplateSelector="{StaticResource TableTemplateSelector}"
+            ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
+            SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}">
+            <ListView.Header>
+                <Border
+                    Background="{ThemeResource SolidBackgroundFillColorQuarternaryBrush}"
+                    BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+                    BorderThickness="0,0,0,1">
+                    <interactivity:Interaction.Behaviors>
+                        <behaviors:StickyHeaderBehavior />
+                    </interactivity:Interaction.Behaviors>
+                    <ContentControl Content="{x:Bind ViewModel}" ContentTemplateSelector="{StaticResource TableHeaderTemplateSelector}" />
+                </Border>
+            </ListView.Header>
+        </ListView>
+        <ProgressRing Grid.Row="1" Visibility="{x:Bind ViewModel.Items, Mode=OneWay, Converter={StaticResource NullToVisibleConverter}}" />
+    </Grid>
+</UserControl>

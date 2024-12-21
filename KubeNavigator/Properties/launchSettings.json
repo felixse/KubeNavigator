@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "KubeNavigator (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "KubeNavigator (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

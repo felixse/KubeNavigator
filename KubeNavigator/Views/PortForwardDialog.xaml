@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="KubeNavigator.Views.PortForwardDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:KubeNavigator.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Style="{ThemeResource DefaultContentDialogStyle}"
+    mc:Ignorable="d">
+
+    <StackPanel Spacing="16">
+        <TextBlock x:Name="SubTitleTextBlock" Style="{ThemeResource BodyStrongTextBlockStyle}" />
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock VerticalAlignment="Center" Text="Local port:" />
+            <NumberBox
+                x:Name="PortNumberBox"
+                VerticalAlignment="Center"
+                Maximum="65535"
+                Minimum="0"
+                PlaceholderText="Random"
+                ValidationMode="InvalidInputOverwritten"
+                ValueChanged="PortNumberBox_ValueChanged" />
+        </StackPanel>
+        <CheckBox Content="Open in Browser" IsChecked="{x:Bind OpenInBrowser, Mode=TwoWay}" />
+    </StackPanel>
+</ContentDialog>

@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="KubeNavigator.Views.ResourceDetailsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:converters="using:KubeNavigator.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:details="using:KubeNavigator.Model.Details"
+    xmlns:local="using:KubeNavigator.Views"
+    xmlns:markdowntextblock="using:CommunityToolkit.Labs.WinUI.MarkdownTextBlock"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:templateselectors="using:KubeNavigator.TemplateSelectors"
+    xmlns:viewmodels="using:KubeNavigator.ViewModels"
+    x:Name="Foo"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <templateselectors:DetailsContentTemplateSelector x:Key="DetailsContentTemplateSelector">
+            <templateselectors:DetailsContentTemplateSelector.TextTemplate>
+                <DataTemplate x:DataType="details:DetailsTextItem">
+                    <controls:DataRow Margin="0,4,0,4">
+                        <TextBlock
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Title}" />
+                        <controls:SwitchPresenter Value="{x:Bind ValueColorString}">
+                            <controls:Case Value="Success">
+                                <TextBlock
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                    IsTextSelectionEnabled="True"
+                                    Text="{x:Bind Value}" />
+                            </controls:Case>
+                            <controls:Case Value="Info">
+                                <TextBlock
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{ThemeResource SystemFillColorAttentionBrush}"
+                                    IsTextSelectionEnabled="True"
+                                    Text="{x:Bind Value}" />
+                            </controls:Case>
+                            <controls:Case Value="Warning">
+                                <TextBlock
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                    IsTextSelectionEnabled="True"
+                                    Text="{x:Bind Value}" />
+                            </controls:Case>
+                            <controls:Case Value="Error">
+                                <TextBlock
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                    IsTextSelectionEnabled="True"
+                                    Text="{x:Bind Value}" />
+                            </controls:Case>
+                            <controls:Case Value="Default">
+                                <TextBlock
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    IsTextSelectionEnabled="True"
+                                    Text="{x:Bind Value}" />
+                            </controls:Case>
+                        </controls:SwitchPresenter>
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:DetailsContentTemplateSelector.TextTemplate>
+            <templateselectors:DetailsContentTemplateSelector.CollectionTemplate>
+                <DataTemplate x:DataType="details:DetailsCollectionItem">
+                    <controls:DataRow Margin="0,4,0,4">
+                        <TextBlock
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Title}" />
+                        <ItemsRepeater
+                            MaxWidth="360"
+                            HorizontalAlignment="Left"
+                            ItemsSource="{x:Bind Items}">
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Border
+                                        Padding="8,4,8,4"
+                                        Background="{ThemeResource ControlAltFillColorQuarternaryBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="2">
+                                        <TextBlock
+                                            IsTextSelectionEnabled="True"
+                                            Text="{x:Bind}"
+                                            TextTrimming="CharacterEllipsis"
+                                            ToolTipService.ToolTip="{x:Bind}" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                            <ItemsRepeater.Layout>
+                                <controls:WrapLayout
+                                    HorizontalSpacing="4"
+                                    Orientation="Horizontal"
+                                    VerticalSpacing="4" />
+                            </ItemsRepeater.Layout>
+                        </ItemsRepeater>
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:DetailsContentTemplateSelector.CollectionTemplate>
+            <templateselectors:DetailsContentTemplateSelector.LinkTemplate>
+                <DataTemplate x:DataType="details:DetailsLinkItem">
+                    <controls:DataRow Margin="0,4,0,4">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Title}" />
+                        <Border>
+                            <HyperlinkButton
+                                Padding="2"
+                                Click="HyperlinkButton_Click"
+                                Visibility="{x:Bind ResourceName, Converter={StaticResource NullToCollapsedConverter}}">
+                                <HyperlinkButton.Content>
+                                    <TextBlock>
+                                        <Run Text="{x:Bind Prefix}" />
+                                        <Run Text="{x:Bind ResourceName}" />
+                                    </TextBlock>
+                                </HyperlinkButton.Content>
+                            </HyperlinkButton>
+                        </Border>
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:DetailsContentTemplateSelector.LinkTemplate>
+            <templateselectors:DetailsContentTemplateSelector.PortsTemplate>
+                <DataTemplate x:DataType="details:DetailsPortsItem">
+                    <controls:DataRow Margin="0,4,0,4">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="Ports" />
+                        <ItemsRepeater ItemsSource="{x:Bind Ports}">
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="viewmodels:PortViewModel">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <HyperlinkButton
+                                            Padding="2"
+                                            VerticalAlignment="Center"
+                                            Command="{x:Bind InvokeCommand}"
+                                            Content="{x:Bind Link, Mode=OneWay}" />
+                                        <controls:SwitchPresenter VerticalAlignment="Center" Value="{x:Bind ForwardedPort.Status, Converter={StaticResource ToStringConverter}, Mode=OneWay}">
+                                            <controls:Case Value="{x:Null}">
+                                                <Button
+                                                    Command="{x:Bind ShowForwardingDialogCommand}"
+                                                    Content="Forward..."
+                                                    Style="{StaticResource AccentButtonStyle}" />
+                                            </controls:Case>
+                                            <controls:Case Value="Active">
+                                                <AppBarButton
+                                                    Width="36"
+                                                    Height="48"
+                                                    Command="{x:Bind StopCommand}"
+                                                    ToolTipService.ToolTip="Stop">
+                                                    <AppBarButton.Icon>
+                                                        <SymbolIcon Symbol="Stop" />
+                                                    </AppBarButton.Icon>
+                                                </AppBarButton>
+                                            </controls:Case>
+                                            <controls:Case Value="Disabled">
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <AppBarButton
+                                                        Width="36"
+                                                        Height="48"
+                                                        Command="{x:Bind StartCommand}"
+                                                        ToolTipService.ToolTip="Start">
+                                                        <AppBarButton.Icon>
+                                                            <SymbolIcon Symbol="Play" />
+                                                        </AppBarButton.Icon>
+                                                    </AppBarButton>
+                                                    <AppBarButton
+                                                        Width="36"
+                                                        Height="48"
+                                                        Command="{x:Bind ShowForwardingDialogCommand}"
+                                                        ToolTipService.ToolTip="Edit">
+                                                        <AppBarButton.Icon>
+                                                            <SymbolIcon Symbol="Edit" />
+                                                        </AppBarButton.Icon>
+                                                    </AppBarButton>
+                                                    <AppBarButton
+                                                        Width="36"
+                                                        Height="48"
+                                                        Command="{x:Bind DeleteForwardedPortCommand}"
+                                                        ToolTipService.ToolTip="Delete">
+                                                        <AppBarButton.Icon>
+                                                            <SymbolIcon Symbol="Delete" />
+                                                        </AppBarButton.Icon>
+                                                    </AppBarButton>
+                                                </StackPanel>
+                                            </controls:Case>
+                                        </controls:SwitchPresenter>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                            <ItemsRepeater.Layout>
+                                <StackLayout Spacing="4" />
+                            </ItemsRepeater.Layout>
+                        </ItemsRepeater>
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:DetailsContentTemplateSelector.PortsTemplate>
+            <templateselectors:DetailsContentTemplateSelector.TableTemplate>
+                <DataTemplate x:DataType="details:DetailsTableItem">
+                    <controls:DataRow Margin="0,4,0,4">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Title}" />
+                        <StackPanel Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock VerticalAlignment="Center" Text="{x:Bind Count, Mode=OneWay}" />
+                                <HyperlinkButton Command="{x:Bind ToggleIsExpandedCommand}" Content="{x:Bind ExpandButtonText, Mode=OneWay}" />
+                            </StackPanel>
+                            <markdowntextblock:MarkdownTextBlock
+                                Config="{x:Bind local:ResourceDetailsView.GetMarkdownConfig()}"
+                                Text="{x:Bind Markdown, Mode=OneWay}"
+                                Visibility="{x:Bind IsExpanded, Mode=OneWay}" />
+                        </StackPanel>
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:DetailsContentTemplateSelector.TableTemplate>
+            <templateselectors:DetailsContentTemplateSelector.DictionaryTemplate>
+                <DataTemplate x:DataType="details:DetailsDictionaryItem">
+                    <controls:DataRow Margin="0,4,0,4">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Title}" />
+                        <Border Background="Transparent">
+                            <Border.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Command="{x:Bind CopyAsJsonCommand}" Text="Copy as JSON" />
+                                    <MenuFlyoutItem Command="{x:Bind CopyAsYamlCommand}" Text="Copy as YAML" />
+                                </MenuFlyout>
+                            </Border.ContextFlyout>
+                            <ItemsRepeater ItemsSource="{x:Bind Items}">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="details:DetailsDictionaryEntry">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                VerticalAlignment="Top"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Text="{x:Bind Key}" />
+                                            <TextBlock
+                                                Margin="8,0,0,0"
+                                                VerticalAlignment="Center"
+                                                IsTextSelectionEnabled="True"
+                                                Text="{x:Bind Value}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                                <ItemsRepeater.Layout>
+                                    <StackLayout Spacing="4" />
+                                </ItemsRepeater.Layout>
+                            </ItemsRepeater>
+                        </Border>
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:DetailsContentTemplateSelector.DictionaryTemplate>
+        </templateselectors:DetailsContentTemplateSelector>
+        <templateselectors:DetailsSectionTemplateSelector x:Key="DetailsSectionTemplateSelector">
+            <templateselectors:DetailsSectionTemplateSelector.SectionTemplate>
+                <DataTemplate x:DataType="details:DetailsSection">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock
+                            Style="{ThemeResource SubtitleTextBlockStyle}"
+                            Text="{x:Bind Header}"
+                            Visibility="{x:Bind Header, Converter={StaticResource NullToCollapsedConverter}}" />
+                        <controls:HeaderedItemsControl
+                            Grid.Row="1"
+                            ItemTemplateSelector="{StaticResource DetailsContentTemplateSelector}"
+                            ItemsSource="{x:Bind Items}">
+                            <controls:HeaderedItemsControl.Header>
+                                <controls:DataTable>
+                                    <controls:DataColumn DesiredWidth="Auto" />
+                                    <controls:DataColumn DesiredWidth="*" />
+                                </controls:DataTable>
+                            </controls:HeaderedItemsControl.Header>
+                        </controls:HeaderedItemsControl>
+                    </Grid>
+                </DataTemplate>
+            </templateselectors:DetailsSectionTemplateSelector.SectionTemplate>
+            <templateselectors:DetailsSectionTemplateSelector.GroupedSectionTemplate>
+                <DataTemplate x:DataType="details:GroupedDetailsSection">
+                    <StackPanel>
+                        <TextBlock
+                            Margin="0,0,0,8"
+                            Style="{ThemeResource SubtitleTextBlockStyle}"
+                            Text="{x:Bind Title}" />
+                        <ItemsRepeater ItemsSource="{x:Bind Groups}">
+                            <ItemsRepeater.Layout>
+                                <StackLayout Spacing="8" />
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="details:DetailsGroup">
+                                    <Expander HorizontalAlignment="Stretch" IsExpanded="True">
+                                        <Expander.Transitions>
+                                            <TransitionCollection />
+                                        </Expander.Transitions>
+                                        <Expander.Header>
+                                            <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Title}" />
+                                        </Expander.Header>
+                                        <controls:HeaderedItemsControl ItemTemplateSelector="{StaticResource DetailsContentTemplateSelector}" ItemsSource="{x:Bind Items}">
+                                            <controls:HeaderedItemsControl.Header>
+                                                <controls:DataTable ColumnSpacing="16">
+                                                    <controls:DataColumn DesiredWidth="Auto" />
+                                                    <controls:DataColumn DesiredWidth="*" />
+                                                </controls:DataTable>
+                                            </controls:HeaderedItemsControl.Header>
+                                        </controls:HeaderedItemsControl>
+                                    </Expander>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </StackPanel>
+                </DataTemplate>
+            </templateselectors:DetailsSectionTemplateSelector.GroupedSectionTemplate>
+        </templateselectors:DetailsSectionTemplateSelector>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ItemsControl
+            Margin="8"
+            ItemTemplateSelector="{StaticResource DetailsSectionTemplateSelector}"
+            ItemsSource="{x:Bind ViewModel.SelectedResource.Details, Mode=OneWay}" />
+    </ScrollViewer>
+</UserControl>

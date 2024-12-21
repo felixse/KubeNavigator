@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="KubeNavigator.Views.WorkspaceView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:converters="using:CommunityToolkit.WinUI.Converters"
+    xmlns:converters1="using:KubeNavigator.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:KubeNavigator.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:media="using:CommunityToolkit.WinUI.Media"
+    xmlns:navigationViewModels="using:KubeNavigator.ViewModels.Navigation"
+    xmlns:shelf="using:KubeNavigator.ViewModels.Shelf"
+    xmlns:system="using:System"
+    xmlns:templateselectors="using:KubeNavigator.TemplateSelectors"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:viewmodels="using:KubeNavigator.ViewModels"
+    xmlns:views="using:KubeNavigator.Views"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <templateselectors:NavigationViewMenuItemTemplateSelector x:Key="NavigationViewMenuItemTemplateSelector">
+                <templateselectors:NavigationViewMenuItemTemplateSelector.CategoryTemplate>
+                    <DataTemplate x:DataType="navigationViewModels:NavigationGroupViewModel">
+                        <NavigationViewItem
+                            Content="{x:Bind Name}"
+                            IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
+                            MenuItemsSource="{x:Bind Items, Mode=OneWay}"
+                            SelectsOnInvoked="False"
+                            Visibility="{x:Bind IsVisible, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}">
+                            <NavigationViewItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind Icon}" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </DataTemplate>
+                </templateselectors:NavigationViewMenuItemTemplateSelector.CategoryTemplate>
+                <templateselectors:NavigationViewMenuItemTemplateSelector.ResourceTypeTemplate>
+                    <DataTemplate x:DataType="viewmodels:KubernetesResourceTypeListViewModel">
+                        <NavigationViewItem Content="{x:Bind ResourceType.PluralDisplayName}" Tag="{x:Bind}">
+                            <NavigationViewItem.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Command="{x:Bind OpenInNewTabCommand}" Text="Open in new tab">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8A7;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem
+                                        Command="{x:Bind PinCommand}"
+                                        Text="Pin"
+                                        Visibility="{x:Bind IsPinned, Mode=OneWay, Converter={StaticResource FalseToVisibleConverter}}">
+                                        <MenuFlyoutItem.Icon>
+                                            <SymbolIcon Symbol="Pin" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem
+                                        Command="{x:Bind UnPinCommand}"
+                                        Text="Unpin"
+                                        Visibility="{x:Bind IsPinned, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}">
+                                        <MenuFlyoutItem.Icon>
+                                            <SymbolIcon Symbol="UnPin" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </NavigationViewItem.ContextFlyout>
+                        </NavigationViewItem>
+                    </DataTemplate>
+                </templateselectors:NavigationViewMenuItemTemplateSelector.ResourceTypeTemplate>
+                <templateselectors:NavigationViewMenuItemTemplateSelector.PinnedResourceTypeTemplate>
+                    <DataTemplate x:DataType="navigationViewModels:PinnedNavigationTargetViewModel">
+                        <NavigationViewItem Content="{x:Bind NavigationTarget.Title}" Tag="{x:Bind}">
+                            <NavigationViewItem.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Command="{x:Bind OpenInNewTabCommand}" Text="Open in new tab">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8A7;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem Command="{x:Bind UnPinCommand}" Text="Unpin">
+                                        <MenuFlyoutItem.Icon>
+                                            <SymbolIcon Symbol="UnPin" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </NavigationViewItem.ContextFlyout>
+                        </NavigationViewItem>
+                    </DataTemplate>
+                </templateselectors:NavigationViewMenuItemTemplateSelector.PinnedResourceTypeTemplate>
+                <templateselectors:NavigationViewMenuItemTemplateSelector.CustomResourceGroupTemplate>
+                    <DataTemplate x:DataType="navigationViewModels:CustomResourceGroupViewModel">
+                        <NavigationViewItem
+                            Content="{x:Bind GroupName}"
+                            MenuItemsSource="{x:Bind Resources, Mode=OneWay}"
+                            SelectsOnInvoked="False" />
+                    </DataTemplate>
+                </templateselectors:NavigationViewMenuItemTemplateSelector.CustomResourceGroupTemplate>
+                <templateselectors:NavigationViewMenuItemTemplateSelector.GenericTemplate>
+                    <DataTemplate x:DataType="navigationViewModels:INavigationTarget">
+                        <NavigationViewItem Content="{x:Bind Title}" Tag="{x:Bind}" />
+                    </DataTemplate>
+                </templateselectors:NavigationViewMenuItemTemplateSelector.GenericTemplate>
+                <templateselectors:NavigationViewMenuItemTemplateSelector.SettingsTemplate>
+                    <DataTemplate x:DataType="viewmodels:SettingsViewModel">
+                        <NavigationViewItem
+                            Content="{x:Bind Title}"
+                            Icon="Setting"
+                            Tag="{x:Bind}" />
+                    </DataTemplate>
+                </templateselectors:NavigationViewMenuItemTemplateSelector.SettingsTemplate>
+                <templateselectors:NavigationViewMenuItemTemplateSelector.PortForwardsTemplate>
+                    <DataTemplate x:DataType="viewmodels:PortForwardsViewModel">
+                        <NavigationViewItem Content="{x:Bind Title}" Tag="{x:Bind}">
+                            <NavigationViewItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE704;" />
+                            </NavigationViewItem.Icon>
+                            <NavigationViewItem.InfoBadge>
+                                <InfoBadge Visibility="{x:Bind ForwardedPorts.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}" Value="{x:Bind ForwardedPorts.Count, Mode=OneWay}" />
+                            </NavigationViewItem.InfoBadge>
+                        </NavigationViewItem>
+                    </DataTemplate>
+                </templateselectors:NavigationViewMenuItemTemplateSelector.PortForwardsTemplate>
+                <templateselectors:NavigationViewMenuItemTemplateSelector.ClusterListTemplate>
+                    <DataTemplate x:DataType="viewmodels:ClusterListViewModel">
+                        <NavigationViewItem Content="{x:Bind Title}" Tag="{x:Bind}">
+                            <NavigationViewItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8FD;" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </DataTemplate>
+                </templateselectors:NavigationViewMenuItemTemplateSelector.ClusterListTemplate>
+            </templateselectors:NavigationViewMenuItemTemplateSelector>
+            <converters1:NavigationTargetToViewConverter x:Key="NavigationTargetToViewConverter" />
+            <converters1:CountToVisibilityConverter x:Key="CountToVisibilityConverter" MinimumCount="1" />
+            <media:AttachedCardShadow x:Key="CommonShadow" Offset="4" />
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid x:Name="Root">
+        <NavigationView
+            x:Name="NavigationView"
+            FooterMenuItemsSource="{x:Bind ViewModel.FooterItems}"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            MenuItemTemplateSelector="{StaticResource NavigationViewMenuItemTemplateSelector}"
+            MenuItemsSource="{x:Bind ViewModel.NavigationGroups, Mode=OneWay}"
+            PaneTitle="{x:Bind ViewModel.Cluster.Name, Mode=OneWay}"
+            SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}">
+            <NavigationView.Content>
+                <Grid Padding="0,8,8,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition x:Name="ContentRow" Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition x:Name="ShelfRow" Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <controls:PropertySizer
+                        Grid.RowSpan="3"
+                        Grid.Column="0"
+                        Width="4"
+                        MinWidth="4"
+                        Margin="2,0,2,0"
+                        HorizontalAlignment="Left"
+                        Binding="{x:Bind NavigationView.OpenPaneLength, Mode=TwoWay}"
+                        CornerRadius="2"
+                        Maximum="500"
+                        Minimum="200"
+                        Visibility="{x:Bind NavigationView.IsPaneOpen, Mode=OneWay}" />
+                    <Border
+                        Grid.Column="0"
+                        Width="8"
+                        Visibility="{x:Bind NavigationView.IsPaneOpen, Mode=OneWay, Converter={StaticResource FalseToVisibleConverter}}" />
+                    <ContentControl
+                        Grid.Column="1"
+                        HorizontalContentAlignment="Stretch"
+                        VerticalContentAlignment="Stretch"
+                        Content="{x:Bind ViewModel.SelectedItem, Mode=OneWay, Converter={StaticResource NavigationTargetToViewConverter}}"
+                        Visibility="{x:Bind ViewModel.IsShelfMaximized, Mode=OneWay, Converter={StaticResource FalseToVisibleConverter}}" />
+                    <controls:GridSplitter
+                        x:Name="ShelfResizer"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Height="4"
+                        MinHeight="4"
+                        Margin="0,2,0,2"
+                        CornerRadius="2"
+                        Visibility="Collapsed" />
+                    <Border
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Visibility="{x:Bind ViewModel.ShelfItemsCount, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TabView
+                                x:Name="Shelf"
+                                Grid.Row="0"
+                                Background="{ThemeResource SolidBackgroundFillColorQuarternaryBrush}"
+                                IsAddTabButtonVisible="False"
+                                SelectedItem="{x:Bind ViewModel.SelectedShelfItem, Mode=TwoWay}"
+                                TabCloseRequested="Shelf_TabCloseRequested"
+                                TabItemTemplateSelector="{StaticResource ShelfItemTemplateSelector}"
+                                TabItemsSource="{x:Bind ViewModel.ShelfItems, Mode=OneWay}">
+                                <TabView.TabStripFooter>
+                                    <Grid>
+                                        <Button
+                                            HorizontalAlignment="Right"
+                                            Command="{x:Bind ViewModel.MaximizeShelfCommand}"
+                                            Style="{ThemeResource AlternateCloseButtonStyle}"
+                                            Visibility="{x:Bind ViewModel.IsShelfMaximized, Mode=OneWay, Converter={StaticResource FalseToVisibleConverter}}">
+                                            <Button.Content>
+                                                <Viewbox Width="12" Height="12">
+                                                    <SymbolIcon Symbol="FullScreen" />
+                                                </Viewbox>
+                                            </Button.Content>
+                                        </Button>
+                                        <Button
+                                            HorizontalAlignment="Right"
+                                            Command="{x:Bind ViewModel.RestoreShelfCommand}"
+                                            Style="{ThemeResource AlternateCloseButtonStyle}"
+                                            Visibility="{x:Bind ViewModel.IsShelfMaximized, Mode=OneWay}">
+                                            <Button.Content>
+                                                <Viewbox Width="12" Height="12">
+                                                    <SymbolIcon Symbol="BackToWindow" />
+                                                </Viewbox>
+                                            </Button.Content>
+                                        </Button>
+                                    </Grid>
+                                </TabView.TabStripFooter>
+                            </TabView>
+                            <ContentControl
+                                Grid.Row="1"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                Content="{x:Bind ViewModel.SelectedShelfItem, Mode=OneWay, Converter={StaticResource ShelfItemToViewConverter}}" />
+
+                        </Grid>
+                    </Border>
+                    <Border
+                        x:Name="ShadowTarget"
+                        Grid.Column="1"
+                        Width="516"
+                        Margin="0,-8,-8,-8"
+                        HorizontalAlignment="Right"
+                        Background="Transparent"
+                        IsHitTestVisible="False"
+                        Visibility="{x:Bind ViewModel.Details, Mode=OneWay, Converter={StaticResource NullToCollapsedConverter}}" />
+                    <Border
+                        x:Name="DetailsBorder"
+                        Grid.RowSpan="3"
+                        Grid.Column="1"
+                        Width="500"
+                        Margin="-4"
+                        HorizontalAlignment="Right"
+                        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                        BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Visibility="{x:Bind ViewModel.Details, Mode=OneWay, Converter={StaticResource NullToCollapsedConverter}}">
+                        <ui:Effects.Shadow>
+                            <ui:AttachedDropShadow
+                                CastTo="{x:Bind ShadowTarget}"
+                                CornerRadius="0"
+                                Opacity="0.2"
+                                Offset="0,4" />
+                        </ui:Effects.Shadow>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid
+                                Grid.ColumnSpan="2"
+                                Padding="8,0,8,0"
+                                Background="{ThemeResource SolidBackgroundFillColorTertiaryBrush}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <AppBarButton
+                                    Width="48"
+                                    Command="{x:Bind ViewModel.Details.GoBackCommand, Mode=OneWay}"
+                                    LabelPosition="Collapsed"
+                                    ToolTipService.ToolTip="Back"
+                                    Visibility="{x:Bind ViewModel.Details.CanGoBack, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}">
+                                    <AppBarButton.Icon>
+                                        <SymbolIcon Symbol="Back" />
+                                    </AppBarButton.Icon>
+                                </AppBarButton>
+                                <TextBlock
+                                    x:Name="Foo2"
+                                    Grid.Column="1"
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                    Text="{x:Bind ViewModel.Details.SelectedResource.Name, Mode=OneWay}" />
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <ItemsRepeater Grid.Column="2" ItemsSource="{x:Bind ViewModel.Details.SelectedResource.Commands, Mode=OneWay}">
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate x:DataType="viewmodels:ItemCommand">
+                                                <AppBarButton
+                                                    Width="36"
+                                                    Click="AppBarButton_Click"
+                                                    CommandParameter="{x:Bind}"
+                                                    LabelPosition="Collapsed"
+                                                    ToolTipService.ToolTip="{x:Bind Name}">
+                                                    <AppBarButton.Icon>
+                                                        <SymbolIcon Symbol="{x:Bind Symbol}" />
+                                                    </AppBarButton.Icon>
+                                                </AppBarButton>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                        <ItemsRepeater.Layout>
+                                            <StackLayout Orientation="Horizontal" />
+                                        </ItemsRepeater.Layout>
+                                    </ItemsRepeater>
+                                    <AppBarSeparator />
+                                    <AppBarButton
+                                        Width="36"
+                                        Command="{x:Bind ViewModel.App.CreateDetailsWindowCommand}"
+                                        CommandParameter="{x:Bind ViewModel.Details.SelectedResource, Mode=OneWay}"
+                                        LabelPosition="Collapsed"
+                                        ToolTipService.ToolTip="Open in new Window">
+                                        <AppBarButton.Icon>
+                                            <SymbolIcon Symbol="NewWindow" />
+                                        </AppBarButton.Icon>
+                                    </AppBarButton>
+                                    <AppBarButton
+                                        Width="36"
+                                        Command="{x:Bind ViewModel.ClosePanelCommand, Mode=OneWay}"
+                                        LabelPosition="Collapsed"
+                                        ToolTipService.ToolTip="Close">
+                                        <AppBarButton.Icon>
+                                            <SymbolIcon Symbol="Cancel" />
+                                        </AppBarButton.Icon>
+                                        <AppBarButton.KeyboardAccelerators>
+                                            <KeyboardAccelerator Key="Escape" />
+                                        </AppBarButton.KeyboardAccelerators>
+                                    </AppBarButton>
+                                </StackPanel>
+                            </Grid>
+                            <views:ResourceDetailsView
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="2"
+                                ViewModel="{x:Bind ViewModel.Details, Mode=OneWay}" />
+                            <controls:PropertySizer
+                                Grid.RowSpan="2"
+                                Grid.Column="0"
+                                Width="4"
+                                MinWidth="4"
+                                Margin="2"
+                                Binding="{x:Bind DetailsBorder.Width, Mode=TwoWay}"
+                                CornerRadius="2"
+                                IsDragInverted="True"
+                                Minimum="300" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </NavigationView.Content>
+        </NavigationView>
+    </Grid>
+</UserControl>

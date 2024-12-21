@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="KubeNavigator.Views.ContainerStatusView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:KubeNavigator.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Border
+        Width="8"
+        Height="8"
+        Background="{ThemeResource SystemFillColorSuccessBrush}"
+        CornerRadius="2">
+        <ToolTipService.ToolTip>
+            <ToolTip>
+                <StackPanel>
+                    <TextBlock>
+                        <Run FontWeight="Bold" Text="{x:Bind Status.Name}" />
+                        <Run Text="{x:Bind Status.LastState}" />
+                    </TextBlock>
+                    <TextBlock>
+                        <Run FontWeight="Bold" Text="Started at" />
+                        <Run Text="{x:Bind Status.ContainerID}" />
+                    </TextBlock>
+                </StackPanel>
+            </ToolTip>
+        </ToolTipService.ToolTip>
+    </Border>
+</UserControl>

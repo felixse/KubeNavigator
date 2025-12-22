@@ -22,13 +22,13 @@ public partial class PodViewModel : KubernetesResourceViewModel
     [RelayCommand]
     public void ShowLogs()
     {
-        Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(new PodLogsViewModel(this, Cluster));
+        Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(new PodLogsViewModel(this, Cluster, Cluster.App.ThemeManager));
     }
 
     [RelayCommand]
     public void OpenShell()
     {
-        Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(new PodShellViewModel(this, Cluster));
+        Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(new PodShellViewModel(this, Cluster, Cluster.App.ThemeManager));
     }
 
     public V1Pod Pod => (V1Pod)Resource;

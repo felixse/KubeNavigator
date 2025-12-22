@@ -43,7 +43,7 @@ public sealed partial class TerminalView : UserControl
         DispatcherQueue.EnqueueAsync(() =>
         {
             var message = new OutputReceived { Data = text };
-            WebView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize<OutgoingMessage>(message));
+            SendMessage(message);
         });
     }
 
@@ -52,8 +52,16 @@ public sealed partial class TerminalView : UserControl
         DispatcherQueue.EnqueueAsync(() =>
         {
             var message = new ClearRequested();
-            WebView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize<OutgoingMessage>(message));
+            SendMessage(message);
         });
+    }
+
+    public void SendMessage(OutgoingMessage message)
+    {
+        if (WebView?.CoreWebView2 != null)
+        {
+            WebView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize<OutgoingMessage>(message));
+        }
     }
 
     public void Close()

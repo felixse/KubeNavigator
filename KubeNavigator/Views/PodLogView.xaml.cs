@@ -1,3 +1,4 @@
+using KubeNavigator.Model.TerminalMessages;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -15,10 +16,28 @@ public sealed partial class PodLogView : UserControl, IShelfItemView
         ViewModel.LineReceived += ViewModel_LineReceived;
         ViewModel.Closed += ViewModel_Closed;
         Terminal.OnInitialized += Terminal_OnInitialized;
+        Terminal.Loaded += Terminal_Loaded;
+        Terminal.Unloaded += Terminal_Unloaded;
+    }
+
+    private void Terminal_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        ViewModel.ThemeManager.RegisterTerminal(Terminal);
+    }
+
+    private void Terminal_Unloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        ViewModel.ThemeManager.UnregisterTerminal(Terminal);
     }
 
     private void Terminal_OnInitialized(object? sender, EventArgs e)
     {
+        var initMessage = new InitializeTerminal
+        {
+            Theme = ViewModel.ThemeManager.GetEffectiveTheme()
+        };
+        Terminal.SendMessage(initMessage);
+        
         ViewModel.Start();
     }
 
@@ -28,6 +47,8 @@ public sealed partial class PodLogView : UserControl, IShelfItemView
         ViewModel.LineReceived -= ViewModel_LineReceived;
         ViewModel.Closed -= ViewModel_Closed;
         Terminal.OnInitialized -= Terminal_OnInitialized;
+        Terminal.Loaded -= Terminal_Loaded;
+        Terminal.Unloaded -= Terminal_Unloaded;
     }
 
     private void ViewModel_LineReceived(object? sender, string e)

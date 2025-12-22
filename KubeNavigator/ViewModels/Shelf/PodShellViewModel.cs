@@ -23,10 +23,11 @@ public partial class PodShellViewModel : ObservableObject, IShelfItem
     private string? _lastLine;
     private readonly AsyncManualResetEvent _initialized = new AsyncManualResetEvent(false);
 
-    public PodShellViewModel(PodViewModel pod, ClusterViewModel cluster)
+    public PodShellViewModel(PodViewModel pod, ClusterViewModel cluster, ThemeManager themeManager)
     {
         Pod = pod;
         Cluster = cluster;
+        ThemeManager = themeManager;
         _cts = new CancellationTokenSource();
     }
 
@@ -35,6 +36,7 @@ public partial class PodShellViewModel : ObservableObject, IShelfItem
 
     public PodViewModel Pod { get; }
     public ClusterViewModel Cluster { get; }
+    public ThemeManager ThemeManager { get; }
 
     KubernetesResourceViewModel IShelfItem.Resource => Pod;
 

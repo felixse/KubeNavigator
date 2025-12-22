@@ -4,7 +4,7 @@ import { WebglAddon } from "@xterm/addon-webgl";
 import { match } from "ts-pattern";
 
 type OutgoingMessage = InputReceived | TerminalSizeChanged;
-type IncomingMessage = OutputReceived | SearchTextChanged | ClearRequested | ThemeChanged;
+type IncomingMessage = InitializeTerminal | OutputReceived | SearchTextChanged | ClearRequested | ThemeChanged;
 
 interface InputReceived {
   type: 'InputReceived';
@@ -29,6 +29,11 @@ interface SearchTextChanged {
 
 interface ClearRequested {
   type: 'ClearRequested';
+}
+
+interface InitializeTerminal {
+  type: 'InitializeTerminal';
+  theme: 'dark' | 'light';
 }
 
 interface ThemeChanged {
@@ -118,21 +123,22 @@ term.options.fontFamily = 'Cascadia Code';
 term.options.cursorBlink = true;
 term.options.cursorStyle = 'bar';
 
-if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-  term.options.theme = darkTheme;
-} else {
-  term.options.theme = lightTheme;
-}
-
-let terminalElement = document.getElementById('terminal');
-if (terminalElement != null) {
-  term.open(terminalElement);
-  fitAddon.fit();
-  term.focus();
-}
-
 window.chrome.webview.addEventListener('message', (message: { data: IncomingMessage }) => {
   match(message.data)
+    .with({ type: 'InitializeTerminal' }, ({ theme }) => {
+      if (theme === 'dark') {
+        term.options.theme = darkTheme;
+      } else {
+        term.options.theme = lightTheme;
+      }
+
+      let terminalElement = document.getElementById('terminal');
+      if (terminalElement != null) {
+        term.open(terminalElement);
+        fitAddon.fit();
+        term.focus();
+      }
+    })
     .with({ type: 'OutputReceived' }, ({ data }) => {
       term.write(data);
     })

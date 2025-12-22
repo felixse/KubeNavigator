@@ -29,12 +29,15 @@ public partial class AppViewModel : ObservableObject
 
     public DispatcherQueue DispatcherQueue { get; }
 
-    public AppViewModel(Func<IUserConfirmationService> userConfirmationServiceFactory, IWindowManager windowManager, SettingsViewModel settings, DispatcherQueue dispatcherQueue)
+    public ThemeManager ThemeManager { get; }
+
+    public AppViewModel(Func<IUserConfirmationService> userConfirmationServiceFactory, IWindowManager windowManager, SettingsViewModel settings, DispatcherQueue dispatcherQueue, ThemeManager themeManager)
     {
         _userConfirmationServiceFactory = userConfirmationServiceFactory;
         WindowManager = windowManager;
         Settings = settings;
         DispatcherQueue = dispatcherQueue;
+        ThemeManager = themeManager;
         var configContent = System.IO.File.ReadAllText(KubernetesClientConfiguration.KubeConfigDefaultLocation);
         var config = KubernetesYaml.Deserialize<K8SConfiguration>(configContent); // todo move to service, make singleton
 

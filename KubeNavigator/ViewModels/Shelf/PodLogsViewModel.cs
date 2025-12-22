@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels.Shelf;
 
-public partial class PodLogsViewModel(PodViewModel pod, ClusterViewModel cluster) : ObservableObject, IShelfItem
+public partial class PodLogsViewModel(PodViewModel pod, ClusterViewModel cluster, ThemeManager themeManager) : ObservableObject, IShelfItem
 {
     private CancellationTokenSource? _cts;
+
+    public ThemeManager ThemeManager { get; } = themeManager;
 
     public void Start()
     {

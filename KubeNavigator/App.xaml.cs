@@ -47,7 +47,7 @@ public partial class App : Application, IWindowManager
         _themeManager = new ThemeManager(_settingsService, dispatcherQueue);
         
         var settings = new SettingsViewModel(_settingsService);
-        var app = new AppViewModel(() => new ConfirmationDialogService(), this, settings, dispatcherQueue);
+        var app = new AppViewModel(() => new ConfirmationDialogService(), this, settings, dispatcherQueue, _themeManager);
         app.DetailWindowViewModels.CollectionChanged += OnDetailWindowsCollectionchanged;
         var mainWindow = new MainWindow(app.MainWindow);
         var bar = DispatcherQueue.GetForCurrentThread();

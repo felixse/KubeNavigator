@@ -2,7 +2,7 @@
 
 namespace KubeNavigator.Model.TerminalMessages;
 
-public class InputReceived() : IncomingMessage(nameof(InputReceived))
+public class InputReceived() : IncomingMessage
 {
     [JsonPropertyName("data")]
     public required string Data { get; set; }

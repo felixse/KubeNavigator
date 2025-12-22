@@ -9,14 +9,14 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "~5.6.2",
-    "vite": "^6.0.5",
-    "vite-plugin-singlefile": "^2.1.0"
+    "typescript": "~5.9.3",
+    "vite": "^7.2.6",
+    "vite-plugin-singlefile": "^2.3.0"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/addon-webgl": "^0.18.0",
     "@xterm/xterm": "^5.5.0",
-    "ts-pattern": "^5.6.2"
+    "ts-pattern": "^5.9.0"
   }
 }

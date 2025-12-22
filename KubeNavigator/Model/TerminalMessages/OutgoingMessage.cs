@@ -5,8 +5,6 @@ namespace KubeNavigator.Model.TerminalMessages;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(OutputReceived), nameof(OutputReceived))]
 [JsonDerivedType(typeof(ClearRequested), nameof(ClearRequested))]
-public class OutgoingMessage(string type)
+public class OutgoingMessage
 {
-    [JsonPropertyName("type")]
-    public string Type { get; init; } = type;
 }

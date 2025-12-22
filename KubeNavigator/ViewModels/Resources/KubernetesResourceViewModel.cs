@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Humanizer;
-using Humanizer.Localisation;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Model;

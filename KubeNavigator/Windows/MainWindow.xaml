@@ -22,13 +22,13 @@
             x:Name="AppTitleBar"
             Title="KubeNavigator"
             IsBackButtonVisible="False">
-            <TitleBar.CenterContent>
+            <TitleBar.Content>
                 <AutoSuggestBox
                     Width="600"
                     Margin="8"
                     PlaceholderText="Enter command"
                     QueryIcon="Find" />
-            </TitleBar.CenterContent>
+            </TitleBar.Content>
         </TitleBar>
         <Frame x:Name="RootFrame" Grid.Row="1" />
     </Grid>

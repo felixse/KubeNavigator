@@ -2,7 +2,7 @@
 
 namespace KubeNavigator.Model.TerminalMessages;
 
-public class TerminalSizeChanged() : IncomingMessage(nameof(TerminalSizeChanged))
+public class TerminalSizeChanged() : IncomingMessage
 {
     [JsonPropertyName("cols")]
     public required int Columns { get; set; }

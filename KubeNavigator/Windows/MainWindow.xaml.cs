@@ -1,6 +1,7 @@
 using KubeNavigator.Pages;
 using KubeNavigator.ViewModels;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace KubeNavigator.Windows;
 

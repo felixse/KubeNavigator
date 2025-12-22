@@ -70,7 +70,7 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
         [
             portForwards,
             new ClusterListViewModel(this, portForwards),
-            new SettingsViewModel(),
+            window.App.Settings,
         ];
 
         ShelfItems.CollectionChanged += OnShelfItemsCollectionChanged;

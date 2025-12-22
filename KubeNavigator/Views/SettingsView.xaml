@@ -29,10 +29,9 @@
         </SelectorBar>
         <StackPanel Grid.Row="2" Spacing="4">
             <controls:SettingsCard Header="Application Theme">
-                <ComboBox x:Name="ThemeComboBox" />
+                <ComboBox x:Name="ThemeComboBox" SelectedItem="{x:Bind ViewModel.Theme, Mode=TwoWay}" ItemsSource="{x:Bind ViewModel.AvailableThemes}" />
             </controls:SettingsCard>
         </StackPanel>
 
     </Grid>
-
 </UserControl>

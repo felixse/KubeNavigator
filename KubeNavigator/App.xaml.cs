@@ -1,4 +1,5 @@
 ﻿using KubeNavigator.Model;
+using KubeNavigator.Services;
 using KubeNavigator.ViewModels;
 using KubeNavigator.Views;
 using KubeNavigator.Windows;
@@ -15,6 +16,8 @@ public partial class App : Application, IWindowManager
 {
     private readonly List<Window> _windows = [];
     private Window? _activeWindow;
+    private readonly ISettingsService _settingsService;
+    private ThemeManager? _themeManager;
 
     public IWindow ActiveWindow => _activeWindow switch
     {
@@ -27,6 +30,8 @@ public partial class App : Application, IWindowManager
     {
         this.InitializeComponent();
         UnhandledException += App_UnhandledException;
+        
+        _settingsService = new SettingsService();
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
@@ -34,10 +39,14 @@ public partial class App : Application, IWindowManager
 
     }
 
-    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
+        await _settingsService.LoadAsync();
+        
         var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
-        var settings = new SettingsViewModel();
+        _themeManager = new ThemeManager(_settingsService, dispatcherQueue);
+        
+        var settings = new SettingsViewModel(_settingsService);
         var app = new AppViewModel(() => new ConfirmationDialogService(), this, settings, dispatcherQueue);
         app.DetailWindowViewModels.CollectionChanged += OnDetailWindowsCollectionchanged;
         var mainWindow = new MainWindow(app.MainWindow);
@@ -45,7 +54,17 @@ public partial class App : Application, IWindowManager
         mainWindow.Closed += OnWindowClosed;
         mainWindow.Activated += OnWindowActivated;
         _windows.Add(mainWindow);
+        
+        RegisterWindowForTheming(mainWindow);
         mainWindow.Activate();
+    }
+
+    private void RegisterWindowForTheming(Window window)
+    {
+        if (window.Content is FrameworkElement content)
+        {
+            _themeManager?.RegisterThemeTarget(content);
+        }
     }
 
     private void OnDetailWindowsCollectionchanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -56,6 +75,8 @@ public partial class App : Application, IWindowManager
             window.Closed += OnWindowClosed;
             window.Activated += OnWindowActivated;
             _windows.Add(window);
+            
+            RegisterWindowForTheming(window);
             window.Activate();
         }
 
@@ -87,6 +108,11 @@ public partial class App : Application, IWindowManager
             window.Closed -= OnWindowClosed;
             window.Activated -= OnWindowActivated;
             _windows.Remove(window);
+            
+            if (window.Content is FrameworkElement content)
+            {
+                _themeManager?.UnregisterThemeTarget(content);
+            }
         }
     }
 }

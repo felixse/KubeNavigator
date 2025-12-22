@@ -43,7 +43,7 @@ public sealed partial class TerminalView : UserControl
         DispatcherQueue.EnqueueAsync(() =>
         {
             var message = new OutputReceived { Data = text };
-            WebView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(message));
+            WebView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize<OutgoingMessage>(message));
         });
     }
 
@@ -52,7 +52,7 @@ public sealed partial class TerminalView : UserControl
         DispatcherQueue.EnqueueAsync(() =>
         {
             var message = new ClearRequested();
-            WebView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(message));
+            WebView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize<OutgoingMessage>(message));
         });
     }
 
@@ -95,7 +95,7 @@ public sealed partial class TerminalView : UserControl
         {
             OnInitialized?.Invoke(this, EventArgs.Empty);
         };
-        //WebView.CoreWebView2.OpenDevToolsWindow();
+        WebView.CoreWebView2.OpenDevToolsWindow();
         WebView.CoreWebView2.Navigate("https://webviews.kubenavigator/Terminal/dist/index.html");
     }
 

@@ -1,5 +1,6 @@
 ﻿using k8s;
 using k8s.Models;
+using KubeNavigator.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,10 +8,11 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace KubeNavigator.Model;
+
 public class KubernetesResourceRepository<T> : IKubernetesResourceRepository where T : IKubernetesObject<V1ObjectMeta>
 {
     private readonly HashSet<IKubernetesResourceEventSubscriber> _subscribers = [];
-    private readonly GenericClient _client;
+    private readonly KubernetesService _kubernetesService;
     private readonly List<T> _resources = [];
 
     private Watcher<T>? _watcher;
@@ -19,9 +21,9 @@ public class KubernetesResourceRepository<T> : IKubernetesResourceRepository whe
 
     private int _instance;
 
-    public KubernetesResourceRepository(ResourceType resourceType, IKubernetes kubernetes)
+    public KubernetesResourceRepository(ResourceType resourceType, KubernetesService kubernetesService)
     {
-        _client = new GenericClient(kubernetes, resourceType.Group, resourceType.Version, resourceType.Plural);
+        _kubernetesService = kubernetesService;
         ResourceType = resourceType;
         _instance = Random.Shared.Next();
     }
@@ -33,7 +35,7 @@ public class KubernetesResourceRepository<T> : IKubernetesResourceRepository whe
 
     public async Task StartAsync()
     {
-        var items = await _client.ListAsync<GenericKubernetesItems<T>>();
+        var items = await _kubernetesService.ListResourcesAsync<T>(ResourceType);
 
         foreach (var item in items.Items)
         {
@@ -69,9 +71,8 @@ public class KubernetesResourceRepository<T> : IKubernetesResourceRepository whe
 
         Debug.WriteLine($"Starting watcher for {ResourceType.Plural}");
 
-        _watcher = _client.Watch<T>((watchEventType, resource) =>
+        _watcher = _kubernetesService.WatchResources<T>(ResourceType, (watchEventType, resource) =>
         {
-
             if (watchEventType == WatchEventType.Added)
             {
                 var index = _resources.FindIndex(r => r.Metadata.Name == resource.Metadata.Name);
@@ -134,10 +135,9 @@ public class KubernetesResourceRepository<T> : IKubernetesResourceRepository whe
             {
                 Debug.WriteLine($"Unhandled watch event type: {watchEventType}");
             }
-
-        }, (ex) =>
+        }, 
+        (ex) =>
         {
-            // todo add error event to show in UI
             Debug.WriteLine(ex);
         });
     }

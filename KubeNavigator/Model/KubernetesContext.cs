@@ -1,5 +1,7 @@
 ﻿using k8s;
 using k8s.Models;
+using KubeNavigator.Services;
+using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 using System;
 using System.Buffers;
@@ -32,7 +34,7 @@ public class KubernetesContext
     private ClusterStatus _status = new ClusterStatus { Status = ConnectionStatus.Disconnected };
 
     private readonly AsyncLock _lock = new();
-    private readonly Kubernetes _kubernetes;
+    private readonly KubernetesService _kubernetesService;
     private readonly Dictionary<ResourceType, IKubernetesResourceRepository> _repositories = [];
 
     public event EventHandler<ClusterStatus>? StatusChanged; // todo change to something that supports async handlers
@@ -49,11 +51,11 @@ public class KubernetesContext
         }
     }
 
-    public KubernetesContext(string name)
+    public KubernetesContext(string name, ILoggerFactory loggerFactory)
     {
         Name = name;
-        var config = KubernetesClientConfiguration.BuildConfigFromConfigFile(currentContext: Name);
-        _kubernetes = new Kubernetes(config);
+        var logger = loggerFactory.CreateLogger<KubernetesService>();
+        _kubernetesService = new KubernetesService(name, logger);
     }
 
     public async Task ConnectAsync()
@@ -67,10 +69,16 @@ public class KubernetesContext
 
             Status = new ClusterStatus { Status = ConnectionStatus.Connecting };
 
-            // check connection
-            var listNamespaces = await _kubernetes.ListNamespaceAsync();
-
-            Status = new ClusterStatus { Status = ConnectionStatus.Connected };
+            var connected = await _kubernetesService.TestConnectionAsync();
+            
+            if (connected)
+            {
+                Status = new ClusterStatus { Status = ConnectionStatus.Connected };
+            }
+            else
+            {
+                Status = new ClusterStatus { Status = ConnectionStatus.Error, ErrorMessage = "Connection test failed" };
+            }
         }
         catch (Exception e)
         {
@@ -86,11 +94,11 @@ public class KubernetesContext
         {
             repository = (resourceType.Group, resourceType.Version, resourceType.Plural) switch
             {
-                (V1Pod.KubeGroup, V1Pod.KubeApiVersion, V1Pod.KubePluralName) => new KubernetesResourceRepository<V1Pod>(resourceType, _kubernetes),
-                (V1Secret.KubeGroup, V1Secret.KubeApiVersion, V1Secret.KubePluralName) => new KubernetesResourceRepository<V1Secret>(resourceType, _kubernetes),
-                (V1Namespace.KubeGroup, V1Namespace.KubeApiVersion, V1Namespace.KubePluralName) => new KubernetesResourceRepository<V1Namespace>(resourceType, _kubernetes),
-                (V1CustomResourceDefinition.KubeGroup, V1CustomResourceDefinition.KubeApiVersion, V1CustomResourceDefinition.KubePluralName) => new KubernetesResourceRepository<V1CustomResourceDefinition>(resourceType, _kubernetes),
-                _ => new KubernetesResourceRepository<GenericKubernetesObject>(resourceType, _kubernetes),
+                (V1Pod.KubeGroup, V1Pod.KubeApiVersion, V1Pod.KubePluralName) => new KubernetesResourceRepository<V1Pod>(resourceType, _kubernetesService),
+                (V1Secret.KubeGroup, V1Secret.KubeApiVersion, V1Secret.KubePluralName) => new KubernetesResourceRepository<V1Secret>(resourceType, _kubernetesService),
+                (V1Namespace.KubeGroup, V1Namespace.KubeApiVersion, V1Namespace.KubePluralName) => new KubernetesResourceRepository<V1Namespace>(resourceType, _kubernetesService),
+                (V1CustomResourceDefinition.KubeGroup, V1CustomResourceDefinition.KubeApiVersion, V1CustomResourceDefinition.KubePluralName) => new KubernetesResourceRepository<V1CustomResourceDefinition>(resourceType, _kubernetesService),
+                _ => new KubernetesResourceRepository<GenericKubernetesObject>(resourceType, _kubernetesService),
             };
             await repository.StartAsync();
             _repositories[resourceType] = repository;
@@ -98,49 +106,19 @@ public class KubernetesContext
         return repository;
     }
 
-    public async Task<IEnumerable<(string ResourceName, string Error)>> DeleteResourcesAsync(ResourceType resourceType, IEnumerable<IKubernetesObject<V1ObjectMeta>> resources)
+    public Task<IEnumerable<(string ResourceName, string Error)>> DeleteResourcesAsync(ResourceType resourceType, IEnumerable<IKubernetesObject<V1ObjectMeta>> resources)
     {
-        var client = new GenericClient(_kubernetes, resourceType.Group, resourceType.Version, resourceType.Plural);
-        var errors = new List<(string ResourceName, string Error)>();
-
-        foreach (var resource in resources)
-        {
-            try
-            {
-                if (resourceType.IsNamespaceScoped)
-                {
-                    await client.DeleteNamespacedAsync<GenericKubernetesObject>(resource.Namespace(), resource.Name());
-                }
-                else
-                {
-                    await client.DeleteAsync<GenericKubernetesObject>(resource.Name());
-                }
-            }
-            catch (Exception e)
-            {
-                errors.Add((resource.Name(), e.Message));
-            }
-        }
-
-        return errors;
+        return _kubernetesService.DeleteResourcesAsync(resourceType, resources);
     }
 
-    public async Task<Stream> OpenLogStreamAsync(V1Pod pod, CancellationToken cancellationToken)
+    public Task<Stream> OpenLogStreamAsync(V1Pod pod, CancellationToken cancellationToken)
     {
-        if (_kubernetes == null)
-        {
-            throw new InvalidOperationException("Not connected to a cluster");
-        }
-
-        var stream = await _kubernetes.CoreV1.ReadNamespacedPodLogAsync(pod.Name(), pod.Namespace(), pretty: true, follow: true, tailLines: 1000, cancellationToken: cancellationToken);
-
-        return stream;
+        return _kubernetesService.OpenPodLogStreamAsync(pod, cancellationToken);
     }
 
-    public async Task<PodExecSession> ExecAsync(V1Pod pod, CancellationToken cancellationToken)
+    public Task<PodExecSession> ExecAsync(V1Pod pod, CancellationToken cancellationToken)
     {
-        var webSocket = await _kubernetes.WebSocketNamespacedPodExecAsync(pod.Name(), pod.Namespace(), ["sh", "-c", "clear; (bash || sh || echo 'no shell found')"]);
-        return new PodExecSession(webSocket);
+        return _kubernetesService.OpenPodExecSessionAsync(pod, cancellationToken);
     }
 
     public async Task StartListenAsync(V1Pod pod, V1ContainerPort port, int localPort, CancellationToken cancellationToken)
@@ -160,7 +138,7 @@ public class KubernetesContext
     private async Task RunSocketAsync(Socket socket, V1Pod pod, V1ContainerPort port, int localPort, CancellationToken cancellationToken)
     {
         var arrayPool = ArrayPool<byte>.Shared;
-        var webSocket = await _kubernetes.WebSocketNamespacedPodPortForwardAsync(pod.Name(), pod.Namespace(), [port.ContainerPort], cancellationToken: cancellationToken);
+        var webSocket = await _kubernetesService.OpenPodPortForwardAsync(pod, port.ContainerPort, cancellationToken);
         var demux = new StreamDemuxer(webSocket, StreamType.PortForward);
         demux.Start();
 
@@ -175,10 +153,8 @@ public class KubernetesContext
                 {
                     var buffer = arrayPool.Rent(4096);
                     var bytesRead = await stream.ReadAsync(buffer, cancellationToken);
-                    //Debug.WriteLine($"Read {bytesRead} bytes from stream");
                     await socket.SendAsync(new ArraySegment<byte>(buffer, 0, bytesRead), SocketFlags.None);
                     arrayPool.Return(buffer);
-                    //Debug.WriteLine($"Sent {bytesRead} bytes to socket");
                 }
                 catch (Exception e)
                 {
@@ -195,10 +171,8 @@ public class KubernetesContext
                 {
                     var buffer = arrayPool.Rent(4096);
                     var bytesRead = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), SocketFlags.None);
-                    //Debug.WriteLine($"Read {bytesRead} bytes from socket");
                     stream.Write(buffer, 0, bytesRead);
                     arrayPool.Return(buffer);
-                    //Debug.WriteLine($"Sent {bytesRead} bytes to stream");
                 }
                 catch (Exception e)
                 {

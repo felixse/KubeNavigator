@@ -45,7 +45,7 @@ public partial class AppViewModel : ObservableObject
         var configContent = System.IO.File.ReadAllText(KubernetesClientConfiguration.KubeConfigDefaultLocation);
         var config = KubernetesYaml.Deserialize<K8SConfiguration>(configContent); // todo move to service, make singleton
 
-        Clusters = [.. config.Contexts.Select(c => new ClusterViewModel(c.Name, this, new KubernetesContext(c.Name)))];
+        Clusters = [.. config.Contexts.Select(c => new ClusterViewModel(c.Name, this, new KubernetesContext(c.Name, loggingService.LoggerFactory)))];
 
         MainWindow = new WindowViewModel(this, _userConfirmationServiceFactory());
     }

@@ -71,7 +71,7 @@
     <PackageReference Include="Humanizer.Core" Version="3.0.1" />
     <PackageReference Include="KubernetesClient" Version="18.0.13" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7175" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.0-experimental3" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />

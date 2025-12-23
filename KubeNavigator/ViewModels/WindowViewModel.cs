@@ -65,14 +65,17 @@ public partial class WindowViewModel : ObservableRecipient,
         }
     }
 
-    public async Task OpenInNewWorkspaceAsync(INavigationTarget navigationTarget, ClusterViewModel cluster)
+    public async Task OpenInNewWorkspaceAsync(INavigationTarget? navigationTarget, ClusterViewModel cluster)
     {
         var workspace = new WorkspaceViewModel(this);
         await workspace.SetContextAsync(cluster);
 
         Workspaces.Add(workspace);
         SelectedWorkspace = workspace;
-        workspace.SelectedItem = workspace.NavigationGroups.SelectMany(c => c.Items).FirstOrDefault(r => r.Title == navigationTarget.Title);
+        if (navigationTarget != null)
+        {
+            workspace.SelectedItem = workspace.NavigationGroups.SelectMany(c => c.Items).FirstOrDefault(r => r.Title == navigationTarget.Title);
+        }
     }
 
     void IRecipient<ShowNotificationMessage>.Receive(ShowNotificationMessage message)

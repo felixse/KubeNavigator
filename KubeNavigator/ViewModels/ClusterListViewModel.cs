@@ -34,6 +34,12 @@ public partial class ClusterListViewModel : ObservableObject, INavigationTarget
         }
     }
 
+    public async Task ConnectInNewTabAsync(ClusterViewModel cluster)
+    {
+        await cluster.Context.ConnectAsync();
+        await Workspace.Window.OpenInNewWorkspaceAsync(null, cluster);
+    }
+
     public Task OnNavigatedTo()
     {
         return Task.CompletedTask;

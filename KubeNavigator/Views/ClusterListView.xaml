@@ -99,7 +99,14 @@
                                 VerticalAlignment="Center"
                                 Content="{x:Bind Status, Mode=OneWay}"
                                 ContentTemplateSelector="{StaticResource ClusterConnectionStatusTemplateSelector}" />
-                            <Button Click="Button_Click" Content="Select" />
+                            <SplitButton Click="SplitButton_Click" Content="Open">
+                                <SplitButton.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="Open" Click="OnOpen" />
+                                        <MenuFlyoutItem Text="Open in new Tab" Click="OnOpenInNewTab" />
+                                    </MenuFlyout>
+                                </SplitButton.Flyout>
+                            </SplitButton>
                         </controls:DataRow>
                     </Border>
 

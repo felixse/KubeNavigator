@@ -39,7 +39,8 @@ public sealed partial class PodShellView : UserControl, IShelfItemView
     {
         var initMessage = new InitializeTerminal
         {
-            Theme = ViewModel.ThemeManager.GetEffectiveTheme()
+            Theme = ViewModel.ThemeManager.GetEffectiveTheme(),
+            ReadOnly = false
         };
         Terminal.SendMessage(initMessage);
         

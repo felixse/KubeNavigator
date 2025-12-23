@@ -22,6 +22,7 @@ public partial class ShelfItemToViewConverter : IValueConverter
                     PodLogsViewModel logViewModel => new PodLogView(logViewModel),
                     EditKubernetesResourceViewModel editViewModel => new ResourceEditView(editViewModel),
                     PodShellViewModel shellViewModel => new PodShellView(shellViewModel),
+                    ApplicationLogViewModel appLogViewModel => new ApplicationLogView(appLogViewModel),
                     _ => throw new NotImplementedException()
                 };
 

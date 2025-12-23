@@ -36,6 +36,17 @@
                 </TabViewItem>
             </DataTemplate>
         </templateselectors:ShelfItemTemplateSelector.ShellTemplate>
+        <templateselectors:ShelfItemTemplateSelector.ApplicationLogTemplate>
+            <DataTemplate x:DataType="shelf:ApplicationLogViewModel">
+                <TabViewItem Header="{x:Bind Title}">
+                    <TabViewItem.IconSource>
+                        <FontIconSource
+                            FontFamily="Segoe MDL2 Assets"
+                            Glyph="&#xEBE8;" />
+                    </TabViewItem.IconSource>
+                </TabViewItem>
+            </DataTemplate>
+        </templateselectors:ShelfItemTemplateSelector.ApplicationLogTemplate>
     </templateselectors:ShelfItemTemplateSelector>
     <toolkitConverters:BoolToVisibilityConverter
         x:Key="TrueToVisibleConverter"

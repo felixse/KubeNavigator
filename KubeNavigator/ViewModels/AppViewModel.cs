@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using k8s;
 using k8s.KubeConfigModels;
 using KubeNavigator.Model;
+using KubeNavigator.Services;
 using KubeNavigator.ViewModels.Resources;
 using Microsoft.UI.Dispatching;
 using System;
@@ -31,13 +32,16 @@ public partial class AppViewModel : ObservableObject
 
     public ThemeManager ThemeManager { get; }
 
-    public AppViewModel(Func<IUserConfirmationService> userConfirmationServiceFactory, IWindowManager windowManager, SettingsViewModel settings, DispatcherQueue dispatcherQueue, ThemeManager themeManager)
+    public LoggingService LoggingService { get; }
+
+    public AppViewModel(Func<IUserConfirmationService> userConfirmationServiceFactory, IWindowManager windowManager, SettingsViewModel settings, DispatcherQueue dispatcherQueue, ThemeManager themeManager, LoggingService loggingService)
     {
         _userConfirmationServiceFactory = userConfirmationServiceFactory;
         WindowManager = windowManager;
         Settings = settings;
         DispatcherQueue = dispatcherQueue;
         ThemeManager = themeManager;
+        LoggingService = loggingService;
         var configContent = System.IO.File.ReadAllText(KubernetesClientConfiguration.KubeConfigDefaultLocation);
         var config = KubernetesYaml.Deserialize<K8SConfiguration>(configContent); // todo move to service, make singleton
 

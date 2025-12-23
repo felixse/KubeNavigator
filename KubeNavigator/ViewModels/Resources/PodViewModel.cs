@@ -1,8 +1,9 @@
-﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 using k8s.Models;
 using KubeNavigator.Model;
 using KubeNavigator.Model.Details;
 using KubeNavigator.ViewModels.Shelf;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,9 +11,13 @@ namespace KubeNavigator.ViewModels.Resources;
 
 public partial class PodViewModel : KubernetesResourceViewModel
 {
+    private readonly ILogger<PodViewModel> _logger;
+
     public PodViewModel(V1Pod resource, ClusterViewModel cluster)
         : base(resource, ResourceType.Pod, cluster)
     {
+        _logger = cluster.App.LoggingService.LoggerFactory.CreateLogger<PodViewModel>();
+        
         Commands.Insert(0, new ItemCommand { Name = "Show Logs", Symbol = "List", Command = ShowLogsCommand });
         Commands.Insert(1, new ItemCommand { Name = "Open Shell", Symbol = "Play", Command = OpenShellCommand });
 
@@ -22,12 +27,14 @@ public partial class PodViewModel : KubernetesResourceViewModel
     [RelayCommand]
     public void ShowLogs()
     {
+        Log.OpeningPodLogs(_logger, Pod.Name(), Pod.Namespace());
         Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(new PodLogsViewModel(this, Cluster, Cluster.App.ThemeManager));
     }
 
     [RelayCommand]
     public void OpenShell()
     {
+        Log.OpeningPodShell(_logger, Pod.Name(), Pod.Namespace());
         Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(new PodShellViewModel(this, Cluster, Cluster.App.ThemeManager));
     }
 
@@ -287,5 +294,20 @@ public partial class PodViewModel : KubernetesResourceViewModel
             OnPropertyChanged(nameof(Status));
             OnPropertyChanged(nameof(ControlledBy));
         }
+    }
+
+    private static partial class Log
+    {
+        [LoggerMessage(
+            EventId = 1001,
+            Level = LogLevel.Information,
+            Message = "Opening logs for pod {PodName} in namespace {Namespace}")]
+        internal static partial void OpeningPodLogs(ILogger logger, string podName, string @namespace);
+
+        [LoggerMessage(
+            EventId = 1002,
+            Level = LogLevel.Information,
+            Message = "Opening shell for pod {PodName} in namespace {Namespace}")]
+        internal static partial void OpeningPodShell(ILogger logger, string podName, string @namespace);
     }
 }

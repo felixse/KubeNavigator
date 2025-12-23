@@ -20,6 +20,7 @@
     <None Remove="Pages\DetailsWindowRootPage.xaml" />
     <None Remove="Resources\PodResources.xaml" />
     <None Remove="RootPage.xaml" />
+    <None Remove="Views\ApplicationLogView.xaml" />
     <None Remove="Views\MainView.xaml" />
     <None Remove="Views\PodLogView.xaml" />
     <None Remove="Views\PodShellView.xaml" />
@@ -72,6 +73,9 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7175" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="WinUIEdit" Version="0.0.4-prerelease" />
   </ItemGroup>
   <ItemGroup>
@@ -127,6 +131,16 @@
   <ItemGroup>
     <Folder Include="Windows\" />
     <Folder Include="WebViews\Terminal\dist\assets\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\ApplicationLogView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\ApplicationLogView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\ContainerStatusView.xaml">

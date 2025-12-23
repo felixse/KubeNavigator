@@ -5,16 +5,16 @@ using System;
 
 namespace KubeNavigator.Views;
 
-public sealed partial class PodLogView : UserControl, IShelfItemView
+public sealed partial class ApplicationLogView : UserControl, IShelfItemView
 {
-    public PodLogsViewModel ViewModel { get; }
+    public ApplicationLogViewModel ViewModel { get; }
 
-    public PodLogView(PodLogsViewModel viewModel)
+    public ApplicationLogView(ApplicationLogViewModel viewModel)
     {
-        this.InitializeComponent();
         ViewModel = viewModel;
-        ViewModel.LineReceived += ViewModel_LineReceived;
+        this.InitializeComponent();
         ViewModel.Closed += ViewModel_Closed;
+        ViewModel.LogReceived += ViewModel_LogReceived;
         Terminal.OnInitialized += Terminal_OnInitialized;
         Terminal.Loaded += Terminal_Loaded;
         Terminal.Unloaded += Terminal_Unloaded;
@@ -35,26 +35,26 @@ public sealed partial class PodLogView : UserControl, IShelfItemView
         var initMessage = new InitializeTerminal
         {
             Theme = ViewModel.ThemeManager.GetEffectiveTheme(),
-            ReadOnly = true,
+            ReadOnly = true
         };
         Terminal.SendMessage(initMessage);
         
-        ViewModel.Start();
+        ViewModel.LoadExistingLogs();
+    }
+
+    private void ViewModel_LogReceived(object? sender, string e)
+    {
+        Terminal.Write(e);
     }
 
     private void ViewModel_Closed(object? sender, EventArgs e)
     {
         Terminal.Close();
-        ViewModel.LineReceived -= ViewModel_LineReceived;
         ViewModel.Closed -= ViewModel_Closed;
+        ViewModel.LogReceived -= ViewModel_LogReceived;
         Terminal.OnInitialized -= Terminal_OnInitialized;
         Terminal.Loaded -= Terminal_Loaded;
         Terminal.Unloaded -= Terminal_Unloaded;
-    }
-
-    private void ViewModel_LineReceived(object? sender, string e)
-    {
-        Terminal.Write(e + Environment.NewLine);
     }
 
     private void OnClearButtonClicked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

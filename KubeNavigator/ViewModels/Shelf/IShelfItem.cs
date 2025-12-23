@@ -6,7 +6,7 @@ namespace KubeNavigator.ViewModels.Shelf;
 
 public interface IShelfItem
 {
-    KubernetesResourceViewModel Resource { get; }
+    KubernetesResourceViewModel? Resource { get; }
 
     event EventHandler Closed;
 

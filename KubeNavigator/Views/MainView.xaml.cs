@@ -23,6 +23,7 @@ public sealed partial class WorkspaceView : UserControl
             }
         };
         this.InitializeComponent();
+        SetRowSizes(ViewModel.ShelfItemsCount > 0, ViewModel.IsShelfMaximized, ViewModel.SelectedItem);
     }
 
     private void SetRowSizes(bool shelfHasItems, bool shelfIsMaximized, INavigationTarget? navigationTarget)
@@ -32,7 +33,7 @@ public sealed partial class WorkspaceView : UserControl
             _previousShelfHeight = ShelfRow.Height.Value;
         }
 
-        if (navigationTarget is PortForwardsViewModel or SettingsViewModel or ClusterListViewModel)
+        if (navigationTarget is SettingsViewModel)
         {
             ShelfResizer.Visibility = Visibility.Collapsed;
             ShelfRow.Height = new GridLength(0);

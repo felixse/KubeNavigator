@@ -18,6 +18,7 @@ public partial class App : Application, IWindowManager
     private Window? _activeWindow;
     private readonly ISettingsService _settingsService;
     private ThemeManager? _themeManager;
+    private LoggingService? _loggingService;
 
     public IWindow ActiveWindow => _activeWindow switch
     {
@@ -32,11 +33,12 @@ public partial class App : Application, IWindowManager
         UnhandledException += App_UnhandledException;
         
         _settingsService = new SettingsService();
+        _loggingService = new LoggingService();
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-
+        Serilog.Log.Fatal(e.Exception, "Unhandled exception occurred");
     }
 
     protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
@@ -46,8 +48,10 @@ public partial class App : Application, IWindowManager
         var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         _themeManager = new ThemeManager(_settingsService, dispatcherQueue);
         
+        Serilog.Log.Information("KubeNavigator starting");
+        
         var settings = new SettingsViewModel(_settingsService);
-        var app = new AppViewModel(() => new ConfirmationDialogService(), this, settings, dispatcherQueue, _themeManager);
+        var app = new AppViewModel(() => new ConfirmationDialogService(), this, settings, dispatcherQueue, _themeManager, _loggingService!);
         app.DetailWindowViewModels.CollectionChanged += OnDetailWindowsCollectionchanged;
         var mainWindow = new MainWindow(app.MainWindow);
         var bar = DispatcherQueue.GetForCurrentThread();
@@ -57,6 +61,8 @@ public partial class App : Application, IWindowManager
         
         RegisterWindowForTheming(mainWindow);
         mainWindow.Activate();
+        
+        Serilog.Log.Information("KubeNavigator started successfully");
     }
 
     private void RegisterWindowForTheming(Window window)

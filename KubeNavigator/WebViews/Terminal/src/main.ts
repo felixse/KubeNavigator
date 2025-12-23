@@ -34,6 +34,7 @@ interface ClearRequested {
 interface InitializeTerminal {
   type: 'InitializeTerminal';
   theme: 'dark' | 'light';
+  readOnly: boolean;
 }
 
 interface ThemeChanged {
@@ -125,12 +126,14 @@ term.options.cursorStyle = 'bar';
 
 window.chrome.webview.addEventListener('message', (message: { data: IncomingMessage }) => {
   match(message.data)
-    .with({ type: 'InitializeTerminal' }, ({ theme }) => {
+    .with({ type: 'InitializeTerminal' }, ({ theme, readOnly }) => {
       if (theme === 'dark') {
         term.options.theme = darkTheme;
       } else {
         term.options.theme = lightTheme;
       }
+
+      term.options.disableStdin = readOnly;
 
       let terminalElement = document.getElementById('terminal');
       if (terminalElement != null) {

@@ -76,6 +76,8 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
         ShelfItems.CollectionChanged += OnShelfItemsCollectionChanged;
 
         SelectedItem = FooterItems.First(f => f is ClusterListViewModel);
+        ShelfItems.Add(new ApplicationLogViewModel(App.LoggingService, App.ThemeManager));
+        SelectedShelfItem = ShelfItems.First();
     }
 
     public async Task SetContextAsync(ClusterViewModel cluster)

@@ -12,6 +12,8 @@ public partial class ShelfItemTemplateSelector : DataTemplateSelector
 
     public DataTemplate? ShellTemplate { get; set; }
 
+    public DataTemplate? ApplicationLogTemplate { get; set; }
+
     protected override DataTemplate SelectTemplateCore(object item)
     {
         if (item is EditKubernetesResourceViewModel && EditTemplate != null)
@@ -25,6 +27,10 @@ public partial class ShelfItemTemplateSelector : DataTemplateSelector
         else if (item is PodShellViewModel && ShellTemplate != null)
         {
             return ShellTemplate;
+        }
+        else if (item is ApplicationLogViewModel && ApplicationLogTemplate != null)
+        {
+            return ApplicationLogTemplate;
         }
 
         return base.SelectTemplateCore(item);

@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Humanizer;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Model;
@@ -92,7 +91,7 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
         var nullableAge = DateTime.UtcNow - Resource.CreationTimestamp();
         if (nullableAge is TimeSpan age)
         {
-            return age.Humanize(minUnit: TimeUnit.Second, maxUnit: TimeUnit.Day, precision: 2); // todo write this myself to shorten output?
+            return FormatDuration(age);
         }
 
         return string.Empty;
@@ -101,5 +100,115 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
     partial void OnResourceChanged(IKubernetesObject<V1ObjectMeta> value)
     {
         UpdateDetails();
+    }
+
+    private static string FormatDuration(TimeSpan duration, bool compact = true)
+    {
+        var totalSeconds = (int)Math.Floor(duration.TotalSeconds);
+        var separator = compact ? "" : " ";
+
+        if (totalSeconds < 0)
+        {
+            return "0s";
+        }
+        else if (totalSeconds < 60 * 2)
+        {
+            return $"{totalSeconds}s";
+        }
+
+        var totalMinutes = (int)Math.Floor(duration.TotalMinutes);
+
+        if (totalMinutes < 10)
+        {
+            var seconds = duration.Seconds;
+            return GetMeaningfulValues([totalMinutes, seconds], ["m", "s"], separator);
+        }
+        else if (totalMinutes < 60 * 3)
+        {
+            if (!compact)
+            {
+                return GetMeaningfulValues([totalMinutes, duration.Seconds], ["m", "s"], separator);
+            }
+            return $"{totalMinutes}m";
+        }
+
+        var totalHours = (int)Math.Floor(duration.TotalHours);
+
+        if (totalHours < 8)
+        {
+            var minutes = duration.Minutes;
+            return GetMeaningfulValues([totalHours, minutes], ["h", "m"], separator);
+        }
+        else if (totalHours < 48)
+        {
+            if (compact)
+            {
+                return $"{totalHours}h";
+            }
+            else
+            {
+                return GetMeaningfulValues([totalHours, duration.Minutes], ["h", "m"], separator);
+            }
+        }
+
+        var totalDays = (int)Math.Floor(duration.TotalDays);
+
+        if (totalDays < 8)
+        {
+            var hours = duration.Hours;
+            if (compact)
+            {
+                return GetMeaningfulValues([totalDays, hours], ["d", "h"], separator);
+            }
+            else
+            {
+                return GetMeaningfulValues([totalDays, hours, duration.Minutes], ["d", "h", "m"], separator);
+            }
+        }
+
+        var totalYears = (int)Math.Floor(duration.TotalDays / 365.25);
+
+        if (totalYears < 2)
+        {
+            if (compact)
+            {
+                return $"{totalDays}d";
+            }
+            else
+            {
+                return GetMeaningfulValues([totalDays, duration.Hours, duration.Minutes], ["d", "h", "m"], separator);
+            }
+        }
+        else if (totalYears < 8)
+        {
+            var days = totalDays - (int)(totalYears * 365.25);
+            if (compact)
+            {
+                return GetMeaningfulValues([totalYears, days], ["y", "d"], separator);
+            }
+        }
+
+        if (compact)
+        {
+            return $"{totalYears}y";
+        }
+
+        var remainingDays = totalDays - (int)(totalYears * 365.25);
+        var remainingHours = duration.Hours;
+        var remainingMinutes = duration.Minutes;
+        return GetMeaningfulValues([totalYears, remainingDays, remainingHours, remainingMinutes], ["y", "d", "h", "m"], separator);
+    }
+
+    private static string GetMeaningfulValues(int[] values, string[] suffixes, string separator = " ")
+    {
+        var parts = new List<string>();
+        for (int i = 0; i < values.Length && i < suffixes.Length; i++)
+        {
+            if (values[i] > 0)
+            {
+                parts.Add($"{values[i]}{suffixes[i]}");
+            }
+        }
+        return string.Join(separator, parts);
     }
 }

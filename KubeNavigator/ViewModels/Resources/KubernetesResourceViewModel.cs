@@ -79,7 +79,7 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
                     },
                     new DetailsCollectionItem {
                         Title = "Annotations",
-                        Items = [.. Resource.Metadata.Annotations?.Select(a => $"{a.Key}={a.Value}") ?? []]
+                        Items = [.. Resource.Metadata.Annotations?.Select(a => new DetailsCollectionItemElement { Value = $"{a.Key}={a.Value}" }) ?? []]
                     }
                 ]
             }

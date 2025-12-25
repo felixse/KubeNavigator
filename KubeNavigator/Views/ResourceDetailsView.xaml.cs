@@ -1,14 +1,24 @@
 using CommunityToolkit.Labs.WinUI.MarkdownTextBlock;
 using KubeNavigator.Model.Details;
 using KubeNavigator.ViewModels;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace KubeNavigator.Views;
 
 public sealed partial class ResourceDetailsView : UserControl
 {
-    private static MarkdownConfig _markdownConfig = new MarkdownConfig();
+    private static MarkdownConfig _markdownConfig = new MarkdownConfig
+    {
+        Themes = new()
+        {
+            InlineCodePadding = new(4),
+            InlineCodeBorderBrush = new SolidColorBrush(Colors.Transparent),
+            InlineCodeBorderThickness = new(4),
+        }
+    };
 
     public static readonly DependencyProperty ViewModelProperty =
         DependencyProperty.Register(nameof(ViewModel), typeof(DetailsViewModel), typeof(ResourceDetailsView), new PropertyMetadata(null));

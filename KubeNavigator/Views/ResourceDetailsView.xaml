@@ -16,7 +16,27 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <templateselectors:DetailsContentTemplateSelector x:Key="DetailsContentTemplateSelector">
+        <DataTemplate x:Key="DetailsCollectionItemElementTemplate" x:DataType="details:DetailsCollectionItemElement">
+            <StackPanel>
+                <Border
+        Padding="8,4,8,4"
+        Background="{ThemeResource ControlAltFillColorQuarternaryBrush}"
+        BorderThickness="1"
+        CornerRadius="2">
+                    <TextBlock
+            IsTextSelectionEnabled="True"
+            Text="{x:Bind Value}"
+            TextTrimming="CharacterEllipsis"
+            ToolTipService.ToolTip="{x:Bind Value}" />
+                </Border>
+                <TextBlock
+                    Visibility="{x:Bind SecondaryValue, Converter={StaticResource NullToCollapsedConverter}}"
+                     IsTextSelectionEnabled="True"
+                     Text="{x:Bind SecondaryValue}"
+                     TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            </DataTemplate>
+            <templateselectors:DetailsContentTemplateSelector x:Key="DetailsContentTemplateSelector">
             <templateselectors:DetailsContentTemplateSelector.TextTemplate>
                 <DataTemplate x:DataType="details:DetailsTextItem">
                     <controls:DataRow Margin="0,4,0,4">
@@ -28,6 +48,7 @@
                             <controls:Case Value="Success">
                                 <TextBlock
                                     Margin="8,0,0,0"
+                                    TextWrapping="WrapWholeWords"
                                     VerticalAlignment="Center"
                                     Foreground="{ThemeResource SystemFillColorSuccessBrush}"
                                     IsTextSelectionEnabled="True"
@@ -36,6 +57,7 @@
                             <controls:Case Value="Info">
                                 <TextBlock
                                     Margin="8,0,0,0"
+                                    TextWrapping="WrapWholeWords"
                                     VerticalAlignment="Center"
                                     Foreground="{ThemeResource SystemFillColorAttentionBrush}"
                                     IsTextSelectionEnabled="True"
@@ -44,6 +66,7 @@
                             <controls:Case Value="Warning">
                                 <TextBlock
                                     Margin="8,0,0,0"
+                                    TextWrapping="WrapWholeWords"
                                     VerticalAlignment="Center"
                                     Foreground="{ThemeResource SystemFillColorCautionBrush}"
                                     IsTextSelectionEnabled="True"
@@ -52,6 +75,7 @@
                             <controls:Case Value="Error">
                                 <TextBlock
                                     Margin="8,0,0,0"
+                                    TextWrapping="WrapWholeWords"
                                     VerticalAlignment="Center"
                                     Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                                     IsTextSelectionEnabled="True"
@@ -60,6 +84,7 @@
                             <controls:Case Value="Default">
                                 <TextBlock
                                     Margin="8,0,0,0"
+                                    TextWrapping="WrapWholeWords"
                                     VerticalAlignment="Center"
                                     IsTextSelectionEnabled="True"
                                     Text="{x:Bind Value}" />
@@ -78,22 +103,8 @@
                         <ItemsRepeater
                             MaxWidth="360"
                             HorizontalAlignment="Left"
+                            ItemTemplate="{StaticResource DetailsCollectionItemElementTemplate}"
                             ItemsSource="{x:Bind Items}">
-                            <ItemsRepeater.ItemTemplate>
-                                <DataTemplate x:DataType="x:String">
-                                    <Border
-                                        Padding="8,4,8,4"
-                                        Background="{ThemeResource ControlAltFillColorQuarternaryBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="2">
-                                        <TextBlock
-                                            IsTextSelectionEnabled="True"
-                                            Text="{x:Bind}"
-                                            TextTrimming="CharacterEllipsis"
-                                            ToolTipService.ToolTip="{x:Bind}" />
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsRepeater.ItemTemplate>
                             <ItemsRepeater.Layout>
                                 <controls:WrapLayout
                                     HorizontalSpacing="4"
@@ -104,6 +115,25 @@
                     </controls:DataRow>
                 </DataTemplate>
             </templateselectors:DetailsContentTemplateSelector.CollectionTemplate>
+            <templateselectors:DetailsContentTemplateSelector.CollectionStackTemplate>
+                <DataTemplate x:DataType="details:DetailsCollectionItem">
+                    <controls:DataRow Margin="0,4,0,4">
+                        <TextBlock
+                VerticalAlignment="Top"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind Title}" />
+                        <ItemsRepeater
+                MaxWidth="360"
+                HorizontalAlignment="Left"
+                ItemTemplate="{StaticResource DetailsCollectionItemElementTemplate}"
+                ItemsSource="{x:Bind Items}">
+                            <ItemsRepeater.Layout>
+                                <StackLayout Spacing="4" />
+                            </ItemsRepeater.Layout>
+                        </ItemsRepeater>
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:DetailsContentTemplateSelector.CollectionStackTemplate>
             <templateselectors:DetailsContentTemplateSelector.LinkTemplate>
                 <DataTemplate x:DataType="details:DetailsLinkItem">
                     <controls:DataRow Margin="0,4,0,4">
@@ -265,6 +295,17 @@
                     </controls:DataRow>
                 </DataTemplate>
             </templateselectors:DetailsContentTemplateSelector.DictionaryTemplate>
+            <templateselectors:DetailsContentTemplateSelector.MarkdownTemplate>
+                <DataTemplate x:DataType="details:DetailsMarkdownItem">
+                    <controls:DataRow Margin="0,4,0,4">
+                        <TextBlock
+                            VerticalAlignment="Top"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind Title}" />
+                        <markdowntextblock:MarkdownTextBlock Config="{x:Bind local:ResourceDetailsView.GetMarkdownConfig()}" Margin="8 0 0 0" Text="{x:Bind Value}" />
+                    </controls:DataRow>
+                </DataTemplate>
+            </templateselectors:DetailsContentTemplateSelector.MarkdownTemplate>
         </templateselectors:DetailsContentTemplateSelector>
         <templateselectors:DetailsSectionTemplateSelector x:Key="DetailsSectionTemplateSelector">
             <templateselectors:DetailsSectionTemplateSelector.SectionTemplate>

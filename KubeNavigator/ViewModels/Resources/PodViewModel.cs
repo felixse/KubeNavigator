@@ -4,8 +4,10 @@ using KubeNavigator.Model;
 using KubeNavigator.Model.Details;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.Devices.Radios;
 
 namespace KubeNavigator.ViewModels.Resources;
 
@@ -93,7 +95,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         yield return new DetailsCollectionItem
         {
             Title = "Labels",
-            Items = [.. Pod.Metadata.Labels?.Select(l => $"{l.Key}={l.Value}") ?? []]
+            Items = [.. Pod.Metadata.Labels?.Select(l => new DetailsCollectionItemElement { Value = $"{l.Key}={l.Value}" }) ?? []]
         };
 
         if (Pod.Metadata.Annotations?.Count > 0)
@@ -101,7 +103,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
             yield return new DetailsCollectionItem
             {
                 Title = "Annotations",
-                Items = [.. Pod.Metadata.Annotations?.Select(l => $"{l.Key}={l.Value}") ?? []]
+                Items = [.. Pod.Metadata.Annotations?.Select(l => new DetailsCollectionItemElement { Value = $"{l.Key}={l.Value}" }) ?? []]
             };
         }
 
@@ -155,7 +157,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         yield return new DetailsCollectionItem
         {
             Title = "Pod IPs",
-            Items = [.. Pod.Status.PodIPs?.Select(p => p.Ip) ?? []],
+            Items = [.. Pod.Status.PodIPs?.Select(p => new DetailsCollectionItemElement { Value = p.Ip }) ?? []],
         };
 
         yield return new DetailsLinkItem
@@ -181,13 +183,13 @@ public partial class PodViewModel : KubernetesResourceViewModel
         yield return new DetailsCollectionItem
         {
             Title = "Conditions",
-            Items = [.. Pod.Status.Conditions?.Select(c => $"{c.Type}: {c.Status}") ?? []]
+            Items = [.. Pod.Status.Conditions?.Select(c => new DetailsCollectionItemElement { Value = $"{c.Type}: {c.Status}" }) ?? []]
         };
 
         yield return new DetailsCollectionItem
         {
             Title = "Node Selector",
-            Items = [.. Pod.Spec.NodeSelector?.Select(n => $"{n.Key}: {n.Value}") ?? []],
+            Items = [.. Pod.Spec.NodeSelector?.Select(n => new DetailsCollectionItemElement { Value = $"{n.Key}: {n.Value}" }) ?? []],
         };
 
         yield return new DetailsTableItem("Tolerations", ["Key", "Operator", "Value", "Effect", "Seconds"], Pod.Spec.Tolerations?.Select(t => new[] { t.Key, t.OperatorProperty, t.Value, t.Effect, t.TolerationSeconds.ToString() }) ?? []);
@@ -203,6 +205,23 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
 
         var status = Pod.Status.ContainerStatuses.First(s => s.Name == container.Name);
+        var statusText = status.State switch
+        {
+            V1ContainerState { Running: V1ContainerStateRunning } => "Running",
+            V1ContainerState { Terminated: V1ContainerStateTerminated } => "Terminated",
+            _ => "Waiting"
+        };
+
+        if (status.RestartCount > 0) 
+        {
+            statusText += ", Restarted";
+        }
+
+        if (status.Ready)
+        {
+            statusText += ", Ready";
+        }    
+
         yield return new DetailsTextItem
         {
             Title = "Status",
@@ -212,12 +231,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 V1ContainerState { Terminated: V1ContainerStateTerminated } => DetailsTextItem.Color.Error,
                 _ => DetailsTextItem.Color.Warning
             },
-            Value = status.State switch
-            {
-                V1ContainerState { Running: V1ContainerStateRunning } => "Running",
-                V1ContainerState { Terminated: V1ContainerStateTerminated } => "Terminated",
-                _ => "Waiting"
-            }
+            Value = statusText
         };
 
         if (status.LastState is not null)
@@ -251,6 +265,86 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
 
         yield return new DetailsDictionaryItem { Title = "Environment", Items = container.Env?.Select(e => new DetailsDictionaryEntry { Key = e.Name, Value = GetEnvValueRepresentation(e) }).ToList() ?? [] };
+
+        yield return new DetailsCollectionItem { Title = "Mounts", IsWrapLayout = false, Items = [.. container.VolumeMounts.Select(m => new DetailsCollectionItemElement { Value = m.MountPath, SecondaryValue = $"from {m.Name} ({(m.ReadOnlyProperty == true ? "ro" : "rw")})" })] };
+
+        if (container.LivenessProbe != null)
+        {
+            var elements = new List<DetailsCollectionItemElement>();
+            if (container.LivenessProbe.HttpGet != null)
+            {
+                elements.Add(new DetailsCollectionItemElement { Value = "http-get" });
+                elements.Add(new DetailsCollectionItemElement { Value = $"{container.LivenessProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.LivenessProbe.HttpGet.Host}{container.LivenessProbe.HttpGet.Path}:{container.LivenessProbe.HttpGet.Port}" });
+                elements.Add(new DetailsCollectionItemElement { Value = $"port: {container.LivenessProbe.HttpGet.Port}" });
+            }
+
+            // todo fill for exec
+
+            elements.Add(new DetailsCollectionItemElement { Value = $"delay={container.LivenessProbe.InitialDelaySeconds}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"timeout={container.LivenessProbe.TimeoutSeconds}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"period={container.LivenessProbe.PeriodSeconds}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"#success={container.LivenessProbe.SuccessThreshold}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"#failure={container.LivenessProbe.FailureThreshold}s" });
+
+            yield return new DetailsCollectionItem { Title = "Liveness", Items = elements };
+        }
+
+        if (container.ReadinessProbe != null)
+        {
+            var elements = new List<DetailsCollectionItemElement>();
+            if (container.ReadinessProbe.HttpGet != null)
+            {
+                elements.Add(new DetailsCollectionItemElement { Value = "http-get" });
+                elements.Add(new DetailsCollectionItemElement { Value = $"{container.ReadinessProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.ReadinessProbe.HttpGet.Host}{container.ReadinessProbe.HttpGet.Path}:{container.ReadinessProbe.HttpGet.Port}" });
+                elements.Add(new DetailsCollectionItemElement { Value = $"port: {container.ReadinessProbe.HttpGet.Port}" });
+            }
+
+            // todo fill for exec
+
+            elements.Add(new DetailsCollectionItemElement { Value = $"delay={container.ReadinessProbe.InitialDelaySeconds}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"timeout={container.ReadinessProbe.TimeoutSeconds}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"period={container.ReadinessProbe.PeriodSeconds}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"#success={container.ReadinessProbe.SuccessThreshold}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"#failure={container.ReadinessProbe.FailureThreshold}s" });
+
+            yield return new DetailsCollectionItem { Title = "Readiness", Items = elements };
+        }
+
+        if (container.StartupProbe != null)
+        {
+            var elements = new List<DetailsCollectionItemElement>();
+            if (container.StartupProbe.HttpGet != null)
+            {
+                elements.Add(new DetailsCollectionItemElement { Value = "http-get" });
+                elements.Add(new DetailsCollectionItemElement { Value = $"{container.StartupProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.StartupProbe.HttpGet.Host}{container.StartupProbe.HttpGet.Path}:{container.StartupProbe.HttpGet.Port}" });
+                elements.Add(new DetailsCollectionItemElement { Value = $"port: {container.StartupProbe.HttpGet.Port}" });
+            }
+
+            // todo fill for exec
+
+            elements.Add(new DetailsCollectionItemElement { Value = $"delay={container.StartupProbe.InitialDelaySeconds}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"timeout={container.StartupProbe.TimeoutSeconds}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"period={container.StartupProbe.PeriodSeconds}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"#success={container.StartupProbe.SuccessThreshold}s" });
+            elements.Add(new DetailsCollectionItemElement { Value = $"#failure={container.StartupProbe.FailureThreshold}s" });
+
+            yield return new DetailsCollectionItem { Title = "Startup", Items = elements };
+        }
+
+        if (container.Command != null)
+        {
+            yield return new DetailsTextItem { Title = "Command", Value = string.Join(" ", container.Command) };
+        }
+
+        if (container.Args != null)
+        {
+            yield return new DetailsTextItem { Title = "Args", Value = string.Join(" ", container.Args) };
+        }
+
+        if (container.Resources.Requests != null)
+        {
+            yield return new DetailsCollectionItem { Title = "Requests", Items = [.. container.Resources.Requests.Select(r => new DetailsCollectionItemElement { Value = $"{r.Key}={r.Value}"})] };
+        }
     }
 
     private string GetEnvValueRepresentation(V1EnvVar envVar)

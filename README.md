@@ -1,10 +1,27 @@
 ﻿# KubeNavigator
 
-A modern, native Windows application for managing and interacting with Kubernetes clusters, built with WinUI 3 and .NET 10.
+<p align="center">
+  <img src="KubeNavigator/Assets/Square44x44Logo.altform-lightunplated_targetsize-256.png" alt="KubeNavigator Logo" width="150" height="150">
+</p>
 
-![KubeNavigator](https://img.shields.io/badge/platform-Windows-blue)
-![.NET](https://img.shields.io/badge/.NET-10.0-purple)
-![WinUI](https://img.shields.io/badge/WinUI-3-green)
+<p align="center">
+  <strong>A modern, native Windows application for managing and interacting with Kubernetes clusters</strong>
+  <br>
+  Built with WinUI 3 and .NET 10
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Platform">
+  <img src="https://img.shields.io/badge/.NET-10.0-purple" alt=".NET">
+  <img src="https://img.shields.io/badge/WinUI-3-green" alt="WinUI">
+  <img src="https://img.shields.io/badge/license-GPL--3.0-blue" alt="License">
+</p>
+
+## 📸 Screenshots
+
+### Pod Management
+![Pod View](screenshots/pods.png)
+*View and manage pods with detailed information, logs, and shell access*
 
 ## 🚀 Features
 

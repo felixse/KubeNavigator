@@ -51,7 +51,7 @@ public partial class App : Application, IWindowManager
         Serilog.Log.Information("KubeNavigator starting");
         
         var settings = new SettingsViewModel(_settingsService);
-        var app = new AppViewModel(() => new ConfirmationDialogService(), this, settings, dispatcherQueue, _themeManager, _loggingService!);
+        var app = new AppViewModel(() => new ConfirmationDialogService(_themeManager), this, settings, dispatcherQueue, _themeManager, _loggingService!);
         app.DetailWindowViewModels.CollectionChanged += OnDetailWindowsCollectionchanged;
         var mainWindow = new MainWindow(app.MainWindow);
         var bar = DispatcherQueue.GetForCurrentThread();

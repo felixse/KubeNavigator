@@ -10,12 +10,20 @@ namespace KubeNavigator.Views;
 
 public class ConfirmationDialogService : IUserConfirmationService
 {
+    private readonly ThemeManager _themeManager;
+
     public Page Page { get; set; }
+
+    public ConfirmationDialogService(ThemeManager themeManager)
+    {
+        _themeManager = themeManager;
+    }
 
     public async Task<bool> ConfirmResourceDeletionAsync(ResourceType resourceType, IEnumerable<string> resourceNames, string clusterName)
     {
         var dialog = new ConfirmDeletionDialog(resourceType, resourceNames.First(), clusterName); // todo list multiple resources in dialog if more than one selected
         dialog.XamlRoot = Page.XamlRoot;
+        dialog.RequestedTheme = _themeManager.GetEffectiveTheme() == "dark" ? Microsoft.UI.Xaml.ElementTheme.Dark : Microsoft.UI.Xaml.ElementTheme.Light; 
         var result = await dialog.ShowAsync();
 
         return result == ContentDialogResult.Primary;
@@ -25,6 +33,7 @@ public class ConfirmationDialogService : IUserConfirmationService
     {
         var dialog = new PortForwardDialog(pod);
         dialog.XamlRoot = Page.XamlRoot;
+        dialog.RequestedTheme = _themeManager.GetEffectiveTheme() == "dark" ? Microsoft.UI.Xaml.ElementTheme.Dark : Microsoft.UI.Xaml.ElementTheme.Light;
 
         if (options != null)
         {

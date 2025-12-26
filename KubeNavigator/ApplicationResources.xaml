@@ -41,7 +41,6 @@
                 <TabViewItem Header="{x:Bind Title}">
                     <TabViewItem.IconSource>
                         <FontIconSource
-                            FontFamily="Segoe MDL2 Assets"
                             Glyph="&#xEBE8;" />
                     </TabViewItem.IconSource>
                 </TabViewItem>

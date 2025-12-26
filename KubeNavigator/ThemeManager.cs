@@ -12,6 +12,12 @@ namespace KubeNavigator;
 
 public class ThemeManager
 {
+    public enum EffectiveTheme
+    {
+        Light,
+        Dark
+    }
+
     private readonly List<FrameworkElement> _themeTargets = [];
     private readonly List<TerminalView> _terminalTargets = [];
     private readonly UISettings _uiSettings;
@@ -108,11 +114,11 @@ public class ThemeManager
         });
     }
 
-    public string GetEffectiveTheme()
+    public EffectiveTheme GetEffectiveTheme()
     {
         var theme = _settingsService.Settings.Theme;
         var effectiveTheme = theme == AppTheme.System ? GetSystemAppTheme() : theme;
-        return effectiveTheme.ToString().ToLowerInvariant();
+        return effectiveTheme == AppTheme.Dark ? EffectiveTheme.Dark : EffectiveTheme.Light;
     }
 
     private ElementTheme GetSystemTheme()

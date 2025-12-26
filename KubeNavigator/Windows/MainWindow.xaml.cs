@@ -41,7 +41,7 @@ public sealed partial class MainWindow : Window
         Color buttonHoverForegroundColor;
 
         Color buttonHoverBackgroundColor;
-        if (ViewModel.App.ThemeManager.GetEffectiveTheme() == "dark")
+        if (ViewModel.App.ThemeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark)
         {
             buttonForegroundColor = "#FFFFFF".ToColor();
             buttonHoverForegroundColor = "#FFFFFF".ToColor();

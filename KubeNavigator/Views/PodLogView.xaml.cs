@@ -34,7 +34,7 @@ public sealed partial class PodLogView : UserControl, IShelfItemView
     {
         var initMessage = new InitializeTerminal
         {
-            Theme = ViewModel.ThemeManager.GetEffectiveTheme(),
+            Theme = ViewModel.ThemeManager.GetEffectiveTheme().ToString().ToLowerInvariant(),
             ReadOnly = true,
         };
         Terminal.SendMessage(initMessage);

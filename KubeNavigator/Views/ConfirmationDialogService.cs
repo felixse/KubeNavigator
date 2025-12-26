@@ -1,5 +1,6 @@
 ﻿using KubeNavigator.Model;
 using KubeNavigator.ViewModels.Resources;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
@@ -21,9 +22,11 @@ public class ConfirmationDialogService : IUserConfirmationService
 
     public async Task<bool> ConfirmResourceDeletionAsync(ResourceType resourceType, IEnumerable<string> resourceNames, string clusterName)
     {
-        var dialog = new ConfirmDeletionDialog(resourceType, resourceNames.First(), clusterName); // todo list multiple resources in dialog if more than one selected
-        dialog.XamlRoot = Page.XamlRoot;
-        dialog.RequestedTheme = _themeManager.GetEffectiveTheme() == "dark" ? Microsoft.UI.Xaml.ElementTheme.Dark : Microsoft.UI.Xaml.ElementTheme.Light; 
+        var dialog = new ConfirmDeletionDialog(resourceType, resourceNames.First(), clusterName) // todo list multiple resources in dialog if more than one selected
+        {
+            XamlRoot = Page.XamlRoot,
+            RequestedTheme = _themeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark ? ElementTheme.Dark : ElementTheme.Light
+        }; 
         var result = await dialog.ShowAsync();
 
         return result == ContentDialogResult.Primary;
@@ -31,9 +34,11 @@ public class ConfirmationDialogService : IUserConfirmationService
 
     public async Task<PortForwardOptions?> GetPortForwardOptionsAsync(PodViewModel pod, PortForwardOptions? options)
     {
-        var dialog = new PortForwardDialog(pod);
-        dialog.XamlRoot = Page.XamlRoot;
-        dialog.RequestedTheme = _themeManager.GetEffectiveTheme() == "dark" ? Microsoft.UI.Xaml.ElementTheme.Dark : Microsoft.UI.Xaml.ElementTheme.Light;
+        var dialog = new PortForwardDialog(pod)
+        {
+            XamlRoot = Page.XamlRoot,
+            RequestedTheme = _themeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark ? ElementTheme.Dark : ElementTheme.Light
+        };
 
         if (options != null)
         {

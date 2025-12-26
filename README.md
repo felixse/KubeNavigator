@@ -20,7 +20,7 @@
 ## 📸 Screenshots
 
 ### Pod Management
-![Pod View](screenshots/pods.png)
+![Pod View](Screenshots/pods.png)
 *View and manage pods with detailed information, logs, and shell access*
 
 ## 🚀 Features

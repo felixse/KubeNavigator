@@ -35,10 +35,10 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
         {
             if (e.PropertyName == nameof(DetailsViewModel.SelectedResource))
             {
-                Title = Details.SelectedResource.Name;
+                Title = $"{Details.SelectedResource.ResourceType.SingularDisplayName}: {Details.SelectedResource.Name}";
             }
         };
-        Title = Details.SelectedResource.Name;
+        Title = $"{Details.SelectedResource.ResourceType.SingularDisplayName}: {Details.SelectedResource.Name}";
         UserConfirmationService = userConfirmationService;
     }
 

@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Windows.Devices.Radios;
 
 namespace KubeNavigator.ViewModels.Resources;
 
@@ -19,7 +18,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         : base(resource, ResourceType.Pod, cluster)
     {
         _logger = cluster.App.LoggingService.LoggerFactory.CreateLogger<PodViewModel>();
-        
+
         Commands.Insert(0, new ItemCommand { Name = "Show Logs", Symbol = "List", Command = ShowLogsCommand });
         Commands.Insert(1, new ItemCommand { Name = "Open Shell", Symbol = "Play", Command = OpenShellCommand });
 
@@ -67,6 +66,14 @@ public partial class PodViewModel : KubernetesResourceViewModel
                     Title = c.Name,
                     Items = [.. GetContainerItems(c)]
                 })]
+            },
+            new GroupedDetailsSection {
+                Title = "Volumes",
+                Groups = [.. Pod.Spec.Volumes?.Select(v => new DetailsGroup {
+                    Title = v.Name,
+                    Items = [.. GetVolumeItems(v)
+                    ]
+                }) ?? []]
             }
         ];
     }
@@ -212,7 +219,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
             _ => "Waiting"
         };
 
-        if (status.RestartCount > 0) 
+        if (status.RestartCount > 0)
         {
             statusText += ", Restarted";
         }
@@ -220,7 +227,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         if (status.Ready)
         {
             statusText += ", Ready";
-        }    
+        }
 
         yield return new DetailsTextItem
         {
@@ -343,7 +350,877 @@ public partial class PodViewModel : KubernetesResourceViewModel
 
         if (container.Resources.Requests != null)
         {
-            yield return new DetailsCollectionItem { Title = "Requests", Items = [.. container.Resources.Requests.Select(r => new DetailsCollectionItemElement { Value = $"{r.Key}={r.Value}"})] };
+            yield return new DetailsCollectionItem { Title = "Requests", Items = [.. container.Resources.Requests.Select(r => new DetailsCollectionItemElement { Value = $"{r.Key}={r.Value}" })] };
+        }
+    }
+
+    private IEnumerable<IDetailsItem> GetVolumeItems(V1Volume volume)
+    {
+        if (volume.AwsElasticBlockStore != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "AWS Elastic Block Store",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.AwsElasticBlockStore.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.AwsElasticBlockStore.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Partition",
+                Value = volume.AwsElasticBlockStore.Partition.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Volume ID",
+                Value = volume.AwsElasticBlockStore.VolumeID,
+            };
+        }
+        else if (volume.AzureDisk != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Azure Disk",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.AzureDisk.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.AzureDisk.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Kind",
+                Value = volume.AzureDisk.Kind,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Disk Name",
+                Value = volume.AzureDisk.DiskName,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Disk URI",
+                Value = volume.AzureDisk.DiskURI,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Caching Mode",
+                Value = volume.AzureDisk.CachingMode,
+            };
+        }
+        else if (volume.AzureFile != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Azure File",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.AzureFile.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Share Name",
+                Value = volume.AzureFile.ShareName,
+            };
+
+            yield return new DetailsTextItem
+            {
+                Title = "Secret Name",
+                Value = volume.AzureFile.SecretName,
+            };
+        }
+        else if (volume.Cephfs != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "CephFS",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.Cephfs.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Monitors",
+                Value = string.Join(", ", volume.Cephfs.Monitors),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Path",
+                Value = volume.Cephfs.Path,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "User",
+                Value = volume.Cephfs.User,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Secret File",
+                Value = volume.Cephfs.SecretFile,
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Secret Ref",
+                ResourceType = ResourceType.Secret,
+                ResourceName = volume.Cephfs.SecretRef?.Name,
+            };
+        }
+        else if (volume.Cinder != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Cinder",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.Cinder.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.Cinder.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Volume ID",
+                Value = volume.Cinder.VolumeID,
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Secret Ref",
+                ResourceType = ResourceType.Secret,
+                ResourceName = volume.Cinder.SecretRef?.Name,
+            };
+        }
+        else if (volume.ConfigMap != null) // todo items
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Config Map",
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Name",
+                ResourceType = ResourceType.ConfigMap,
+                ResourceName = volume.ConfigMap.Name,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Default Mode",
+                Value = volume.ConfigMap.DefaultMode?.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Optional",
+                Value = volume.ConfigMap.Optional?.ToString(),
+            };
+        }
+        else if (volume.Csi != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "CSI",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.Csi.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.Csi.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Driver",
+                Value = volume.Csi.Driver,
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Node Publish Secret Ref",
+                ResourceType = ResourceType.Secret,
+                ResourceName = volume.Csi.NodePublishSecretRef?.Name,
+            };
+            yield return new DetailsDictionaryItem
+            {
+                Title = "Volume Attributes",
+                Items = volume.Csi.VolumeAttributes?.Select(va => new DetailsDictionaryEntry { Key = va.Key, Value = va.Value }).ToList() ?? []
+            };
+        }
+        else if (volume.DownwardAPI != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Downward API",
+            };
+            yield return new DetailsDictionaryItem
+            {
+                Title = "Default Mode",
+                Items = volume.DownwardAPI.DefaultMode.HasValue ? [new DetailsDictionaryEntry { Key = "Default Mode", Value = volume.DownwardAPI.DefaultMode.Value.ToString() }] : []
+            };
+            yield return new DetailsCollectionItem
+            {
+                Title = "Items",
+                Items = volume.DownwardAPI.Items?.Select(i => new DetailsCollectionItemElement
+                {
+                    Value = i.Path,
+                    SecondaryValue = i.FieldRef != null ? $"FieldRef: {i.FieldRef.FieldPath}" : i.ResourceFieldRef != null ? $"ResourceFieldRef: {i.ResourceFieldRef.Resource}" : string.Empty
+                }).ToList() ?? []
+            };
+        }
+        else if (volume.EmptyDir != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Empty Dir",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Medium",
+                Value = volume.EmptyDir.Medium,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Size Limit",
+                Value = volume.EmptyDir.SizeLimit.ToString(),
+            };
+
+        }
+        else if (volume.Ephemeral != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Ephemeral",
+            };
+            if (volume.Ephemeral.VolumeClaimTemplate != null)
+            {
+                yield return new DetailsLinkItem
+                {
+                    Title = "Volume Claim Template",
+                    ResourceType = ResourceType.PersistentVolumeClaim,
+                    ResourceName = volume.Ephemeral.VolumeClaimTemplate.Metadata?.Name,
+                };
+            }
+        }
+        else if (volume.Fc != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Fibre Channel",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FSType",
+                Value = volume.Fc.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.Fc.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Target WWNs",
+                Value = string.Join(", ", volume.Fc.TargetWWNs),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Lun",
+                Value = volume.Fc.Lun.ToString(),
+            };
+
+            yield return new DetailsTextItem
+            {
+                Title = "Wwids",
+                Value = string.Join(", ", volume.Fc.Wwids),
+            };
+        }
+        else if (volume.FlexVolume != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Flex Volume",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Driver",
+                Value = volume.FlexVolume.Driver,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.FlexVolume.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.FlexVolume.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsDictionaryItem
+            {
+                Title = "Options",
+                Items = volume.FlexVolume.Options?.Select(o => new DetailsDictionaryEntry { Key = o.Key, Value = o.Value }).ToList() ?? []
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Secret Ref",
+                ResourceType = ResourceType.Secret,
+                ResourceName = volume.FlexVolume.SecretRef?.Name,
+            };
+        }
+        else if (volume.Flocker != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Flocker",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Dataset Name",
+                Value = volume.Flocker.DatasetName,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Dataset UUID",
+                Value = volume.Flocker.DatasetUUID,
+            };
+        }
+        else if (volume.GcePersistentDisk != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "GCE Persistent Disk",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.GcePersistentDisk.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.GcePersistentDisk.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Partition",
+                Value = volume.GcePersistentDisk.Partition.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "PD Name",
+                Value = volume.GcePersistentDisk.PdName,
+            };
+        }
+        else if (volume.GitRepo != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Git Repo",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Repository",
+                Value = volume.GitRepo.Repository,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Revision",
+                Value = volume.GitRepo.Revision,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Directory",
+                Value = volume.GitRepo.Directory,
+            };
+        }
+        else if (volume.Glusterfs != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "GlusterFS",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.Glusterfs.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Endpoints",
+                Value = volume.Glusterfs.Endpoints,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Path",
+                Value = volume.Glusterfs.Path,
+            };
+        }
+        else if (volume.HostPath != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Host Path",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Path",
+                Value = volume.HostPath.Path,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = volume.HostPath.Type,
+            };
+        }
+        else if (volume.Image != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Image",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Reference",
+                Value = volume.Image.Reference,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Pull Policy",
+                Value = volume.Image.PullPolicy,
+            };
+        }
+        else if (volume.Iscsi != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "iSCSI",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.Iscsi.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.Iscsi.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Target Portal",
+                Value = volume.Iscsi.TargetPortal,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "IQN",
+                Value = volume.Iscsi.Iqn,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Lun",
+                Value = volume.Iscsi.Lun.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "ISCSI Interface",
+                Value = volume.Iscsi.IscsiInterface,
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Secret Ref",
+                ResourceType = ResourceType.Secret,
+                ResourceName = volume.Iscsi.SecretRef?.Name,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Portals",
+                Value = string.Join(", ", volume.Iscsi.Portals),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Initiator Name",
+                Value = volume.Iscsi.InitiatorName,
+            };
+        }
+        else if (volume.Nfs != null)
+            {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "NFS",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.Nfs.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Server",
+                Value = volume.Nfs.Server,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Path",
+                Value = volume.Nfs.Path,
+            };
+        }
+        else if (volume.PersistentVolumeClaim != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Persistent Volume Claim",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.PersistentVolumeClaim.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Claim Name",
+                ResourceType = ResourceType.PersistentVolumeClaim,
+                ResourceName = volume.PersistentVolumeClaim.ClaimName,
+            };
+        }
+        else if (volume.PhotonPersistentDisk != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Photon Persistent Disk",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.PhotonPersistentDisk.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "PD ID",
+                Value = volume.PhotonPersistentDisk.PdID,
+            };
+        }
+        else if (volume.PortworxVolume != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Portworx Volume",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.PortworxVolume.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.PortworxVolume.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Volume ID",
+                Value = volume.PortworxVolume.VolumeID,
+            };
+        }
+        else if (volume.Projected != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Projected",
+            };
+            yield return new DetailsCollectionItem // todo support a link collection
+            {
+                Title = "Sources",
+                Items = volume.Projected.Sources?.Select(s => new DetailsCollectionItemElement
+                {
+                    Value = s.ConfigMap != null ? $"ConfigMap: {s.ConfigMap.Name}" :
+                            s.Secret != null ? $"Secret: {s.Secret.Name}" :
+                            s.ServiceAccountToken != null ? "ServiceAccountToken" :
+                            "Unknown Source"
+                }).ToList() ?? []
+            };
+        }
+        else if (volume.Quobyte != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Quobyte",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.Quobyte.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Registry",
+                Value = volume.Quobyte.Registry,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Volume",
+                Value = volume.Quobyte.Volume,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "User",
+                Value = volume.Quobyte.User,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Group",
+                Value = volume.Quobyte.Group,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Tenant",
+                Value = volume.Quobyte.Tenant,
+            };
+        }
+        else if (volume.Rbd != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "RBD (RADOS Block Device)",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.Rbd.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.Rbd.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Pool",
+                Value = volume.Rbd.Pool,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Image",
+                Value = volume.Rbd.Image,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "User",
+                Value = volume.Rbd.User,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Keyring",
+                Value = volume.Rbd.Keyring,
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Secret Ref",
+                ResourceType = ResourceType.Secret,
+                ResourceName = volume.Rbd.SecretRef?.Name,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Ceph Monitors",
+                Value = string.Join(", ", volume.Rbd.Monitors),
+            };
+        }
+        else if (volume.ScaleIO != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "ScaleIO",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.ScaleIO.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.ScaleIO.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Gateway",
+                Value = volume.ScaleIO.Gateway,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "System",
+                Value = volume.ScaleIO.System,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Volume Name",
+                Value = volume.ScaleIO.VolumeName,
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Secret Ref",
+                ResourceType = ResourceType.Secret,
+                ResourceName = volume.ScaleIO.SecretRef?.Name,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "SSLEnabled",
+                Value = volume.ScaleIO.SslEnabled.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Protection Domain",
+                Value = volume.ScaleIO.ProtectionDomain,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Storage Pool",
+                Value = volume.ScaleIO.StoragePool,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Storage Mode",
+                Value = volume.ScaleIO.StorageMode,
+            };
+        }
+        else if (volume.Secret != null) // todo items
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Secret",
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Name",
+                ResourceType = ResourceType.Secret,
+                ResourceName = volume.Secret.SecretName,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Default Mode",
+                Value = volume.Secret.DefaultMode?.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Optional",
+                Value = volume.Secret.Optional?.ToString(),
+            };
+        }
+        else if (volume.Storageos != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "StorageOS",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.Storageos.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Read Only",
+                Value = volume.Storageos.ReadOnlyProperty.ToString(),
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Volume Name",
+                Value = volume.Storageos.VolumeName,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Volume Namespace",
+                Value = volume.Storageos.VolumeNamespace,
+            };
+            yield return new DetailsLinkItem
+            {
+                Title = "Secret Ref",
+                ResourceType = ResourceType.Secret,
+                ResourceName = volume.Storageos.SecretRef?.Name,
+            };
+        }
+        else if (volume.VsphereVolume != null)
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "vSphere Volume",
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "FS Type",
+                Value = volume.VsphereVolume.FsType,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Volume Path",
+                Value = volume.VsphereVolume.VolumePath,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Storage Policy Name",
+                Value = volume.VsphereVolume.StoragePolicyName,
+            };
+            yield return new DetailsTextItem
+            {
+                Title = "Storage Policy ID",
+                Value = volume.VsphereVolume.StoragePolicyID,
+            };
+        }
+        else
+        {
+            yield return new DetailsTextItem
+            {
+                Title = "Type",
+                Value = "Unknown or Unsupported Volume Type",
+            };
         }
     }
 

@@ -1,4 +1,4 @@
-using CommunityToolkit.Labs.WinUI.MarkdownTextBlock;
+using CommunityToolkit.WinUI.Controls;
 using KubeNavigator.Model.Details;
 using KubeNavigator.ViewModels;
 using Microsoft.UI;

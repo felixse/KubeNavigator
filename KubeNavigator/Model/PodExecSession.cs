@@ -33,7 +33,7 @@ public sealed partial class PodExecSession : IDisposable
     {
         try
         {
-            _resizeStream.Write(JsonSerializer.SerializeToUtf8Bytes(size));
+            _resizeStream.Write(JsonSerializer.SerializeToUtf8Bytes(size, SerializerContext.Default.TerminalSize));
         }
         catch (Exception e)
         {

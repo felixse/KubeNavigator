@@ -8,7 +8,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:details="using:KubeNavigator.Model.Details"
     xmlns:local="using:KubeNavigator.Views"
-    xmlns:markdowntextblock="using:CommunityToolkit.Labs.WinUI.MarkdownTextBlock"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:templateselectors="using:KubeNavigator.TemplateSelectors"
     xmlns:viewmodels="using:KubeNavigator.ViewModels"
@@ -248,7 +247,7 @@
                                 <TextBlock VerticalAlignment="Center" Text="{x:Bind Count, Mode=OneWay}" />
                                 <HyperlinkButton Command="{x:Bind ToggleIsExpandedCommand}" Content="{x:Bind ExpandButtonText, Mode=OneWay}" />
                             </StackPanel>
-                            <markdowntextblock:MarkdownTextBlock
+                            <controls:MarkdownTextBlock
                                 Config="{x:Bind local:ResourceDetailsView.GetMarkdownConfig()}"
                                 Text="{x:Bind Markdown, Mode=OneWay}"
                                 Visibility="{x:Bind IsExpanded, Mode=OneWay}" />
@@ -302,7 +301,7 @@
                             VerticalAlignment="Top"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             Text="{x:Bind Title}" />
-                        <markdowntextblock:MarkdownTextBlock Config="{x:Bind local:ResourceDetailsView.GetMarkdownConfig()}" Margin="8 0 0 0" Text="{x:Bind Value}" />
+                        <controls:MarkdownTextBlock Config="{x:Bind local:ResourceDetailsView.GetMarkdownConfig()}" Margin="8 0 0 0" Text="{x:Bind Value}" />
                     </controls:DataRow>
                 </DataTemplate>
             </templateselectors:DetailsContentTemplateSelector.MarkdownTemplate>

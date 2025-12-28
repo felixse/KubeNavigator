@@ -6,7 +6,7 @@ namespace KubeNavigator.Services;
 public partial class AppSettings : ObservableObject
 {
     [ObservableProperty]
-    private AppTheme _theme = AppTheme.System;
+    public partial AppTheme Theme { get; set; } = AppTheme.System;
 }
 
 public enum AppTheme

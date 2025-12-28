@@ -6,5 +6,5 @@ public class GroupedDetailsSection : IDetailsSection
 {
     public required string Title { get; init; }
 
-    public required IReadOnlyCollection<DetailsGroup> Groups { get; init; }
+    public required List<DetailsGroup> Groups { get; init; }
 }

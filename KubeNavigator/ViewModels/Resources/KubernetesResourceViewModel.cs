@@ -24,7 +24,7 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
     public partial bool IsSelected { get; set; }
 
     [ObservableProperty]
-    public partial IReadOnlyCollection<IDetailsSection> Details { get; private set; } = [];
+    public partial List<IDetailsSection> Details { get; private set; } = [];
 
     [ObservableProperty]
     public partial IKubernetesObject<V1ObjectMeta> Resource { get; set; }
@@ -59,7 +59,7 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
         Details = CreateDetails(); // todo remove details property, let the detailsviewmodel handle this instead
     }
 
-    protected virtual IReadOnlyCollection<IDetailsSection> CreateDetails()
+    protected virtual List<IDetailsSection> CreateDetails()
     {
         return [
             new DetailsSection{

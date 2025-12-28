@@ -9,8 +9,6 @@ using System.Text.Json;
 namespace KubeNavigator.Model.Helm;
 public class HelmRelease
 {
-    private static readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
     public string Name { get; set; }
 
     public HelmReleaseInformation Info { get; set; }
@@ -36,6 +34,6 @@ public class HelmRelease
         using var releaseData = new MemoryStream();
         gzipStream.CopyTo(releaseData);
         releaseData.Position = 0;
-        return JsonSerializer.Deserialize<HelmRelease>(releaseData, _serializerOptions)!;
+        return JsonSerializer.Deserialize(releaseData, SerializerContext.Default.HelmRelease)!;
     }
 }

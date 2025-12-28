@@ -41,7 +41,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
 
     public V1Pod Pod => (V1Pod)Resource;
 
-    public IEnumerable<V1ContainerStatus> ContainerStatuses => Pod.Status.ContainerStatuses ?? Enumerable.Empty<V1ContainerStatus>();
+    public List<V1ContainerStatus> ContainerStatuses => Pod.Status.ContainerStatuses.ToList() ?? Enumerable.Empty<V1ContainerStatus>().ToList();
 
     public int Restarts => Pod.Status.ContainerStatuses?.Sum(c => c.RestartCount) ?? 0;
 
@@ -54,7 +54,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
     public string ControlledBy => Pod.Metadata.OwnerReferences?.FirstOrDefault()?.Name ?? string.Empty;
 
 
-    protected override IReadOnlyCollection<IDetailsSection> CreateDetails()
+    protected override List<IDetailsSection> CreateDetails()
     {
         return [
             new DetailsSection {

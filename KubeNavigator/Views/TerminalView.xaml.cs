@@ -60,7 +60,7 @@ public sealed partial class TerminalView : UserControl
     {
         if (WebView?.CoreWebView2 != null)
         {
-            WebView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize<OutgoingMessage>(message));
+            WebView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(message, SerializerContext.Default.OutgoingMessage));
         }
     }
 
@@ -85,7 +85,7 @@ public sealed partial class TerminalView : UserControl
         await WebView.EnsureCoreWebView2Async(environment);
         WebView.CoreWebView2.WebMessageReceived += (s, e) =>
         {
-            var message = JsonSerializer.Deserialize<IncomingMessage>(e.WebMessageAsJson);
+            var message = JsonSerializer.Deserialize(e.WebMessageAsJson, SerializerContext.Default.IncomingMessage);
 
             if (message is InputReceived input)
             {

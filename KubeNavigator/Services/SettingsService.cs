@@ -14,12 +14,6 @@ public class SettingsService : ISettingsService
     
     private static readonly string SettingsFilePath = Path.Combine(SettingsFolder, "settings.json");
     
-    private readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() }
-    };
-
     public AppSettings Settings { get; private set; } = new();
 
     public event EventHandler<AppSettings>? SettingsChanged;
@@ -31,7 +25,7 @@ public class SettingsService : ISettingsService
             if (File.Exists(SettingsFilePath))
             {
                 var json = await File.ReadAllTextAsync(SettingsFilePath);
-                Settings = JsonSerializer.Deserialize<AppSettings>(json, _jsonOptions) ?? new AppSettings();
+                Settings = JsonSerializer.Deserialize(json, SerializerContext.Default.AppSettings) ?? new AppSettings();
             }
             else
             {
@@ -59,7 +53,7 @@ public class SettingsService : ISettingsService
         try
         {
             Directory.CreateDirectory(SettingsFolder);
-            var json = JsonSerializer.Serialize(Settings, _jsonOptions);
+            var json = JsonSerializer.Serialize(Settings, SerializerContext.Default.AppSettings);
             await File.WriteAllTextAsync(SettingsFilePath, json);
         }
         catch (Exception)

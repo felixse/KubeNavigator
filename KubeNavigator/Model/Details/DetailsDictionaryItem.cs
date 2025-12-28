@@ -20,7 +20,7 @@ public partial class DetailsDictionaryItem : ObservableObject, IDetailsItem
     [RelayCommand]
     public void CopyAsJson()
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(Items.ToDictionary(x => x.Key, x => x.Value));
+        var json = System.Text.Json.JsonSerializer.Serialize(Items.ToDictionary(x => x.Key, x => x.Value), SerializerContext.Default.DetailsDictionaryEntry);
         var package = new DataPackage();
         package.SetText(json);
         Clipboard.SetContent(package);

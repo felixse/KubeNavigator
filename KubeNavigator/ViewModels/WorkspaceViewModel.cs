@@ -41,7 +41,7 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
 
     public ObservableCollection<NavigationGroupViewModel> NavigationGroups { get; } = [];
 
-    public IReadOnlyCollection<Navigation.INavigationTarget> FooterItems { get; private set; }
+    public ObservableCollection<INavigationTarget> FooterItems { get; private set; }
 
     public NavigationGroupViewModel Pinned { get; }
 

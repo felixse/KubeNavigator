@@ -26,7 +26,7 @@ public partial class ClusterListViewModel : ObservableObject, INavigationTarget
         {
             await cluster.Context.ConnectAsync();
 
-            Workspace.SetContextAsync(cluster);
+            await Workspace.SetContextAsync(cluster);
         }
         catch (System.Exception e)
         {

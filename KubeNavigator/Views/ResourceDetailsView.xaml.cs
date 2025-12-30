@@ -39,11 +39,11 @@ public sealed partial class ResourceDetailsView : UserControl
         this.InitializeComponent();
     }
 
-    private void HyperlinkButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private async void HyperlinkButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         if (sender is HyperlinkButton hyperlink && hyperlink.DataContext is DetailsLinkItem linkItem && ViewModel != null)
         {
-            ViewModel.NavigateAsync(linkItem);
+            await ViewModel.NavigateAsync(linkItem);
         }
     }
 }

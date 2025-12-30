@@ -7,5 +7,5 @@ public interface IWindow
 {
     IUserConfirmationService UserConfirmationService { get; }
 
-    IShelfHost ShelfHost { get; }
+    IShelfHost? ShelfHost { get; }
 }

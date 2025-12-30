@@ -7,7 +7,7 @@ namespace KubeNavigator.Model;
 public class GenericKubernetesItems<T> : IItems<T>, IKubernetesObject
     where T : IKubernetesObject
 {
-    public IList<T> Items { get; set; }
-    public string ApiVersion { get; set; }
-    public string Kind { get; set; }
+    public required IList<T> Items { get; set; }
+    public required string ApiVersion { get; set; }
+    public required string Kind { get; set; }
 }

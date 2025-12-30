@@ -31,7 +31,7 @@ public class ClusterStatus
 
 public class KubernetesContext
 {
-    private ClusterStatus _status = new ClusterStatus { Status = ConnectionStatus.Disconnected };
+    private ClusterStatus _status = new() { Status = ConnectionStatus.Disconnected };
 
     private readonly AsyncLock _lock = new();
     private readonly KubernetesService _kubernetesService;
@@ -131,11 +131,11 @@ public class KubernetesContext
         while (!cancellationToken.IsCancellationRequested)
         {
             var socket = await listener.AcceptSocketAsync(cancellationToken);
-            Task.Run(async () => await RunSocketAsync(socket, pod, port, localPort, cancellationToken), cancellationToken);
+            Task.Run(async () => await RunSocketAsync(socket, pod, port, cancellationToken), cancellationToken);
         }
     }
 
-    private async Task RunSocketAsync(Socket socket, V1Pod pod, V1ContainerPort port, int localPort, CancellationToken cancellationToken)
+    private async Task RunSocketAsync(Socket socket, V1Pod pod, V1ContainerPort port, CancellationToken cancellationToken)
     {
         var arrayPool = ArrayPool<byte>.Shared;
         var webSocket = await _kubernetesService.OpenPodPortForwardAsync(pod, port.ContainerPort, cancellationToken);

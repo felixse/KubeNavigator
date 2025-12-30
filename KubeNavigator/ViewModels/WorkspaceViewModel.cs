@@ -18,7 +18,7 @@ namespace KubeNavigator.ViewModels;
 
 public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
 {
-    private ObservableCollection<KubernetesResourceViewModel> _customResourceDefinitions;
+    private ObservableCollection<KubernetesResourceViewModel>? _customResourceDefinitions;
 
     public event EventHandler? Closed;
 
@@ -50,12 +50,12 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
 
     [ObservableProperty]
     public partial INamespaceFilter? SelectedNamespaceFilter { get; set; }
-    public NavigationGroupViewModel CustomResourcesNavigationGroup { get; private set; }
+    public NavigationGroupViewModel? CustomResourcesNavigationGroup { get; private set; }
 
     [ObservableProperty]
     public partial bool IsShelfMaximized { get; set; }
 
-    public AdvancedCollectionView HelmReleasesViews { get; private set; }
+    public AdvancedCollectionView? HelmReleasesViews { get; private set; }
 
     public WorkspaceViewModel(WindowViewModel window)
     {
@@ -174,8 +174,14 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
         SelectedItem = null;
     }
 
-    private void OnCustomResourceDefinitionsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void OnCustomResourceDefinitionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        if (CustomResourcesNavigationGroup == null)
+        {
+            // todo log error 
+            return;
+        }
+
         foreach (var item in e.NewItems?.Cast<KubernetesResourceViewModel>() ?? [])
         {
             if (item.Resource is V1CustomResourceDefinition crd)
@@ -205,7 +211,7 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
     [RelayCommand]
     public void Close()
     {
-        _customResourceDefinitions.CollectionChanged -= OnCustomResourceDefinitionsCollectionChanged;
+        _customResourceDefinitions?.CollectionChanged -= OnCustomResourceDefinitionsCollectionChanged;
         ShelfItems.CollectionChanged -= OnShelfItemsCollectionChanged;
 
         Window.Workspaces.Remove(this);
@@ -223,6 +229,18 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
 
     private void AddCustomResourceDefinitionToNavigation(V1CustomResourceDefinition crd)
     {
+        if (Cluster == null)
+        {
+            // todo log error 
+            return;
+        }
+
+        if (CustomResourcesNavigationGroup == null)
+        {
+            // todo log error 
+            return;
+        }
+
         if (!CustomResourcesNavigationGroup.Items.Any(c => c is CustomResourceGroupViewModel group && group.GroupName == crd.Spec.Group))
         {
             CustomResourcesNavigationGroup.Items.Add(new CustomResourceGroupViewModel(crd.Spec.Group));
@@ -344,8 +362,8 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
         }
     }
 
-    partial void OnSelectedNamespaceFilterChanged(INamespaceFilter oldValue, INamespaceFilter newValue)
+    partial void OnSelectedNamespaceFilterChanged(INamespaceFilter? oldValue, INamespaceFilter? newValue)
     {
-        HelmReleasesViews.RefreshFilter(); // todo this should be done in the viewmodel
+        HelmReleasesViews?.RefreshFilter(); // todo this should be done in the viewmodel
     }
 }

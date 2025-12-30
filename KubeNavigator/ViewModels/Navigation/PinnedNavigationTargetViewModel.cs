@@ -20,6 +20,12 @@ public partial class PinnedNavigationTargetViewModel : ObservableObject, INaviga
     [RelayCommand]
     public async Task OpenInNewTab()
     {
+        if (Workspace.Cluster == null)
+        {
+            // todo log error
+            return;
+        }
+
         await Workspace.Window.OpenInNewWorkspaceAsync(this, Workspace.Cluster);
     }
 

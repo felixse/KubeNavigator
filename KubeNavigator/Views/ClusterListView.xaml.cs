@@ -1,7 +1,6 @@
 using KubeNavigator.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Windows.Web.AtomPub;
 
 namespace KubeNavigator.Views;
 
@@ -11,12 +10,12 @@ public sealed partial class ClusterListView : UserControl
 
     public ClusterListView()
     {
-        this.InitializeComponent();
+        InitializeComponent();
     }
 
     private async void OnOpen(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (sender is FrameworkElement element && element.DataContext is ClusterViewModel cluster)
+        if (ViewModel is not null && sender is FrameworkElement element && element.DataContext is ClusterViewModel cluster)
         {
             await ViewModel.ConnectAsync(cluster);
         }
@@ -24,7 +23,7 @@ public sealed partial class ClusterListView : UserControl
 
     private async void OnOpenInNewTab(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (sender is FrameworkElement element && element.DataContext is ClusterViewModel cluster)
+        if (ViewModel is not null && sender is FrameworkElement element && element.DataContext is ClusterViewModel cluster)
         {
             await ViewModel.ConnectInNewTabAsync(cluster);
         }
@@ -32,7 +31,7 @@ public sealed partial class ClusterListView : UserControl
 
     private async void SplitButton_Click(SplitButton sender, SplitButtonClickEventArgs args)
     {
-        if (sender.DataContext is ClusterViewModel cluster)
+        if (ViewModel is not null && sender.DataContext is ClusterViewModel cluster)
         {
             await ViewModel.ConnectAsync(cluster);
         }

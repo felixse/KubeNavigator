@@ -4,8 +4,6 @@ using KubeNavigator.Services;
 using KubeNavigator.ViewModels.Resources;
 using Serilog.Events;
 using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels.Shelf;
@@ -15,11 +13,10 @@ public partial class ApplicationLogViewModel : ObservableObject, IShelfItem
     private readonly LoggingService _loggingService;
 
     [ObservableProperty]
-    private string? _searchText;
+    public partial string? SearchText { get; set; }
 
     [ObservableProperty]
-    private LogEventLevel _minimumLevel = LogEventLevel.Verbose;
-
+    public partial LogEventLevel MinimumLevel { get; set; } = LogEventLevel.Verbose;
     public ThemeManager ThemeManager { get; }
 
     public event EventHandler<string>? LogReceived;

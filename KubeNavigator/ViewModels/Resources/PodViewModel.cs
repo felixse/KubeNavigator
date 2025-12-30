@@ -199,7 +199,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
             Items = [.. Pod.Spec.NodeSelector?.Select(n => new DetailsCollectionItemElement { Value = $"{n.Key}: {n.Value}" }) ?? []],
         };
 
-        yield return new DetailsTableItem("Tolerations", ["Key", "Operator", "Value", "Effect", "Seconds"], Pod.Spec.Tolerations?.Select(t => new[] { t.Key, t.OperatorProperty, t.Value, t.Effect, t.TolerationSeconds.ToString() }) ?? []);
+        yield return new DetailsTableItem("Tolerations", ["Key", "Operator", "Value", "Effect", "Seconds"], Pod.Spec.Tolerations?.Select(t => new[] { t.Key, t.OperatorProperty, t.Value, t.Effect, t.TolerationSeconds?.ToString() ?? string.Empty }) ?? []);
 
         // todo affinities?
     }
@@ -354,7 +354,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
     }
 
-    private IEnumerable<IDetailsItem> GetVolumeItems(V1Volume volume)
+    private static IEnumerable<IDetailsItem> GetVolumeItems(V1Volume volume)
     {
         if (volume.AwsElasticBlockStore != null)
         {
@@ -606,12 +606,14 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 Title = "Medium",
                 Value = volume.EmptyDir.Medium,
             };
-            yield return new DetailsTextItem
+            if (volume.EmptyDir.SizeLimit != null)
             {
-                Title = "Size Limit",
-                Value = volume.EmptyDir.SizeLimit.ToString(),
-            };
-
+                yield return new DetailsTextItem
+                {
+                    Title = "Size Limit",
+                    Value = volume.EmptyDir.SizeLimit.ToString(),
+                };
+            }
         }
         else if (volume.Ephemeral != null)
         {
@@ -1224,7 +1226,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
     }
 
-    private string GetEnvValueRepresentation(V1EnvVar envVar)
+    private static string GetEnvValueRepresentation(V1EnvVar envVar)
     {
         if (envVar.Value is not null)
         {

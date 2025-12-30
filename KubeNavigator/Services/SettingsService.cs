@@ -1,3 +1,4 @@
+using KubeNavigator.ViewModels;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -35,8 +36,9 @@ public class SettingsService : ISettingsService
             
             Settings.PropertyChanged += OnSettingsPropertyChanged;
         }
-        catch (Exception e)
+        catch (Exception)
         {
+            // todo log error
             Settings = new AppSettings();
             Settings.PropertyChanged += OnSettingsPropertyChanged;
         }
@@ -58,6 +60,7 @@ public class SettingsService : ISettingsService
         }
         catch (Exception)
         {
+            // todo log error
         }
     }
 }

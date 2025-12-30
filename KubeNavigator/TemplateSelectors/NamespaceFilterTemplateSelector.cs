@@ -4,7 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace KubeNavigator.TemplateSelectors;
 
-public class NamespaceFilterTemplateSelector : DataTemplateSelector
+public partial class NamespaceFilterTemplateSelector : DataTemplateSelector
 {
     public DataTemplate? AllNamespacesTemplate { get; set; }
 

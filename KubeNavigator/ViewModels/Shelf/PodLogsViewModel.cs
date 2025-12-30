@@ -38,7 +38,7 @@ public partial class PodLogsViewModel(PodViewModel pod, ClusterViewModel cluster
     }
 
     public event EventHandler<string>? LineReceived;
-    public event EventHandler Closed;
+    public event EventHandler? Closed;
 
     public PodViewModel Pod { get; } = pod;
     public ClusterViewModel Cluster { get; } = cluster;

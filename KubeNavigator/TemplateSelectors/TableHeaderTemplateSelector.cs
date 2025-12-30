@@ -20,8 +20,8 @@ public partial class TableHeaderTemplateSelector : DataTemplateSelector
         {
             if (kubernetesResourceTypeListViewModel.ResourceType == ResourceType.Pod)
             {
-                var foo = Application.Current.Resources["PodTableHeader"];
-                return foo as DataTemplate;
+                var podTableHeader = Application.Current.Resources["PodTableHeader"];
+                return (DataTemplate)podTableHeader;
             }
             return KubernetesResourceTemplate;
         }

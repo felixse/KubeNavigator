@@ -20,8 +20,8 @@ public partial class TableTemplateSelector : DataTemplateSelector
         {
             if (item is PodViewModel)
             {
-                var foo = Application.Current.Resources["PodTableRow"];
-                return foo as DataTemplate;
+                var podTableRow = Application.Current.Resources["PodTableRow"];
+                return (DataTemplate)podTableRow;
             }
             return KubernetesResourceTemplate;
         }

@@ -16,14 +16,14 @@ public partial class WindowViewModel : ObservableRecipient,
 {
     public IUserConfirmationService UserConfirmationService { get; }
 
-    public IShelfHost ShelfHost => SelectedWorkspace;
+    public IShelfHost? ShelfHost => SelectedWorkspace;
 
     public ObservableCollection<WorkspaceViewModel> Workspaces { get; set; }
 
     public ObservableCollection<NotificationViewModel> Notifications { get; set; }
 
     [ObservableProperty]
-    public partial WorkspaceViewModel SelectedWorkspace { get; set; }
+    public partial WorkspaceViewModel? SelectedWorkspace { get; set; }
 
     public AppViewModel App { get; }
 
@@ -54,15 +54,8 @@ public partial class WindowViewModel : ObservableRecipient,
 
     partial void OnSelectedWorkspaceChanged(WorkspaceViewModel? oldValue, WorkspaceViewModel? newValue)
     {
-        if (oldValue != null)
-        {
-            oldValue.IsActive = false;
-        }
-
-        if (newValue != null)
-        {
-            newValue.IsActive = true;
-        }
+        oldValue?.IsActive = false;
+        newValue?.IsActive = true;
     }
 
     public async Task OpenInNewWorkspaceAsync(INavigationTarget? navigationTarget, ClusterViewModel cluster)

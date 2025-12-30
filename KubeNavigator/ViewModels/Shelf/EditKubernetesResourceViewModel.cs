@@ -30,7 +30,7 @@ public partial class EditKubernetesResourceViewModel : ObservableObject, IShelfI
 
     public Func<string>? TextRetriever { get; set; }
 
-    public event EventHandler Closed;
+    public event EventHandler? Closed;
 
     public async Task<string> LoadResourceBodyAsync()
     {

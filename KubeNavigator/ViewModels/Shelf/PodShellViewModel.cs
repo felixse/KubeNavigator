@@ -32,7 +32,7 @@ public partial class PodShellViewModel : ObservableObject, IShelfItem
     }
 
     public event EventHandler<string>? TextReceived;
-    public event EventHandler Closed;
+    public event EventHandler? Closed;
 
     public PodViewModel Pod { get; }
     public ClusterViewModel Cluster { get; }
@@ -116,7 +116,7 @@ public partial class PodShellViewModel : ObservableObject, IShelfItem
     {
         try
         {
-            _session.Stream.Write(Encoding.UTF8.GetBytes(text));
+            _session!.Stream.Write(Encoding.UTF8.GetBytes(text));
         }
         catch (Exception e)
         {
@@ -127,7 +127,7 @@ public partial class PodShellViewModel : ObservableObject, IShelfItem
     public async Task ResizeAsync(TerminalSize size)
     {
         await _initialized.WaitAsync();
-        _session.Resize(size);
+        _session?.Resize(size);
         Debug.WriteLine($"Resized to {size.Width}*{size.Height}");
     }
 }

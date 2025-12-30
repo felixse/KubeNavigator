@@ -13,7 +13,7 @@ public class ConfirmationDialogService : IUserConfirmationService
 {
     private readonly ThemeManager _themeManager;
 
-    public Page Page { get; set; }
+    public Page? Page { get; set; }
 
     public ConfirmationDialogService(ThemeManager themeManager)
     {
@@ -24,7 +24,7 @@ public class ConfirmationDialogService : IUserConfirmationService
     {
         var dialog = new ConfirmDeletionDialog(resourceType, resourceNames.First(), clusterName) // todo list multiple resources in dialog if more than one selected
         {
-            XamlRoot = Page.XamlRoot,
+            XamlRoot = Page?.XamlRoot,
             RequestedTheme = _themeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark ? ElementTheme.Dark : ElementTheme.Light
         }; 
         var result = await dialog.ShowAsync();
@@ -36,7 +36,7 @@ public class ConfirmationDialogService : IUserConfirmationService
     {
         var dialog = new PortForwardDialog(pod)
         {
-            XamlRoot = Page.XamlRoot,
+            XamlRoot = Page?.XamlRoot,
             RequestedTheme = _themeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark ? ElementTheme.Dark : ElementTheme.Light
         };
 

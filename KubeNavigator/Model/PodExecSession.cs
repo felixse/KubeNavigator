@@ -12,7 +12,7 @@ public sealed partial class PodExecSession : IDisposable
     private readonly StreamDemuxer _demux;
     private readonly Stream _resizeStream;
 
-    public event EventHandler Closed;
+    public event EventHandler? Closed;
 
     public Stream Stream { get; }
 

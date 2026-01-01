@@ -1,7 +1,7 @@
+using System;
 using KubeNavigator.Model.TerminalMessages;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.UI.Xaml.Controls;
-using System;
 
 namespace KubeNavigator.Views;
 
@@ -35,10 +35,10 @@ public sealed partial class ApplicationLogView : UserControl, IShelfItemView
         var initMessage = new InitializeTerminal
         {
             Theme = ViewModel.ThemeManager.GetEffectiveTheme().ToString().ToLowerInvariant(),
-            ReadOnly = true
+            ReadOnly = true,
         };
         Terminal.SendMessage(initMessage);
-        
+
         ViewModel.LoadExistingLogs();
     }
 

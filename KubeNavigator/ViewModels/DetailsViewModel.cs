@@ -1,11 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KubeNavigator.Model.Details;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels;
 
@@ -13,7 +13,11 @@ public partial class DetailsViewModel : ObservableObject
 {
     private readonly Action? onClose;
 
-    public DetailsViewModel(KubernetesResourceViewModel selectedResource, IShelfHost shelfHost, Action? onClose = null)
+    public DetailsViewModel(
+        KubernetesResourceViewModel selectedResource,
+        IShelfHost shelfHost,
+        Action? onClose = null
+    )
     {
         NavigationStack.Push(selectedResource);
         Cluster = selectedResource.Cluster;
@@ -25,7 +29,8 @@ public partial class DetailsViewModel : ObservableObject
 
     public bool CanGoBack => NavigationStack.Count > 1;
 
-    public Stack<KubernetesResourceViewModel> NavigationStack { get; } = new Stack<KubernetesResourceViewModel>();
+    public Stack<KubernetesResourceViewModel> NavigationStack { get; } =
+        new Stack<KubernetesResourceViewModel>();
     public ClusterViewModel Cluster { get; }
     public IShelfHost ShelfHost { get; }
 

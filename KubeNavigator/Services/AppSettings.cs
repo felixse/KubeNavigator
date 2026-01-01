@@ -1,5 +1,5 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace KubeNavigator.Services;
 
@@ -13,5 +13,5 @@ public enum AppTheme
 {
     Light,
     Dark,
-    System
+    System,
 }

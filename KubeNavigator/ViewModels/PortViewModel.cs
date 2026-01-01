@@ -1,17 +1,23 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using k8s.Models;
 using KubeNavigator.Model;
 using KubeNavigator.ViewModels.Resources;
-using System;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels;
+
 public partial class PortViewModel : ObservableObject
 {
-    public PortViewModel(V1ContainerPort port, PodViewModel pod, ClusterViewModel cluster, ForwardedPortViewModel? forwardedPort)
+    public PortViewModel(
+        V1ContainerPort port,
+        PodViewModel pod,
+        ClusterViewModel cluster,
+        ForwardedPortViewModel? forwardedPort
+    )
     {
         Name = port.Name;
         HostPort = port.HostPort;
@@ -40,7 +46,7 @@ public partial class PortViewModel : ObservableObject
             var suffix = ForwardedPort?.LocalPort switch
             {
                 null => string.Empty,
-                _ => $" → {ForwardedPort.LocalPort}"
+                _ => $" → {ForwardedPort.LocalPort}",
             };
 
             return $"{name}{target}/{Protocol}{suffix}";
@@ -78,8 +84,15 @@ public partial class PortViewModel : ObservableObject
     [RelayCommand]
     public async Task ShowForwardingDialogAsync()
     {
-        var currentOptions = ForwardedPort?.Status == ForwardedPortStatus.Active ? new PortForwardOptions { Port = ForwardedPort.LocalPort } : null;
-        var options = await Cluster.App.WindowManager.ActiveWindow.UserConfirmationService.GetPortForwardOptionsAsync(Pod, currentOptions);
+        var currentOptions =
+            ForwardedPort?.Status == ForwardedPortStatus.Active
+                ? new PortForwardOptions { Port = ForwardedPort.LocalPort }
+                : null;
+        var options =
+            await Cluster.App.WindowManager.ActiveWindow.UserConfirmationService.GetPortForwardOptionsAsync(
+                Pod,
+                currentOptions
+            );
 
         if (options == null)
         {
@@ -114,7 +127,6 @@ public partial class PortViewModel : ObservableObject
             if (ForwardedPort.Status != ForwardedPortStatus.Active)
             {
                 ForwardedPort.Start();
-
             }
 
             await ForwardedPort.OpenInBrowserAsync();
@@ -125,7 +137,12 @@ public partial class PortViewModel : ObservableObject
             do
             {
                 randomPort = new Random().Next(49152, 65535);
-            } while (IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().Any(x => x.Port == randomPort));
+            } while (
+                IPGlobalProperties
+                    .GetIPGlobalProperties()
+                    .GetActiveTcpListeners()
+                    .Any(x => x.Port == randomPort)
+            );
 
             ForwardedPort = Cluster.CreateForwardedPort(Pod, Port, randomPort);
             ForwardedPort.Start();

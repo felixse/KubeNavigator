@@ -1,11 +1,12 @@
-﻿using k8s.Models;
-using System;
+﻿using System;
 using System.Buffers.Text;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
+using k8s.Models;
 
 namespace KubeNavigator.Model.Helm;
+
 public class HelmRelease
 {
     public required string Name { get; set; }

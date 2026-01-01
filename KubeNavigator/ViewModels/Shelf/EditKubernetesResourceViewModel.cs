@@ -1,4 +1,7 @@
-﻿using CliWrap;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using CliWrap;
 using CliWrap.Buffered;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -6,9 +9,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using k8s.Models;
 using KubeNavigator.Messages;
 using KubeNavigator.ViewModels.Resources;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels.Shelf;
 
@@ -34,21 +34,23 @@ public partial class EditKubernetesResourceViewModel : ObservableObject, IShelfI
 
     public async Task<string> LoadResourceBodyAsync()
     {
-        var result = await Cli.Wrap("kubectl").WithArguments(args =>
-        {
-            args.Add("get");
-            args.Add(Resource.ResourceType.Plural);
-            args.Add(Resource.Resource.Name());
-            if (Resource.ResourceType.IsNamespaceScoped)
+        var result = await Cli.Wrap("kubectl")
+            .WithArguments(args =>
             {
-                args.Add("-n");
-                args.Add(Resource.Resource.Namespace());
-            }
-            args.Add($"--context");
-            args.Add(Resource.Cluster.Name);
-            args.Add("-o");
-            args.Add("yaml");
-        }).ExecuteBufferedAsync();
+                args.Add("get");
+                args.Add(Resource.ResourceType.Plural);
+                args.Add(Resource.Resource.Name());
+                if (Resource.ResourceType.IsNamespaceScoped)
+                {
+                    args.Add("-n");
+                    args.Add(Resource.Resource.Namespace());
+                }
+                args.Add($"--context");
+                args.Add(Resource.Cluster.Name);
+                args.Add("-o");
+                args.Add("yaml");
+            })
+            .ExecuteBufferedAsync();
 
         ContentLoaded = true;
         return result.StandardOutput;
@@ -69,24 +71,32 @@ public partial class EditKubernetesResourceViewModel : ObservableObject, IShelfI
             var filePath = Path.GetTempFileName();
             await File.WriteAllTextAsync(filePath, text);
 
-            var result = await Cli.Wrap("kubectl").WithArguments(args =>
-            {
-                args.Add("apply");
-                args.Add("-f");
-                args.Add(filePath);
-                if (Resource.ResourceType.IsNamespaceScoped)
+            var result = await Cli.Wrap("kubectl")
+                .WithArguments(args =>
                 {
-                    args.Add("-n");
-                    args.Add(Resource.Resource.Namespace());
-                }
-                args.Add($"--context");
-                args.Add(Resource.Cluster.Name);
-
-            }).ExecuteBufferedAsync();
+                    args.Add("apply");
+                    args.Add("-f");
+                    args.Add(filePath);
+                    if (Resource.ResourceType.IsNamespaceScoped)
+                    {
+                        args.Add("-n");
+                        args.Add(Resource.Resource.Namespace());
+                    }
+                    args.Add($"--context");
+                    args.Add(Resource.Cluster.Name);
+                })
+                .ExecuteBufferedAsync();
 
             File.Delete(filePath);
 
-            WeakReferenceMessenger.Default.Send(new ShowNotificationMessage { Message = $"{Resource.Resource.Kind} {Resource.Name} has been updated", Title = "Success", Severity = NotificationSeverity.Success });
+            WeakReferenceMessenger.Default.Send(
+                new ShowNotificationMessage
+                {
+                    Message = $"{Resource.Resource.Kind} {Resource.Name} has been updated",
+                    Title = "Success",
+                    Severity = NotificationSeverity.Success,
+                }
+            );
         }
     }
 

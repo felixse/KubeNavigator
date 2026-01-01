@@ -1,10 +1,11 @@
+using System;
 using KubeNavigator.ViewModels.Resources;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
 using Windows.Globalization.NumberFormatting;
 
 namespace KubeNavigator.Views;
+
 public sealed partial class PortForwardDialog : ContentDialog
 {
     public PortForwardDialog(PodViewModel pod)
@@ -12,7 +13,11 @@ public sealed partial class PortForwardDialog : ContentDialog
         this.InitializeComponent();
         Pod = pod;
 
-        PortNumberBox.NumberFormatter = new DecimalFormatter { IntegerDigits = 5, FractionDigits = 0 };
+        PortNumberBox.NumberFormatter = new DecimalFormatter
+        {
+            IntegerDigits = 5,
+            FractionDigits = 0,
+        };
 
         Title = $"Port Forwarding";
         SubTitleTextBlock.Text = $"Pod: {Pod.Name}";
@@ -31,8 +36,12 @@ public sealed partial class PortForwardDialog : ContentDialog
         set { SetValue(OpenInBrowserProperty, value); }
     }
 
-    public static readonly DependencyProperty OpenInBrowserProperty =
-        DependencyProperty.Register(nameof(OpenInBrowser), typeof(bool), typeof(PortForwardDialog), new PropertyMetadata(false));
+    public static readonly DependencyProperty OpenInBrowserProperty = DependencyProperty.Register(
+        nameof(OpenInBrowser),
+        typeof(bool),
+        typeof(PortForwardDialog),
+        new PropertyMetadata(false)
+    );
 
     public int Port { get; set; }
 

@@ -1,5 +1,3 @@
 ﻿namespace KubeNavigator.Model.TerminalMessages;
 
-public class ClearRequested : OutgoingMessage
-{
-}
+public class ClearRequested : OutgoingMessage { }

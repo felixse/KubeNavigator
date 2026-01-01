@@ -1,7 +1,7 @@
-﻿using CommunityToolkit.WinUI.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using CommunityToolkit.WinUI.Collections;
 
 namespace KubeNavigator.ViewModels;
 
@@ -9,7 +9,10 @@ public partial class PortForwardsViewModel : ListViewModel
 {
     public ObservableCollection<ForwardedPortViewModel> ForwardedPorts { get; } = [];
 
-    public PortForwardsViewModel(WorkspaceViewModel workspace, ObservableCollection<ForwardedPortViewModel> forwardedPorts)
+    public PortForwardsViewModel(
+        WorkspaceViewModel workspace,
+        ObservableCollection<ForwardedPortViewModel> forwardedPorts
+    )
         : base(workspace, title: "Port Forwards", isNamespaceScoped: false, namespaceFilters: [])
     {
         ForwardedPorts = forwardedPorts;
@@ -20,6 +23,7 @@ public partial class PortForwardsViewModel : ListViewModel
     {
         throw new System.NotImplementedException();
     }
+
     public override Task OnNavigatedTo()
     {
         return Task.CompletedTask;

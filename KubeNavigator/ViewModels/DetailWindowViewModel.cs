@@ -1,10 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using KubeNavigator.Model;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels;
 
@@ -26,7 +26,10 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
     [ObservableProperty]
     public partial IShelfItem? SelectedShelfItem { get; set; }
 
-    public DetailWindowViewModel(KubernetesResourceViewModel resource, IUserConfirmationService userConfirmationService)
+    public DetailWindowViewModel(
+        KubernetesResourceViewModel resource,
+        IUserConfirmationService userConfirmationService
+    )
     {
         App = resource.Cluster.App;
         Details = new DetailsViewModel(resource, this);
@@ -35,10 +38,12 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
         {
             if (e.PropertyName == nameof(DetailsViewModel.SelectedResource))
             {
-                Title = $"{Details.SelectedResource.ResourceType.SingularDisplayName}: {Details.SelectedResource.Name}";
+                Title =
+                    $"{Details.SelectedResource.ResourceType.SingularDisplayName}: {Details.SelectedResource.Name}";
             }
         };
-        Title = $"{Details.SelectedResource.ResourceType.SingularDisplayName}: {Details.SelectedResource.Name}";
+        Title =
+            $"{Details.SelectedResource.ResourceType.SingularDisplayName}: {Details.SelectedResource.Name}";
         UserConfirmationService = userConfirmationService;
     }
 
@@ -52,7 +57,9 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
 
     public void OpenShelfItem(IShelfItem item)
     {
-        var existing = ShelfItems.FirstOrDefault(t => t.Resource == item.Resource && item.GetType() == t.GetType());
+        var existing = ShelfItems.FirstOrDefault(t =>
+            t.Resource == item.Resource && item.GetType() == t.GetType()
+        );
         if (existing != null)
         {
             SelectedShelfItem = existing;

@@ -1,12 +1,15 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels.Navigation;
 
 public partial class PinnedNavigationTargetViewModel : ObservableObject, INavigationTarget
 {
-    public PinnedNavigationTargetViewModel(INavigationTarget navigationTarget, WorkspaceViewModel workspace)
+    public PinnedNavigationTargetViewModel(
+        INavigationTarget navigationTarget,
+        WorkspaceViewModel workspace
+    )
     {
         NavigationTarget = navigationTarget;
         Workspace = workspace;

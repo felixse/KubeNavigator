@@ -1,6 +1,6 @@
-﻿using k8s;
+﻿using System.Collections.Generic;
+using k8s;
 using k8s.Models;
-using System.Collections.Generic;
 
 namespace KubeNavigator.Model;
 

@@ -1,15 +1,13 @@
-﻿using KubeNavigator.ViewModels;
+﻿using System;
+using KubeNavigator.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
-using System;
 
 namespace KubeNavigator.Converters;
 
 public partial class ListItemToMenuConverter : IValueConverter
 {
-    public ListItemToMenuConverter()
-    {
-    }
+    public ListItemToMenuConverter() { }
 
     public object Convert(object value, Type targetType, object parameter, string language)
     {
@@ -22,7 +20,7 @@ public partial class ListItemToMenuConverter : IValueConverter
                 {
                     Text = command.Name,
                     Command = command.Command,
-                    Icon = new SymbolIcon(Enum.Parse<Symbol>(command.Symbol, true))
+                    Icon = new SymbolIcon(Enum.Parse<Symbol>(command.Symbol, true)),
                 };
                 menuFlyout.Items.Add(menuItem);
             }

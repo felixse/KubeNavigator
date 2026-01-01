@@ -9,5 +9,5 @@ namespace KubeNavigator.Model.TerminalMessages
 
         [JsonPropertyName("readOnly")]
         public required bool ReadOnly { get; set; }
-        }
+    }
 }

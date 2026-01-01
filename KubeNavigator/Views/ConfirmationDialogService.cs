@@ -1,11 +1,11 @@
-﻿using KubeNavigator.Model;
-using KubeNavigator.ViewModels.Resources;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KubeNavigator.Model;
+using KubeNavigator.ViewModels.Resources;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace KubeNavigator.Views;
 
@@ -20,24 +20,37 @@ public class ConfirmationDialogService : IUserConfirmationService
         _themeManager = themeManager;
     }
 
-    public async Task<bool> ConfirmResourceDeletionAsync(ResourceType resourceType, IEnumerable<string> resourceNames, string clusterName)
+    public async Task<bool> ConfirmResourceDeletionAsync(
+        ResourceType resourceType,
+        IEnumerable<string> resourceNames,
+        string clusterName
+    )
     {
         var dialog = new ConfirmDeletionDialog(resourceType, resourceNames.First(), clusterName) // todo list multiple resources in dialog if more than one selected
         {
             XamlRoot = Page?.XamlRoot,
-            RequestedTheme = _themeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark ? ElementTheme.Dark : ElementTheme.Light
-        }; 
+            RequestedTheme =
+                _themeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark
+                    ? ElementTheme.Dark
+                    : ElementTheme.Light,
+        };
         var result = await dialog.ShowAsync();
 
         return result == ContentDialogResult.Primary;
     }
 
-    public async Task<PortForwardOptions?> GetPortForwardOptionsAsync(PodViewModel pod, PortForwardOptions? options)
+    public async Task<PortForwardOptions?> GetPortForwardOptionsAsync(
+        PodViewModel pod,
+        PortForwardOptions? options
+    )
     {
         var dialog = new PortForwardDialog(pod)
         {
             XamlRoot = Page?.XamlRoot,
-            RequestedTheme = _themeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark ? ElementTheme.Dark : ElementTheme.Light
+            RequestedTheme =
+                _themeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark
+                    ? ElementTheme.Dark
+                    : ElementTheme.Light,
         };
 
         if (options != null)
@@ -53,7 +66,7 @@ public class ConfirmationDialogService : IUserConfirmationService
             return new PortForwardOptions
             {
                 Port = dialog.Port,
-                OpenInBrowser = dialog.OpenInBrowser
+                OpenInBrowser = dialog.OpenInBrowser,
             };
         }
 

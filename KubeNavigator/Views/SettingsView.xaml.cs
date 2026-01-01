@@ -9,6 +9,7 @@ namespace KubeNavigator.Views;
 public sealed partial class SettingsView : UserControl
 {
     public SettingsViewModel? ViewModel { get; set; }
+
     public SettingsView()
     {
         this.InitializeComponent();

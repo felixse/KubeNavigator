@@ -1,13 +1,17 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using KubeNavigator.ViewModels.Resources;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.ViewModels.Shelf;
 
-public partial class PodLogsViewModel(PodViewModel pod, ClusterViewModel cluster, ThemeManager themeManager) : ObservableObject, IShelfItem
+public partial class PodLogsViewModel(
+    PodViewModel pod,
+    ClusterViewModel cluster,
+    ThemeManager themeManager
+) : ObservableObject, IShelfItem
 {
     private CancellationTokenSource? _cts;
 
@@ -16,25 +20,27 @@ public partial class PodLogsViewModel(PodViewModel pod, ClusterViewModel cluster
     public void Start()
     {
         _cts = new CancellationTokenSource();
-        Task.Run(async () =>
-        {
-            using var stream = await Cluster.Context.OpenLogStreamAsync(Pod.Pod, _cts.Token);
-            using var reader = new StreamReader(stream);
-
-            while (!_cts.IsCancellationRequested)
+        Task.Run(
+            async () =>
             {
-                var line = await reader.ReadLineAsync(cancellationToken: _cts.Token);
-                if (line != null)
-                {
-                    LineReceived?.Invoke(this, line);
-                }
-                else
-                {
-                    await Task.Delay(1000);
-                }
-            }
-        }, cancellationToken: _cts.Token);
+                using var stream = await Cluster.Context.OpenLogStreamAsync(Pod.Pod, _cts.Token);
+                using var reader = new StreamReader(stream);
 
+                while (!_cts.IsCancellationRequested)
+                {
+                    var line = await reader.ReadLineAsync(cancellationToken: _cts.Token);
+                    if (line != null)
+                    {
+                        LineReceived?.Invoke(this, line);
+                    }
+                    else
+                    {
+                        await Task.Delay(1000);
+                    }
+                }
+            },
+            cancellationToken: _cts.Token
+        );
     }
 
     public event EventHandler<string>? LineReceived;

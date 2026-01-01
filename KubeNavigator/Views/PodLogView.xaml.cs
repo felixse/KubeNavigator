@@ -1,7 +1,7 @@
+using System;
 using KubeNavigator.Model.TerminalMessages;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.UI.Xaml.Controls;
-using System;
 
 namespace KubeNavigator.Views;
 
@@ -38,7 +38,7 @@ public sealed partial class PodLogView : UserControl, IShelfItemView
             ReadOnly = true,
         };
         Terminal.SendMessage(initMessage);
-        
+
         ViewModel.Start();
     }
 

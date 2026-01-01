@@ -1,11 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using k8s.Models;
-using KubeNavigator.ViewModels.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using k8s.Models;
+using KubeNavigator.ViewModels.Resources;
 using Windows.System;
 
 namespace KubeNavigator.ViewModels;
@@ -14,7 +14,7 @@ public enum ForwardedPortStatus
 {
     Active,
     Disabled,
-    Error
+    Error,
 }
 
 public partial class ForwardedPortViewModel : ObservableObject, ISelectable
@@ -37,7 +37,12 @@ public partial class ForwardedPortViewModel : ObservableObject, ISelectable
 
     public List<ItemCommand> Commands { get; } = [];
 
-    public ForwardedPortViewModel(ClusterViewModel cluster, PodViewModel pod, V1ContainerPort port, int localPort)
+    public ForwardedPortViewModel(
+        ClusterViewModel cluster,
+        PodViewModel pod,
+        V1ContainerPort port,
+        int localPort
+    )
     {
         PodPort = port.ContainerPort;
         Protocol = port.Protocol;

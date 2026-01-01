@@ -1,12 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using CommunityToolkit.Mvvm.Input;
 using k8s.Models;
 using KubeNavigator.Model;
 using KubeNavigator.Model.Details;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace KubeNavigator.ViewModels.Resources;
 
@@ -19,8 +19,24 @@ public partial class PodViewModel : KubernetesResourceViewModel
     {
         _logger = cluster.App.LoggingService.LoggerFactory.CreateLogger<PodViewModel>();
 
-        Commands.Insert(0, new ItemCommand { Name = "Show Logs", Symbol = "List", Command = ShowLogsCommand });
-        Commands.Insert(1, new ItemCommand { Name = "Open Shell", Symbol = "Play", Command = OpenShellCommand });
+        Commands.Insert(
+            0,
+            new ItemCommand
+            {
+                Name = "Show Logs",
+                Symbol = "List",
+                Command = ShowLogsCommand,
+            }
+        );
+        Commands.Insert(
+            1,
+            new ItemCommand
+            {
+                Name = "Open Shell",
+                Symbol = "Play",
+                Command = OpenShellCommand,
+            }
+        );
 
         PropertyChanged += OnPropertyChanged;
     }
@@ -29,19 +45,24 @@ public partial class PodViewModel : KubernetesResourceViewModel
     public void ShowLogs()
     {
         Log.OpeningPodLogs(_logger, Pod.Name(), Pod.Namespace());
-        Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(new PodLogsViewModel(this, Cluster, Cluster.App.ThemeManager));
+        Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(
+            new PodLogsViewModel(this, Cluster, Cluster.App.ThemeManager)
+        );
     }
 
     [RelayCommand]
     public void OpenShell()
     {
         Log.OpeningPodShell(_logger, Pod.Name(), Pod.Namespace());
-        Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(new PodShellViewModel(this, Cluster, Cluster.App.ThemeManager));
+        Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(
+            new PodShellViewModel(this, Cluster, Cluster.App.ThemeManager)
+        );
     }
 
     public V1Pod Pod => (V1Pod)Resource;
 
-    public List<V1ContainerStatus> ContainerStatuses => Pod.Status.ContainerStatuses.ToList() ?? Enumerable.Empty<V1ContainerStatus>().ToList();
+    public List<V1ContainerStatus> ContainerStatuses =>
+        Pod.Status.ContainerStatuses.ToList() ?? Enumerable.Empty<V1ContainerStatus>().ToList();
 
     public int Restarts => Pod.Status.ContainerStatuses?.Sum(c => c.RestartCount) ?? 0;
 
@@ -49,32 +70,42 @@ public partial class PodViewModel : KubernetesResourceViewModel
 
     public string QoS => Pod.Status.QosClass;
 
-    public string Status => Pod.Metadata.DeletionTimestamp is not null ? "Terminating" : Pod.Status.Phase;
+    public string Status =>
+        Pod.Metadata.DeletionTimestamp is not null ? "Terminating" : Pod.Status.Phase;
 
-    public string ControlledBy => Pod.Metadata.OwnerReferences?.FirstOrDefault()?.Name ?? string.Empty;
-
+    public string ControlledBy =>
+        Pod.Metadata.OwnerReferences?.FirstOrDefault()?.Name ?? string.Empty;
 
     protected override List<IDetailsSection> CreateDetails()
     {
-        return [
-            new DetailsSection {
-                Items = [.. GetPodItems()]
-            },
-            new GroupedDetailsSection {
+        return
+        [
+            new DetailsSection { Items = [.. GetPodItems()] },
+            new GroupedDetailsSection
+            {
                 Title = "Containers",
-                Groups = [.. Pod.Spec.Containers.Select(c => new DetailsGroup {
-                    Title = c.Name,
-                    Items = [.. GetContainerItems(c)]
-                })]
+                Groups =
+                [
+                    .. Pod.Spec.Containers.Select(c => new DetailsGroup
+                    {
+                        Title = c.Name,
+                        Items = [.. GetContainerItems(c)],
+                    }),
+                ],
             },
-            new GroupedDetailsSection {
+            new GroupedDetailsSection
+            {
                 Title = "Volumes",
-                Groups = [.. Pod.Spec.Volumes?.Select(v => new DetailsGroup {
-                    Title = v.Name,
-                    Items = [.. GetVolumeItems(v)
-                    ]
-                }) ?? []]
-            }
+                Groups =
+                [
+                    .. Pod.Spec.Volumes?.Select(v => new DetailsGroup
+                    {
+                        Title = v.Name,
+                        Items = [.. GetVolumeItems(v)],
+                    })
+                        ?? [],
+                ],
+            },
         ];
     }
 
@@ -86,11 +117,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
             Value = Pod.CreationTimestamp().ToString(),
         };
 
-        yield return new DetailsTextItem
-        {
-            Title = "Name",
-            Value = Pod.Name(),
-        };
+        yield return new DetailsTextItem { Title = "Name", Value = Pod.Name() };
 
         yield return new DetailsLinkItem
         {
@@ -102,7 +129,13 @@ public partial class PodViewModel : KubernetesResourceViewModel
         yield return new DetailsCollectionItem
         {
             Title = "Labels",
-            Items = [.. Pod.Metadata.Labels?.Select(l => new DetailsCollectionItemElement { Value = $"{l.Key}={l.Value}" }) ?? []]
+            Items =
+            [
+                .. Pod.Metadata.Labels?.Select(l => new DetailsCollectionItemElement
+                {
+                    Value = $"{l.Key}={l.Value}",
+                }) ?? [],
+            ],
         };
 
         if (Pod.Metadata.Annotations?.Count > 0)
@@ -110,7 +143,13 @@ public partial class PodViewModel : KubernetesResourceViewModel
             yield return new DetailsCollectionItem
             {
                 Title = "Annotations",
-                Items = [.. Pod.Metadata.Annotations?.Select(l => new DetailsCollectionItemElement { Value = $"{l.Key}={l.Value}" }) ?? []]
+                Items =
+                [
+                    .. Pod.Metadata.Annotations?.Select(l => new DetailsCollectionItemElement
+                    {
+                        Value = $"{l.Key}={l.Value}",
+                    }) ?? [],
+                ],
             };
         }
 
@@ -121,14 +160,23 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 Title = "Controlled by",
                 Prefix = $"{Pod.Metadata.OwnerReferences.First().Kind}: ",
                 ResourceName = Pod.Metadata.OwnerReferences.First().Name,
-                ResourceType = Pod.Metadata.OwnerReferences.First(o => o.Controller == true).Kind switch
+                ResourceType = Pod
+                    .Metadata.OwnerReferences.First(o => o.Controller == true)
+                    .Kind switch
                 {
                     "ReplicaSet" => ResourceType.ReplicaSet,
                     "Deployment" => ResourceType.Deployment,
                     "DaemonSet" => ResourceType.DaemonSet,
                     "Node" => ResourceType.Node,
-                    _ => new ResourceType("Unknown", "Unknown", "unknown", true, "Unknowns", "Unknown")
-                }
+                    _ => new ResourceType(
+                        "Unknown",
+                        "Unknown",
+                        "unknown",
+                        true,
+                        "Unknowns",
+                        "Unknown"
+                    ),
+                },
             };
         }
 
@@ -143,9 +191,8 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 "Failed" => Category.Error,
                 "Pending" => Category.Warning,
                 "Terminating" => Category.Default,
-                _ => Category.Default
-            }
-
+                _ => Category.Default,
+            },
         };
 
         yield return new DetailsLinkItem
@@ -155,16 +202,16 @@ public partial class PodViewModel : KubernetesResourceViewModel
             ResourceType = ResourceType.Node,
         };
 
-        yield return new DetailsTextItem
-        {
-            Title = "Pod IP",
-            Value = Pod.Status.PodIP,
-        };
+        yield return new DetailsTextItem { Title = "Pod IP", Value = Pod.Status.PodIP };
 
         yield return new DetailsCollectionItem
         {
             Title = "Pod IPs",
-            Items = [.. Pod.Status.PodIPs?.Select(p => new DetailsCollectionItemElement { Value = p.Ip }) ?? []],
+            Items =
+            [
+                .. Pod.Status.PodIPs?.Select(p => new DetailsCollectionItemElement { Value = p.Ip })
+                    ?? [],
+            ],
         };
 
         yield return new DetailsLinkItem
@@ -181,25 +228,52 @@ public partial class PodViewModel : KubernetesResourceViewModel
             ResourceType = ResourceType.PriorityClass,
         };
 
-        yield return new DetailsTextItem
-        {
-            Title = "QoS Class",
-            Value = Pod.Status.QosClass,
-        };
+        yield return new DetailsTextItem { Title = "QoS Class", Value = Pod.Status.QosClass };
 
         yield return new DetailsConditionsItem
         {
             Title = "Conditions",
-            Items = [.. Pod.Status.Conditions?.Select(c => new DetailsConditionsElement { Type = c.Type, Status = c.Status, Message = c.Message, Reason = c.Reason, LastHeartbeatTime = c.LastProbeTime, LastTransitionTime = c.LastTransitionTime }) ?? []]
+            Items =
+            [
+                .. Pod.Status.Conditions?.Select(c => new DetailsConditionsElement
+                {
+                    Type = c.Type,
+                    Status = c.Status,
+                    Message = c.Message,
+                    Reason = c.Reason,
+                    LastHeartbeatTime = c.LastProbeTime,
+                    LastTransitionTime = c.LastTransitionTime,
+                }) ?? [],
+            ],
         };
 
         yield return new DetailsCollectionItem
         {
             Title = "Node Selector",
-            Items = [.. Pod.Spec.NodeSelector?.Select(n => new DetailsCollectionItemElement { Value = $"{n.Key}: {n.Value}" }) ?? []],
+            Items =
+            [
+                .. Pod.Spec.NodeSelector?.Select(n => new DetailsCollectionItemElement
+                {
+                    Value = $"{n.Key}: {n.Value}",
+                }) ?? [],
+            ],
         };
 
-        yield return new DetailsTableItem("Tolerations", ["Key", "Operator", "Value", "Effect", "Seconds"], Pod.Spec.Tolerations?.Select(t => new[] { t.Key, t.OperatorProperty, t.Value, t.Effect, t.TolerationSeconds?.ToString() ?? string.Empty }) ?? []);
+        yield return new DetailsTableItem(
+            "Tolerations",
+            ["Key", "Operator", "Value", "Effect", "Seconds"],
+            Pod.Spec.Tolerations?.Select(t =>
+                new[]
+                {
+                    t.Key,
+                    t.OperatorProperty,
+                    t.Value,
+                    t.Effect,
+                    t.TolerationSeconds?.ToString() ?? string.Empty,
+                }
+            )
+                ?? []
+        );
 
         // todo affinities?
     }
@@ -216,7 +290,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         {
             V1ContainerState { Running: V1ContainerStateRunning } => "Running",
             V1ContainerState { Terminated: V1ContainerStateTerminated } => "Terminated",
-            _ => "Waiting"
+            _ => "Waiting",
         };
 
         if (status.RestartCount > 0)
@@ -236,9 +310,9 @@ public partial class PodViewModel : KubernetesResourceViewModel
             {
                 V1ContainerState { Running: V1ContainerStateRunning } => Category.Success,
                 V1ContainerState { Terminated: V1ContainerStateTerminated } => Category.Error,
-                _ => Category.Warning
+                _ => Category.Warning,
             },
-            Value = statusText
+            Value = statusText,
         };
 
         if (status.LastState is not null)
@@ -246,34 +320,67 @@ public partial class PodViewModel : KubernetesResourceViewModel
             yield return new DetailsTextItem
             {
                 Title = "Last Status",
-                Value = Pod.Status.ContainerStatuses.First(s => s.Name == container.Name).LastState switch
+                Value = Pod
+                    .Status.ContainerStatuses.First(s => s.Name == container.Name)
+                    .LastState switch
                 {
-                    V1ContainerState { Terminated: V1ContainerStateTerminated } => $"terminated\r\n" +
-                    $"Reason: {status.LastState.Terminated.Reason}\r\n" +
-                    $"Started at: {status.LastState.Terminated.StartedAt}\r\n" +
-                    $"Finished at: {status.LastState.Terminated.FinishedAt}",
-                    _ => "Unknown"
-                }
+                    V1ContainerState { Terminated: V1ContainerStateTerminated } => $"terminated\r\n"
+                        + $"Reason: {status.LastState.Terminated.Reason}\r\n"
+                        + $"Started at: {status.LastState.Terminated.StartedAt}\r\n"
+                        + $"Finished at: {status.LastState.Terminated.FinishedAt}",
+                    _ => "Unknown",
+                },
             };
         }
 
-        yield return new DetailsTextItem
-        {
-            Title = "Image",
-            Value = container.Image
-        };
+        yield return new DetailsTextItem { Title = "Image", Value = container.Image };
 
         if (container.Ports != null)
         {
             yield return new DetailsPortsItem
             {
-                Ports = [.. container.Ports.Select(p => new PortViewModel(p, this, Cluster, Cluster.App.ForwardedPorts.FirstOrDefault(fp => fp.Pod == this && fp.Port == p)))]
+                Ports =
+                [
+                    .. container.Ports.Select(p => new PortViewModel(
+                        p,
+                        this,
+                        Cluster,
+                        Cluster.App.ForwardedPorts.FirstOrDefault(fp =>
+                            fp.Pod == this && fp.Port == p
+                        )
+                    )),
+                ],
             };
         }
 
-        yield return new DetailsDictionaryItem { Title = "Environment", Items = container.Env?.Select(e => new DetailsDictionaryEntry { Key = e.Name, Value = GetEnvValueRepresentation(e) }).ToList() ?? [] };
+        yield return new DetailsDictionaryItem
+        {
+            Title = "Environment",
+            Items =
+                container
+                    .Env?.Select(e => new DetailsDictionaryEntry
+                    {
+                        Key = e.Name,
+                        Value = GetEnvValueRepresentation(e),
+                    })
+                    .ToList()
+                ?? [],
+        };
 
-        yield return new DetailsCollectionItem { Title = "Mounts", IsWrapLayout = false, Items = [.. container.VolumeMounts.Select(m => new DetailsCollectionItemElement { Value = m.MountPath, SecondaryValue = $"from {m.Name} ({(m.ReadOnlyProperty == true ? "ro" : "rw")})" })] };
+        yield return new DetailsCollectionItem
+        {
+            Title = "Mounts",
+            IsWrapLayout = false,
+            Items =
+            [
+                .. container.VolumeMounts.Select(m => new DetailsCollectionItemElement
+                {
+                    Value = m.MountPath,
+                    SecondaryValue =
+                        $"from {m.Name} ({(m.ReadOnlyProperty == true ? "ro" : "rw")})",
+                }),
+            ],
+        };
 
         if (container.LivenessProbe != null)
         {
@@ -281,17 +388,53 @@ public partial class PodViewModel : KubernetesResourceViewModel
             if (container.LivenessProbe.HttpGet != null)
             {
                 elements.Add(new DetailsCollectionItemElement { Value = "http-get" });
-                elements.Add(new DetailsCollectionItemElement { Value = $"{container.LivenessProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.LivenessProbe.HttpGet.Host}{container.LivenessProbe.HttpGet.Path}:{container.LivenessProbe.HttpGet.Port}" });
-                elements.Add(new DetailsCollectionItemElement { Value = $"port: {container.LivenessProbe.HttpGet.Port}" });
+                elements.Add(
+                    new DetailsCollectionItemElement
+                    {
+                        Value =
+                            $"{container.LivenessProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.LivenessProbe.HttpGet.Host}{container.LivenessProbe.HttpGet.Path}:{container.LivenessProbe.HttpGet.Port}",
+                    }
+                );
+                elements.Add(
+                    new DetailsCollectionItemElement
+                    {
+                        Value = $"port: {container.LivenessProbe.HttpGet.Port}",
+                    }
+                );
             }
 
             // todo fill for exec
 
-            elements.Add(new DetailsCollectionItemElement { Value = $"delay={container.LivenessProbe.InitialDelaySeconds}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"timeout={container.LivenessProbe.TimeoutSeconds}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"period={container.LivenessProbe.PeriodSeconds}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"#success={container.LivenessProbe.SuccessThreshold}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"#failure={container.LivenessProbe.FailureThreshold}s" });
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"delay={container.LivenessProbe.InitialDelaySeconds}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"timeout={container.LivenessProbe.TimeoutSeconds}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"period={container.LivenessProbe.PeriodSeconds}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"#success={container.LivenessProbe.SuccessThreshold}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"#failure={container.LivenessProbe.FailureThreshold}s",
+                }
+            );
 
             yield return new DetailsCollectionItem { Title = "Liveness", Items = elements };
         }
@@ -302,17 +445,53 @@ public partial class PodViewModel : KubernetesResourceViewModel
             if (container.ReadinessProbe.HttpGet != null)
             {
                 elements.Add(new DetailsCollectionItemElement { Value = "http-get" });
-                elements.Add(new DetailsCollectionItemElement { Value = $"{container.ReadinessProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.ReadinessProbe.HttpGet.Host}{container.ReadinessProbe.HttpGet.Path}:{container.ReadinessProbe.HttpGet.Port}" });
-                elements.Add(new DetailsCollectionItemElement { Value = $"port: {container.ReadinessProbe.HttpGet.Port}" });
+                elements.Add(
+                    new DetailsCollectionItemElement
+                    {
+                        Value =
+                            $"{container.ReadinessProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.ReadinessProbe.HttpGet.Host}{container.ReadinessProbe.HttpGet.Path}:{container.ReadinessProbe.HttpGet.Port}",
+                    }
+                );
+                elements.Add(
+                    new DetailsCollectionItemElement
+                    {
+                        Value = $"port: {container.ReadinessProbe.HttpGet.Port}",
+                    }
+                );
             }
 
             // todo fill for exec
 
-            elements.Add(new DetailsCollectionItemElement { Value = $"delay={container.ReadinessProbe.InitialDelaySeconds}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"timeout={container.ReadinessProbe.TimeoutSeconds}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"period={container.ReadinessProbe.PeriodSeconds}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"#success={container.ReadinessProbe.SuccessThreshold}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"#failure={container.ReadinessProbe.FailureThreshold}s" });
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"delay={container.ReadinessProbe.InitialDelaySeconds}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"timeout={container.ReadinessProbe.TimeoutSeconds}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"period={container.ReadinessProbe.PeriodSeconds}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"#success={container.ReadinessProbe.SuccessThreshold}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"#failure={container.ReadinessProbe.FailureThreshold}s",
+                }
+            );
 
             yield return new DetailsCollectionItem { Title = "Readiness", Items = elements };
         }
@@ -323,34 +502,88 @@ public partial class PodViewModel : KubernetesResourceViewModel
             if (container.StartupProbe.HttpGet != null)
             {
                 elements.Add(new DetailsCollectionItemElement { Value = "http-get" });
-                elements.Add(new DetailsCollectionItemElement { Value = $"{container.StartupProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.StartupProbe.HttpGet.Host}{container.StartupProbe.HttpGet.Path}:{container.StartupProbe.HttpGet.Port}" });
-                elements.Add(new DetailsCollectionItemElement { Value = $"port: {container.StartupProbe.HttpGet.Port}" });
+                elements.Add(
+                    new DetailsCollectionItemElement
+                    {
+                        Value =
+                            $"{container.StartupProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.StartupProbe.HttpGet.Host}{container.StartupProbe.HttpGet.Path}:{container.StartupProbe.HttpGet.Port}",
+                    }
+                );
+                elements.Add(
+                    new DetailsCollectionItemElement
+                    {
+                        Value = $"port: {container.StartupProbe.HttpGet.Port}",
+                    }
+                );
             }
 
             // todo fill for exec
 
-            elements.Add(new DetailsCollectionItemElement { Value = $"delay={container.StartupProbe.InitialDelaySeconds}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"timeout={container.StartupProbe.TimeoutSeconds}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"period={container.StartupProbe.PeriodSeconds}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"#success={container.StartupProbe.SuccessThreshold}s" });
-            elements.Add(new DetailsCollectionItemElement { Value = $"#failure={container.StartupProbe.FailureThreshold}s" });
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"delay={container.StartupProbe.InitialDelaySeconds}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"timeout={container.StartupProbe.TimeoutSeconds}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"period={container.StartupProbe.PeriodSeconds}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"#success={container.StartupProbe.SuccessThreshold}s",
+                }
+            );
+            elements.Add(
+                new DetailsCollectionItemElement
+                {
+                    Value = $"#failure={container.StartupProbe.FailureThreshold}s",
+                }
+            );
 
             yield return new DetailsCollectionItem { Title = "Startup", Items = elements };
         }
 
         if (container.Command != null)
         {
-            yield return new DetailsTextItem { Title = "Command", Value = string.Join(" ", container.Command) };
+            yield return new DetailsTextItem
+            {
+                Title = "Command",
+                Value = string.Join(" ", container.Command),
+            };
         }
 
         if (container.Args != null)
         {
-            yield return new DetailsTextItem { Title = "Args", Value = string.Join(" ", container.Args) };
+            yield return new DetailsTextItem
+            {
+                Title = "Args",
+                Value = string.Join(" ", container.Args),
+            };
         }
 
         if (container.Resources.Requests != null)
         {
-            yield return new DetailsCollectionItem { Title = "Requests", Items = [.. container.Resources.Requests.Select(r => new DetailsCollectionItemElement { Value = $"{r.Key}={r.Value}" })] };
+            yield return new DetailsCollectionItem
+            {
+                Title = "Requests",
+                Items =
+                [
+                    .. container.Resources.Requests.Select(r => new DetailsCollectionItemElement
+                    {
+                        Value = $"{r.Key}={r.Value}",
+                    }),
+                ],
+            };
         }
     }
 
@@ -358,11 +591,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
     {
         if (volume.AwsElasticBlockStore != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "AWS Elastic Block Store",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "AWS Elastic Block Store" };
             yield return new DetailsTextItem
             {
                 Title = "FS Type",
@@ -386,26 +615,14 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.AzureDisk != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Azure Disk",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.AzureDisk.FsType,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Azure Disk" };
+            yield return new DetailsTextItem { Title = "FS Type", Value = volume.AzureDisk.FsType };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
                 Value = volume.AzureDisk.ReadOnlyProperty.ToString(),
             };
-            yield return new DetailsTextItem
-            {
-                Title = "Kind",
-                Value = volume.AzureDisk.Kind,
-            };
+            yield return new DetailsTextItem { Title = "Kind", Value = volume.AzureDisk.Kind };
             yield return new DetailsTextItem
             {
                 Title = "Disk Name",
@@ -424,11 +641,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.AzureFile != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Azure File",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Azure File" };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
@@ -448,11 +661,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Cephfs != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "CephFS",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "CephFS" };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
@@ -463,16 +672,8 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 Title = "Monitors",
                 Value = string.Join(", ", volume.Cephfs.Monitors),
             };
-            yield return new DetailsTextItem
-            {
-                Title = "Path",
-                Value = volume.Cephfs.Path,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "User",
-                Value = volume.Cephfs.User,
-            };
+            yield return new DetailsTextItem { Title = "Path", Value = volume.Cephfs.Path };
+            yield return new DetailsTextItem { Title = "User", Value = volume.Cephfs.User };
             yield return new DetailsTextItem
             {
                 Title = "Secret File",
@@ -487,16 +688,8 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Cinder != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Cinder",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.Cinder.FsType,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Cinder" };
+            yield return new DetailsTextItem { Title = "FS Type", Value = volume.Cinder.FsType };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
@@ -516,11 +709,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.ConfigMap != null) // todo items
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Config Map",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Config Map" };
             yield return new DetailsLinkItem
             {
                 Title = "Name",
@@ -540,26 +729,14 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Csi != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "CSI",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.Csi.FsType,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "CSI" };
+            yield return new DetailsTextItem { Title = "FS Type", Value = volume.Csi.FsType };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
                 Value = volume.Csi.ReadOnlyProperty.ToString(),
             };
-            yield return new DetailsTextItem
-            {
-                Title = "Driver",
-                Value = volume.Csi.Driver,
-            };
+            yield return new DetailsTextItem { Title = "Driver", Value = volume.Csi.Driver };
             yield return new DetailsLinkItem
             {
                 Title = "Node Publish Secret Ref",
@@ -569,43 +746,56 @@ public partial class PodViewModel : KubernetesResourceViewModel
             yield return new DetailsDictionaryItem
             {
                 Title = "Volume Attributes",
-                Items = volume.Csi.VolumeAttributes?.Select(va => new DetailsDictionaryEntry { Key = va.Key, Value = va.Value }).ToList() ?? []
+                Items =
+                    volume
+                        .Csi.VolumeAttributes?.Select(va => new DetailsDictionaryEntry
+                        {
+                            Key = va.Key,
+                            Value = va.Value,
+                        })
+                        .ToList()
+                    ?? [],
             };
         }
         else if (volume.DownwardAPI != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Downward API",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Downward API" };
             yield return new DetailsDictionaryItem
             {
                 Title = "Default Mode",
-                Items = volume.DownwardAPI.DefaultMode.HasValue ? [new DetailsDictionaryEntry { Key = "Default Mode", Value = volume.DownwardAPI.DefaultMode.Value.ToString() }] : []
+                Items = volume.DownwardAPI.DefaultMode.HasValue
+                    ?
+                    [
+                        new DetailsDictionaryEntry
+                        {
+                            Key = "Default Mode",
+                            Value = volume.DownwardAPI.DefaultMode.Value.ToString(),
+                        },
+                    ]
+                    : [],
             };
             yield return new DetailsCollectionItem
             {
                 Title = "Items",
-                Items = volume.DownwardAPI.Items?.Select(i => new DetailsCollectionItemElement
-                {
-                    Value = i.Path,
-                    SecondaryValue = i.FieldRef != null ? $"FieldRef: {i.FieldRef.FieldPath}" : i.ResourceFieldRef != null ? $"ResourceFieldRef: {i.ResourceFieldRef.Resource}" : string.Empty
-                }).ToList() ?? []
+                Items =
+                    volume
+                        .DownwardAPI.Items?.Select(i => new DetailsCollectionItemElement
+                        {
+                            Value = i.Path,
+                            SecondaryValue =
+                                i.FieldRef != null ? $"FieldRef: {i.FieldRef.FieldPath}"
+                                : i.ResourceFieldRef != null
+                                    ? $"ResourceFieldRef: {i.ResourceFieldRef.Resource}"
+                                : string.Empty,
+                        })
+                        .ToList()
+                    ?? [],
             };
         }
         else if (volume.EmptyDir != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Empty Dir",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Medium",
-                Value = volume.EmptyDir.Medium,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Empty Dir" };
+            yield return new DetailsTextItem { Title = "Medium", Value = volume.EmptyDir.Medium };
             if (volume.EmptyDir.SizeLimit != null)
             {
                 yield return new DetailsTextItem
@@ -617,11 +807,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Ephemeral != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Ephemeral",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Ephemeral" };
             if (volume.Ephemeral.VolumeClaimTemplate != null)
             {
                 yield return new DetailsLinkItem
@@ -634,16 +820,8 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Fc != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Fibre Channel",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "FSType",
-                Value = volume.Fc.FsType,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Fibre Channel" };
+            yield return new DetailsTextItem { Title = "FSType", Value = volume.Fc.FsType };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
@@ -654,11 +832,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 Title = "Target WWNs",
                 Value = string.Join(", ", volume.Fc.TargetWWNs),
             };
-            yield return new DetailsTextItem
-            {
-                Title = "Lun",
-                Value = volume.Fc.Lun.ToString(),
-            };
+            yield return new DetailsTextItem { Title = "Lun", Value = volume.Fc.Lun.ToString() };
 
             yield return new DetailsTextItem
             {
@@ -668,16 +842,8 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.FlexVolume != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Flex Volume",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Driver",
-                Value = volume.FlexVolume.Driver,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Flex Volume" };
+            yield return new DetailsTextItem { Title = "Driver", Value = volume.FlexVolume.Driver };
             yield return new DetailsTextItem
             {
                 Title = "FS Type",
@@ -691,7 +857,15 @@ public partial class PodViewModel : KubernetesResourceViewModel
             yield return new DetailsDictionaryItem
             {
                 Title = "Options",
-                Items = volume.FlexVolume.Options?.Select(o => new DetailsDictionaryEntry { Key = o.Key, Value = o.Value }).ToList() ?? []
+                Items =
+                    volume
+                        .FlexVolume.Options?.Select(o => new DetailsDictionaryEntry
+                        {
+                            Key = o.Key,
+                            Value = o.Value,
+                        })
+                        .ToList()
+                    ?? [],
             };
             yield return new DetailsLinkItem
             {
@@ -702,11 +876,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Flocker != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Flocker",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Flocker" };
             yield return new DetailsTextItem
             {
                 Title = "Dataset Name",
@@ -720,11 +890,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.GcePersistentDisk != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "GCE Persistent Disk",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "GCE Persistent Disk" };
             yield return new DetailsTextItem
             {
                 Title = "FS Type",
@@ -748,11 +914,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.GitRepo != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Git Repo",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Git Repo" };
             yield return new DetailsTextItem
             {
                 Title = "Repository",
@@ -771,11 +933,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Glusterfs != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "GlusterFS",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "GlusterFS" };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
@@ -786,37 +944,17 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 Title = "Endpoints",
                 Value = volume.Glusterfs.Endpoints,
             };
-            yield return new DetailsTextItem
-            {
-                Title = "Path",
-                Value = volume.Glusterfs.Path,
-            };
+            yield return new DetailsTextItem { Title = "Path", Value = volume.Glusterfs.Path };
         }
         else if (volume.HostPath != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Host Path",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Path",
-                Value = volume.HostPath.Path,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = volume.HostPath.Type,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Host Path" };
+            yield return new DetailsTextItem { Title = "Path", Value = volume.HostPath.Path };
+            yield return new DetailsTextItem { Title = "Type", Value = volume.HostPath.Type };
         }
         else if (volume.Image != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Image",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Image" };
             yield return new DetailsTextItem
             {
                 Title = "Reference",
@@ -830,16 +968,8 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Iscsi != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "iSCSI",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.Iscsi.FsType,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "iSCSI" };
+            yield return new DetailsTextItem { Title = "FS Type", Value = volume.Iscsi.FsType };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
@@ -850,16 +980,8 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 Title = "Target Portal",
                 Value = volume.Iscsi.TargetPortal,
             };
-            yield return new DetailsTextItem
-            {
-                Title = "IQN",
-                Value = volume.Iscsi.Iqn,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Lun",
-                Value = volume.Iscsi.Lun.ToString(),
-            };
+            yield return new DetailsTextItem { Title = "IQN", Value = volume.Iscsi.Iqn };
+            yield return new DetailsTextItem { Title = "Lun", Value = volume.Iscsi.Lun.ToString() };
             yield return new DetailsTextItem
             {
                 Title = "ISCSI Interface",
@@ -883,35 +1005,19 @@ public partial class PodViewModel : KubernetesResourceViewModel
             };
         }
         else if (volume.Nfs != null)
-            {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "NFS",
-            };
+        {
+            yield return new DetailsTextItem { Title = "Type", Value = "NFS" };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
                 Value = volume.Nfs.ReadOnlyProperty.ToString(),
             };
-            yield return new DetailsTextItem
-            {
-                Title = "Server",
-                Value = volume.Nfs.Server,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Path",
-                Value = volume.Nfs.Path,
-            };
+            yield return new DetailsTextItem { Title = "Server", Value = volume.Nfs.Server };
+            yield return new DetailsTextItem { Title = "Path", Value = volume.Nfs.Path };
         }
         else if (volume.PersistentVolumeClaim != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Persistent Volume Claim",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Persistent Volume Claim" };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
@@ -926,11 +1032,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.PhotonPersistentDisk != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Photon Persistent Disk",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Photon Persistent Disk" };
             yield return new DetailsTextItem
             {
                 Title = "FS Type",
@@ -944,11 +1046,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.PortworxVolume != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Portworx Volume",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Portworx Volume" };
             yield return new DetailsTextItem
             {
                 Title = "FS Type",
@@ -967,30 +1065,27 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Projected != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Projected",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Projected" };
             yield return new DetailsCollectionItem // todo support a link collection
             {
                 Title = "Sources",
-                Items = volume.Projected.Sources?.Select(s => new DetailsCollectionItemElement
-                {
-                    Value = s.ConfigMap != null ? $"ConfigMap: {s.ConfigMap.Name}" :
-                            s.Secret != null ? $"Secret: {s.Secret.Name}" :
-                            s.ServiceAccountToken != null ? "ServiceAccountToken" :
-                            "Unknown Source"
-                }).ToList() ?? []
+                Items =
+                    volume
+                        .Projected.Sources?.Select(s => new DetailsCollectionItemElement
+                        {
+                            Value =
+                                s.ConfigMap != null ? $"ConfigMap: {s.ConfigMap.Name}"
+                                : s.Secret != null ? $"Secret: {s.Secret.Name}"
+                                : s.ServiceAccountToken != null ? "ServiceAccountToken"
+                                : "Unknown Source",
+                        })
+                        .ToList()
+                    ?? [],
             };
         }
         else if (volume.Quobyte != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Quobyte",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Quobyte" };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
@@ -1001,64 +1096,24 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 Title = "Registry",
                 Value = volume.Quobyte.Registry,
             };
-            yield return new DetailsTextItem
-            {
-                Title = "Volume",
-                Value = volume.Quobyte.Volume,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "User",
-                Value = volume.Quobyte.User,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Group",
-                Value = volume.Quobyte.Group,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Tenant",
-                Value = volume.Quobyte.Tenant,
-            };
+            yield return new DetailsTextItem { Title = "Volume", Value = volume.Quobyte.Volume };
+            yield return new DetailsTextItem { Title = "User", Value = volume.Quobyte.User };
+            yield return new DetailsTextItem { Title = "Group", Value = volume.Quobyte.Group };
+            yield return new DetailsTextItem { Title = "Tenant", Value = volume.Quobyte.Tenant };
         }
         else if (volume.Rbd != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "RBD (RADOS Block Device)",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.Rbd.FsType,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "RBD (RADOS Block Device)" };
+            yield return new DetailsTextItem { Title = "FS Type", Value = volume.Rbd.FsType };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
                 Value = volume.Rbd.ReadOnlyProperty.ToString(),
             };
-            yield return new DetailsTextItem
-            {
-                Title = "Pool",
-                Value = volume.Rbd.Pool,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Image",
-                Value = volume.Rbd.Image,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "User",
-                Value = volume.Rbd.User,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Keyring",
-                Value = volume.Rbd.Keyring,
-            };
+            yield return new DetailsTextItem { Title = "Pool", Value = volume.Rbd.Pool };
+            yield return new DetailsTextItem { Title = "Image", Value = volume.Rbd.Image };
+            yield return new DetailsTextItem { Title = "User", Value = volume.Rbd.User };
+            yield return new DetailsTextItem { Title = "Keyring", Value = volume.Rbd.Keyring };
             yield return new DetailsLinkItem
             {
                 Title = "Secret Ref",
@@ -1073,31 +1128,15 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.ScaleIO != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "ScaleIO",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.ScaleIO.FsType,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "ScaleIO" };
+            yield return new DetailsTextItem { Title = "FS Type", Value = volume.ScaleIO.FsType };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
                 Value = volume.ScaleIO.ReadOnlyProperty.ToString(),
             };
-            yield return new DetailsTextItem
-            {
-                Title = "Gateway",
-                Value = volume.ScaleIO.Gateway,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "System",
-                Value = volume.ScaleIO.System,
-            };
+            yield return new DetailsTextItem { Title = "Gateway", Value = volume.ScaleIO.Gateway };
+            yield return new DetailsTextItem { Title = "System", Value = volume.ScaleIO.System };
             yield return new DetailsTextItem
             {
                 Title = "Volume Name",
@@ -1132,11 +1171,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Secret != null) // todo items
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "Secret",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "Secret" };
             yield return new DetailsLinkItem
             {
                 Title = "Name",
@@ -1156,16 +1191,8 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.Storageos != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "StorageOS",
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.Storageos.FsType,
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "StorageOS" };
+            yield return new DetailsTextItem { Title = "FS Type", Value = volume.Storageos.FsType };
             yield return new DetailsTextItem
             {
                 Title = "Read Only",
@@ -1190,11 +1217,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.VsphereVolume != null)
         {
-            yield return new DetailsTextItem
-            {
-                Title = "Type",
-                Value = "vSphere Volume",
-            };
+            yield return new DetailsTextItem { Title = "Type", Value = "vSphere Volume" };
             yield return new DetailsTextItem
             {
                 Title = "FS Type",
@@ -1274,13 +1297,23 @@ public partial class PodViewModel : KubernetesResourceViewModel
         [LoggerMessage(
             EventId = 1001,
             Level = LogLevel.Information,
-            Message = "Opening logs for pod {PodName} in namespace {Namespace}")]
-        internal static partial void OpeningPodLogs(ILogger logger, string podName, string @namespace);
+            Message = "Opening logs for pod {PodName} in namespace {Namespace}"
+        )]
+        internal static partial void OpeningPodLogs(
+            ILogger logger,
+            string podName,
+            string @namespace
+        );
 
         [LoggerMessage(
             EventId = 1002,
             Level = LogLevel.Information,
-            Message = "Opening shell for pod {PodName} in namespace {Namespace}")]
-        internal static partial void OpeningPodShell(ILogger logger, string podName, string @namespace);
+            Message = "Opening shell for pod {PodName} in namespace {Namespace}"
+        )]
+        internal static partial void OpeningPodShell(
+            ILogger logger,
+            string podName,
+            string @namespace
+        );
     }
 }

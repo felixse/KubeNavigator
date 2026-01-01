@@ -1,5 +1,3 @@
 ﻿namespace KubeNavigator.Views;
 
-interface IShelfItemView
-{
-}
+interface IShelfItemView { }

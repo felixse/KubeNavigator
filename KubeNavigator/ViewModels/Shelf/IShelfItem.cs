@@ -1,6 +1,6 @@
-﻿using KubeNavigator.ViewModels.Resources;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.ViewModels.Shelf;
 

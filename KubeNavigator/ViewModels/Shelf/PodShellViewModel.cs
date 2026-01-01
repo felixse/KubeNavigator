@@ -1,17 +1,17 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.WinUI;
-using KubeNavigator.Messages;
-using KubeNavigator.Model;
-using KubeNavigator.ViewModels.Resources;
-using Nito.AsyncEx;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.WinUI;
+using KubeNavigator.Messages;
+using KubeNavigator.Model;
+using KubeNavigator.ViewModels.Resources;
+using Nito.AsyncEx;
 
 namespace KubeNavigator.ViewModels.Shelf;
 
@@ -60,17 +60,30 @@ public partial class PodShellViewModel : ObservableObject, IShelfItem
         //var stream = demux.GetStream(ChannelIndex.StdOut, ChannelIndex.StdIn);
         //_stream = stream;
 
-
         _session = await Cluster.Context.ExecAsync(Pod.Pod, _cts.Token);
         _session.Closed += async (s, e) =>
         {
             await Cluster.App.DispatcherQueue.EnqueueAsync(async () =>
             {
-                var exitedByUser = _lastLine?.Replace("\0", string.Empty).Split(Environment.NewLine).Where(l => !string.IsNullOrWhiteSpace(l)).LastOrDefault()?.EndsWith("exit") ?? false;
+                var exitedByUser =
+                    _lastLine
+                        ?.Replace("\0", string.Empty)
+                        .Split(Environment.NewLine)
+                        .Where(l => !string.IsNullOrWhiteSpace(l))
+                        .LastOrDefault()
+                        ?.EndsWith("exit")
+                    ?? false;
 
                 if (!exitedByUser)
                 {
-                    WeakReferenceMessenger.Default.Send(new ShowNotificationMessage { Message = _lastLine ?? "Unknown error", Title = "Exec Session closed", Severity = NotificationSeverity.Error });
+                    WeakReferenceMessenger.Default.Send(
+                        new ShowNotificationMessage
+                        {
+                            Message = _lastLine ?? "Unknown error",
+                            Title = "Exec Session closed",
+                            Severity = NotificationSeverity.Error,
+                        }
+                    );
                 }
 
                 await Cluster.App.WindowManager.ActiveWindow.ShelfHost.CloseShelfItemAsync(this);
@@ -78,36 +91,38 @@ public partial class PodShellViewModel : ObservableObject, IShelfItem
         };
         //_writer = new StreamWriter(stream);
 
-        _ = Task.Run(async () =>
-        {
-            _reader = new StreamReader(_session.Stream);
-
-            while (!_cts.IsCancellationRequested)
+        _ = Task.Run(
+            async () =>
             {
-                try
+                _reader = new StreamReader(_session.Stream);
+
+                while (!_cts.IsCancellationRequested)
                 {
-                    var buff = new Memory<char>(new char[1024]);
-                    var chars = await _reader.ReadAsync(buff);
-                    if (chars > 0)
+                    try
                     {
-                        var text = buff.ToString();
-                        _lastLine = text;
-                        TextReceived?.Invoke(this, text);
+                        var buff = new Memory<char>(new char[1024]);
+                        var chars = await _reader.ReadAsync(buff);
+                        if (chars > 0)
+                        {
+                            var text = buff.ToString();
+                            _lastLine = text;
+                            TextReceived?.Invoke(this, text);
+                        }
+                        else
+                        {
+                            await Task.Delay(500);
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        await Task.Delay(500);
+                        Debug.WriteLine("Read failed: " + e.Message);
                     }
                 }
-                catch (Exception e)
-                {
-                    Debug.WriteLine("Read failed: " + e.Message);
-                }
-            }
 
-
-            Debug.WriteLine("Read loop exited");
-        }, cancellationToken: _cts.Token);
+                Debug.WriteLine("Read loop exited");
+            },
+            cancellationToken: _cts.Token
+        );
 
         _initialized.Set();
     }

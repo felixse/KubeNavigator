@@ -20,7 +20,10 @@ public sealed partial class DetailsWindowRootPage : Page
         if (e.Parameter is DetailWindowViewModel viewModel)
         {
             ViewModel = viewModel;
-            if (ViewModel.UserConfirmationService is ConfirmationDialogService confirmationDialogService)
+            if (
+                ViewModel.UserConfirmationService
+                is ConfirmationDialogService confirmationDialogService
+            )
             {
                 confirmationDialogService.Page = this;
             }

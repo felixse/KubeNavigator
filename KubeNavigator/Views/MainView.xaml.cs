@@ -17,16 +17,33 @@ public sealed partial class WorkspaceView : UserControl
         ViewModel = viewModel;
         ViewModel.PropertyChanged += (s, e) =>
         {
-            if (e.PropertyName is nameof(ViewModel.ShelfItemsCount) or nameof(ViewModel.IsShelfMaximized) or nameof(ViewModel.SelectedItem))
+            if (
+                e.PropertyName
+                is nameof(ViewModel.ShelfItemsCount)
+                    or nameof(ViewModel.IsShelfMaximized)
+                    or nameof(ViewModel.SelectedItem)
+            )
             {
-                SetRowSizes(ViewModel.ShelfItemsCount > 0, ViewModel.IsShelfMaximized, ViewModel.SelectedItem);
+                SetRowSizes(
+                    ViewModel.ShelfItemsCount > 0,
+                    ViewModel.IsShelfMaximized,
+                    ViewModel.SelectedItem
+                );
             }
         };
         this.InitializeComponent();
-        SetRowSizes(ViewModel.ShelfItemsCount > 0, ViewModel.IsShelfMaximized, ViewModel.SelectedItem);
+        SetRowSizes(
+            ViewModel.ShelfItemsCount > 0,
+            ViewModel.IsShelfMaximized,
+            ViewModel.SelectedItem
+        );
     }
 
-    private void SetRowSizes(bool shelfHasItems, bool shelfIsMaximized, INavigationTarget? navigationTarget)
+    private void SetRowSizes(
+        bool shelfHasItems,
+        bool shelfIsMaximized,
+        INavigationTarget? navigationTarget
+    )
     {
         if (ShelfRow.Height.IsAbsolute && ShelfRow.Height.Value != 0)
         {
@@ -62,7 +79,10 @@ public sealed partial class WorkspaceView : UserControl
         }
     }
 
-    private async void Shelf_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
+    private async void Shelf_TabCloseRequested(
+        TabView sender,
+        TabViewTabCloseRequestedEventArgs args
+    )
     {
         if (args.Item is IShelfItem shelfItem)
         {

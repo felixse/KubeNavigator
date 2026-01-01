@@ -1,7 +1,7 @@
-using Serilog.Core;
-using Serilog.Events;
 using System;
 using System.Collections.Generic;
+using Serilog.Core;
+using Serilog.Events;
 
 namespace KubeNavigator.Services;
 
@@ -22,7 +22,7 @@ public class InMemoryLogSink : ILogEventSink
         lock (_logEvents)
         {
             _logEvents.Add(logEvent);
-            
+
             if (_logEvents.Count > _maxLogCount)
             {
                 _logEvents.RemoveAt(0);

@@ -1,12 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using KubeNavigator.Model.Helm;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using KubeNavigator.Model.Helm;
 
 namespace KubeNavigator.ViewModels.Helm;
+
 public partial class HelmReleaseViewModel : ObservableObject, ISelectable
 {
     [ObservableProperty]
@@ -37,12 +38,16 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable
     public HelmReleaseViewModel(HelmRelease helmRelease)
     {
         Revisions.Add(helmRelease);
-        Commands.Add(new ItemCommand { Name = "Delete", Symbol = "Dekete", Command = DeleteCommand });
+        Commands.Add(
+            new ItemCommand
+            {
+                Name = "Delete",
+                Symbol = "Dekete",
+                Command = DeleteCommand,
+            }
+        );
     }
 
     [RelayCommand]
-    public async Task DeleteAsync()
-    {
-
-    }
+    public async Task DeleteAsync() { }
 }

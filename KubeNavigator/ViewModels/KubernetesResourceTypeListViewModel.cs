@@ -1,4 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI;
 using CommunityToolkit.WinUI.Collections;
@@ -7,15 +12,12 @@ using k8s.Models;
 using KubeNavigator.Model;
 using KubeNavigator.ViewModels.Resources;
 using Microsoft.UI.Dispatching;
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels;
 
-public partial class KubernetesResourceTypeListViewModel : ListViewModel, IKubernetesResourceEventSubscriber
+public partial class KubernetesResourceTypeListViewModel
+    : ListViewModel,
+        IKubernetesResourceEventSubscriber
 {
     public ClusterViewModel Cluster { get; }
 
@@ -28,15 +30,30 @@ public partial class KubernetesResourceTypeListViewModel : ListViewModel, IKuber
 
     public ResourceType ResourceType { get; }
 
-    private readonly Func<IKubernetesObject<V1ObjectMeta>, KubernetesResourceViewModel> _itemViewModelFactory;
+    private readonly Func<
+        IKubernetesObject<V1ObjectMeta>,
+        KubernetesResourceViewModel
+    > _itemViewModelFactory;
 
-    public KubernetesResourceTypeListViewModel(WorkspaceViewModel workspace, ClusterViewModel cluster, ResourceType resourceType, Func<IKubernetesObject<V1ObjectMeta>, KubernetesResourceViewModel>? itemViewModelFactory = null)
-        : base(workspace, title: resourceType.PluralDisplayName, isNamespaceScoped: resourceType.IsNamespaceScoped, namespaceFilters: cluster.NamespaceFilters)
+    public KubernetesResourceTypeListViewModel(
+        WorkspaceViewModel workspace,
+        ClusterViewModel cluster,
+        ResourceType resourceType,
+        Func<IKubernetesObject<V1ObjectMeta>, KubernetesResourceViewModel>? itemViewModelFactory =
+            null
+    )
+        : base(
+            workspace,
+            title: resourceType.PluralDisplayName,
+            isNamespaceScoped: resourceType.IsNamespaceScoped,
+            namespaceFilters: cluster.NamespaceFilters
+        )
     {
         Cluster = cluster;
         ResourceType = resourceType;
 
-        _itemViewModelFactory = itemViewModelFactory ??= (x) => new KubernetesResourceViewModel(x, ResourceType, Cluster);
+        _itemViewModelFactory = itemViewModelFactory ??= (x) =>
+            new KubernetesResourceViewModel(x, ResourceType, Cluster);
 
         _timer = Workspace.Window.App.DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromSeconds(1);
@@ -59,19 +76,21 @@ public partial class KubernetesResourceTypeListViewModel : ListViewModel, IKuber
                 //    return false;
                 //}
 
-                if (ResourceType.IsNamespaceScoped && Workspace.SelectedNamespaceFilter is NamespaceFilter filter && resource.Namespace != filter.Name)
+                if (
+                    ResourceType.IsNamespaceScoped
+                    && Workspace.SelectedNamespaceFilter is NamespaceFilter filter
+                    && resource.Namespace != filter.Name
+                )
                 {
                     return false;
                 }
 
-                return string.IsNullOrEmpty(SearchText) || resource.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+                return string.IsNullOrEmpty(SearchText)
+                    || resource.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
             }
 
             var collection = await Cluster.GetResourcesAsync(ResourceType);
-            Items = new AdvancedCollectionView(collection)
-            {
-                Filter = filter
-            };
+            Items = new AdvancedCollectionView(collection) { Filter = filter };
 
             foreach (var item in Items.Cast<KubernetesResourceViewModel>())
             {
@@ -107,7 +126,10 @@ public partial class KubernetesResourceTypeListViewModel : ListViewModel, IKuber
         await Cluster.StopWatchResource(ResourceType);
     }
 
-    private void ResourceViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void ResourceViewModel_PropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e
+    )
     {
         if (e.PropertyName == nameof(KubernetesResourceViewModel.IsSelected))
         {
@@ -121,7 +143,8 @@ public partial class KubernetesResourceTypeListViewModel : ListViewModel, IKuber
 
     private void Timer_Tick(DispatcherQueueTimer sender, object args)
     {
-        if (!Loaded) return;
+        if (!Loaded)
+            return;
 
         foreach (var item in Items?.Cast<KubernetesResourceViewModel>() ?? [])
         {
@@ -145,10 +168,17 @@ public partial class KubernetesResourceTypeListViewModel : ListViewModel, IKuber
 
     protected override async Task DeleteItemsAsync(IReadOnlyCollection<ISelectable> items)
     {
-        await Cluster.DeleteResourcesAsync(ResourceType, [.. items.Cast<KubernetesResourceViewModel>()]);
+        await Cluster.DeleteResourcesAsync(
+            ResourceType,
+            [.. items.Cast<KubernetesResourceViewModel>()]
+        );
     }
 
-    public Task OnResourceEvent(KubernetesResourceEvent resourceEvent, ResourceType resourceType, IKubernetesObject<V1ObjectMeta> resource)
+    public Task OnResourceEvent(
+        KubernetesResourceEvent resourceEvent,
+        ResourceType resourceType,
+        IKubernetesObject<V1ObjectMeta> resource
+    )
     {
         Workspace.App.DispatcherQueue.EnqueueAsync(() =>
         {

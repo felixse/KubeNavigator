@@ -1,4 +1,5 @@
 ﻿namespace KubeNavigator.Model.Helm;
+
 public class HelmReleaseChartMetadata
 {
     public required string Name { get; set; }

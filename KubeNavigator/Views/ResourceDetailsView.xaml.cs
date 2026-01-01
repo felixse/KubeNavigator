@@ -17,11 +17,15 @@ public sealed partial class ResourceDetailsView : UserControl
             InlineCodePadding = new(4),
             InlineCodeBorderBrush = new SolidColorBrush(Colors.Transparent),
             InlineCodeBorderThickness = new(4),
-        }
+        },
     };
 
-    public static readonly DependencyProperty ViewModelProperty =
-        DependencyProperty.Register(nameof(ViewModel), typeof(DetailsViewModel), typeof(ResourceDetailsView), new PropertyMetadata(null));
+    public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
+        nameof(ViewModel),
+        typeof(DetailsViewModel),
+        typeof(ResourceDetailsView),
+        new PropertyMetadata(null)
+    );
 
     public DetailsViewModel? ViewModel
     {
@@ -41,7 +45,11 @@ public sealed partial class ResourceDetailsView : UserControl
 
     private async void HyperlinkButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (sender is HyperlinkButton hyperlink && hyperlink.DataContext is DetailsLinkItem linkItem && ViewModel != null)
+        if (
+            sender is HyperlinkButton hyperlink
+            && hyperlink.DataContext is DetailsLinkItem linkItem
+            && ViewModel != null
+        )
         {
             await ViewModel.NavigateAsync(linkItem);
         }

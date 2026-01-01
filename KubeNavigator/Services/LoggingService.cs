@@ -1,10 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using SerilogILogger = Serilog.ILogger;
 
 namespace KubeNavigator.Services;
@@ -42,7 +42,7 @@ public class LoggingService : IDisposable
             .CreateLogger();
 
         Log.Logger = _logger;
-        
+
         _loggerFactory = new SerilogLoggerFactory(_logger);
     }
 
@@ -52,7 +52,7 @@ public class LoggingService : IDisposable
     }
 
     public SerilogILogger Logger => _logger;
-    
+
     public ILoggerFactory LoggerFactory => _loggerFactory;
 
     public IReadOnlyList<LogEvent> GetLogs() => _inMemorySink.GetLogs();

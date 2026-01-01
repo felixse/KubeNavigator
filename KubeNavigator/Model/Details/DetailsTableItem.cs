@@ -1,10 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace KubeNavigator.Model.Details;
+
 internal partial class DetailsTableItem : ObservableObject, IDetailsItem
 {
     public string Title { get; set; }
@@ -28,7 +29,11 @@ internal partial class DetailsTableItem : ObservableObject, IDetailsItem
         IsExpanded = !IsExpanded;
     }
 
-    public DetailsTableItem(string title, IEnumerable<string> columns, IEnumerable<IEnumerable<string>> rows)
+    public DetailsTableItem(
+        string title,
+        IEnumerable<string> columns,
+        IEnumerable<IEnumerable<string>> rows
+    )
     {
         Title = title;
         Columns = columns;

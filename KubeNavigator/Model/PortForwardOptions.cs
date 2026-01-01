@@ -1,4 +1,5 @@
 ﻿namespace KubeNavigator.Model;
+
 public class PortForwardOptions
 {
     public int Port { get; set; }

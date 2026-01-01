@@ -1,7 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KubeNavigator.ViewModels.Navigation;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels;
 
@@ -25,8 +25,5 @@ public partial class TodoViewModel : ObservableObject, INavigationTarget
     }
 
     [RelayCommand]
-    public async Task OpenInNewTab()
-    {
-
-    }
+    public async Task OpenInNewTab() { }
 }

@@ -1,4 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.Collections;
 using k8s.Models;
@@ -7,12 +13,6 @@ using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels;
 
@@ -31,7 +31,6 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
 
     [ObservableProperty]
     public partial IShelfItem? SelectedShelfItem { get; set; }
-
 
     [ObservableProperty]
     public partial ClusterViewModel? Cluster { get; private set; }
@@ -85,68 +84,140 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
         Cluster = cluster;
 
         HelmReleasesViews = new AdvancedCollectionView(Cluster.HelmReleases);
-        HelmReleasesViews.SortDescriptions.Add(new SortDescription(nameof(HelmReleaseViewModel.Name), SortDirection.Ascending));
+        HelmReleasesViews.SortDescriptions.Add(
+            new SortDescription(nameof(HelmReleaseViewModel.Name), SortDirection.Ascending)
+        );
 
         NavigationGroups.Clear();
 
         SelectedNamespaceFilter = cluster.NamespaceFilters.First(x => x is AllNamespacesFilter);
 
-        var clusterGroup = new NavigationGroupViewModel("Cluster", "\uE968", [
-            new TodoViewModel("Overview"),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Node),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Namespace),
-            new TodoViewModel("Events"),
-        ]);
-        var workloads = new NavigationGroupViewModel("Workloads", "\uEE40", [
-            new TodoViewModel("Overview"),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Pod, (x) => new PodViewModel((V1Pod)x, Cluster)),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Deployment),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.DaemonSet),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.StatefulSet),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ReplicaSet),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ReplicationController),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Job),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.CronJob),
-        ]);
-        var config = new NavigationGroupViewModel("Config", "\uF259", [
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ConfigMap),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Secret),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ResourceQuota),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.LimitRange),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.HorizontalPodAutoscaler),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.PodDisruptionBudget),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.PriorityClass),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.RuntimeClass),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Lease),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.MutatingWebhookConfiguration),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ValidatingWebhookConfiguration),
-        ]);
-        var network = new NavigationGroupViewModel("Network", "\uED5D", [
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Service),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Endpoint),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Ingress),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.IngressClass),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.NetworkPolicy),
-        ]);
-        var storage = new NavigationGroupViewModel("Storage", "\uEDA2", [
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.PersistentVolumeClaim),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.PersistentVolume),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.StorageClass),
-        ]);
-        var helm = new NavigationGroupViewModel("Helm", "\uEE94", [
-            new TodoViewModel("Charts"),
-            new HelmReleasesViewModel(this, cluster),
-        ]);
-        var accessControl = new NavigationGroupViewModel("Access Control", "\uE72E", [
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ServiceAccount),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ClusterRole),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Role),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ClusterRoleBinding),
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.RoleBinding),
-        ]);
-        CustomResourcesNavigationGroup = new NavigationGroupViewModel("Custom Resources", "\uEA86", [
-            new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.CustomResourceDefinition),
-        ]);
+        var clusterGroup = new NavigationGroupViewModel(
+            "Cluster",
+            "\uE968",
+            [
+                new TodoViewModel("Overview"),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Node),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Namespace),
+                new TodoViewModel("Events"),
+            ]
+        );
+        var workloads = new NavigationGroupViewModel(
+            "Workloads",
+            "\uEE40",
+            [
+                new TodoViewModel("Overview"),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.Pod,
+                    (x) => new PodViewModel((V1Pod)x, Cluster)
+                ),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Deployment),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.DaemonSet),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.StatefulSet),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ReplicaSet),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.ReplicationController
+                ),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Job),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.CronJob),
+            ]
+        );
+        var config = new NavigationGroupViewModel(
+            "Config",
+            "\uF259",
+            [
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ConfigMap),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Secret),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ResourceQuota),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.LimitRange),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.HorizontalPodAutoscaler
+                ),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.PodDisruptionBudget
+                ),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.PriorityClass),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.RuntimeClass),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Lease),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.MutatingWebhookConfiguration
+                ),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.ValidatingWebhookConfiguration
+                ),
+            ]
+        );
+        var network = new NavigationGroupViewModel(
+            "Network",
+            "\uED5D",
+            [
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Service),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Endpoint),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Ingress),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.IngressClass),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.NetworkPolicy),
+            ]
+        );
+        var storage = new NavigationGroupViewModel(
+            "Storage",
+            "\uEDA2",
+            [
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.PersistentVolumeClaim
+                ),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.PersistentVolume
+                ),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.StorageClass),
+            ]
+        );
+        var helm = new NavigationGroupViewModel(
+            "Helm",
+            "\uEE94",
+            [new TodoViewModel("Charts"), new HelmReleasesViewModel(this, cluster)]
+        );
+        var accessControl = new NavigationGroupViewModel(
+            "Access Control",
+            "\uE72E",
+            [
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ServiceAccount),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ClusterRole),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Role),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.ClusterRoleBinding
+                ),
+                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.RoleBinding),
+            ]
+        );
+        CustomResourcesNavigationGroup = new NavigationGroupViewModel(
+            "Custom Resources",
+            "\uEA86",
+            [
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.CustomResourceDefinition
+                ),
+            ]
+        );
 
         NavigationGroups.Add(Pinned);
         NavigationGroups.Add(clusterGroup);
@@ -158,7 +229,9 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
         NavigationGroups.Add(accessControl);
         NavigationGroups.Add(CustomResourcesNavigationGroup);
 
-        _customResourceDefinitions = await cluster.GetResourcesAsync(ResourceType.CustomResourceDefinition);
+        _customResourceDefinitions = await cluster.GetResourcesAsync(
+            ResourceType.CustomResourceDefinition
+        );
 
         foreach (var item in _customResourceDefinitions)
         {
@@ -168,17 +241,20 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
             }
         }
 
-
-        _customResourceDefinitions.CollectionChanged += OnCustomResourceDefinitionsCollectionChanged;
+        _customResourceDefinitions.CollectionChanged +=
+            OnCustomResourceDefinitionsCollectionChanged;
 
         SelectedItem = null;
     }
 
-    private void OnCustomResourceDefinitionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void OnCustomResourceDefinitionsCollectionChanged(
+        object? sender,
+        NotifyCollectionChangedEventArgs e
+    )
     {
         if (CustomResourcesNavigationGroup == null)
         {
-            // todo log error 
+            // todo log error
             return;
         }
 
@@ -194,24 +270,29 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
         {
             if (item.Resource is V1CustomResourceDefinition crd)
             {
-                var group = CustomResourcesNavigationGroup.Items.FirstOrDefault(c => c is CustomResourceGroupViewModel group && group.GroupName == crd.Spec.Group) as CustomResourceGroupViewModel;
+                var group =
+                    CustomResourcesNavigationGroup.Items.FirstOrDefault(c =>
+                        c is CustomResourceGroupViewModel group && group.GroupName == crd.Spec.Group
+                    ) as CustomResourceGroupViewModel;
                 if (group != null)
                 {
-                    var viewModel = group.Resources.FirstOrDefault(r => r.ResourceType.Version == crd.Spec.Versions.First().Name);
+                    var viewModel = group.Resources.FirstOrDefault(r =>
+                        r.ResourceType.Version == crd.Spec.Versions.First().Name
+                    );
                     if (viewModel != null)
                     {
                         group.Resources.Remove(viewModel);
                     }
                 }
             }
-
         }
     }
 
     [RelayCommand]
     public void Close()
     {
-        _customResourceDefinitions?.CollectionChanged -= OnCustomResourceDefinitionsCollectionChanged;
+        _customResourceDefinitions?.CollectionChanged -=
+            OnCustomResourceDefinitionsCollectionChanged;
         ShelfItems.CollectionChanged -= OnShelfItemsCollectionChanged;
 
         Window.Workspaces.Remove(this);
@@ -231,28 +312,49 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
     {
         if (Cluster == null)
         {
-            // todo log error 
+            // todo log error
             return;
         }
 
         if (CustomResourcesNavigationGroup == null)
         {
-            // todo log error 
+            // todo log error
             return;
         }
 
-        if (!CustomResourcesNavigationGroup.Items.Any(c => c is CustomResourceGroupViewModel group && group.GroupName == crd.Spec.Group))
+        if (
+            !CustomResourcesNavigationGroup.Items.Any(c =>
+                c is CustomResourceGroupViewModel group && group.GroupName == crd.Spec.Group
+            )
+        )
         {
-            CustomResourcesNavigationGroup.Items.Add(new CustomResourceGroupViewModel(crd.Spec.Group));
+            CustomResourcesNavigationGroup.Items.Add(
+                new CustomResourceGroupViewModel(crd.Spec.Group)
+            );
         }
 
-        var group = CustomResourcesNavigationGroup.Items.First(c => c is CustomResourceGroupViewModel group && group.GroupName == crd.Spec.Group) as CustomResourceGroupViewModel;
+        var group =
+            CustomResourcesNavigationGroup.Items.First(c =>
+                c is CustomResourceGroupViewModel group && group.GroupName == crd.Spec.Group
+            ) as CustomResourceGroupViewModel;
 
         if (group != null)
         {
             // todo what if multiple versions?
-            group.Resources.Add(new KubernetesResourceTypeListViewModel(this, Cluster, new ResourceType(crd.Spec.Group, crd.Spec.Versions.First().Name, crd.Spec.Names.Plural, crd.Spec.Scope == "Namespaced", crd.Spec.Names.Plural, crd.Spec.Names.Singular)));
-
+            group.Resources.Add(
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    Cluster,
+                    new ResourceType(
+                        crd.Spec.Group,
+                        crd.Spec.Versions.First().Name,
+                        crd.Spec.Names.Plural,
+                        crd.Spec.Scope == "Namespaced",
+                        crd.Spec.Names.Plural,
+                        crd.Spec.Names.Singular
+                    )
+                )
+            );
         }
     }
 
@@ -272,7 +374,6 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
             await item.OnCloseAsync();
         }
     }
-
 
     [RelayCommand]
     public void MaximizeShelf()
@@ -297,7 +398,9 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
     {
         ClosePanel();
 
-        var existing = ShelfItems.FirstOrDefault(t => t.Resource == item.Resource && item.GetType() == t.GetType());
+        var existing = ShelfItems.FirstOrDefault(t =>
+            t.Resource == item.Resource && item.GetType() == t.GetType()
+        );
         if (existing != null)
         {
             SelectedShelfItem = existing;
@@ -312,10 +415,14 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
     {
         if (item is KubernetesResourceViewModel resource) // todo support other types, introduce IDetails?
         {
-            Details = new DetailsViewModel(resource, this, () =>
-            {
-                source.SelectedItem = null;
-            });
+            Details = new DetailsViewModel(
+                resource,
+                this,
+                () =>
+                {
+                    source.SelectedItem = null;
+                }
+            );
         }
     }
 
@@ -333,7 +440,9 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
     {
         if (Pinned != null)
         {
-            var pinnedItem = Pinned.Items.Cast<PinnedNavigationTargetViewModel>().FirstOrDefault(i => i.NavigationTarget == navigationTarget);
+            var pinnedItem = Pinned
+                .Items.Cast<PinnedNavigationTargetViewModel>()
+                .FirstOrDefault(i => i.NavigationTarget == navigationTarget);
             if (pinnedItem != null)
             {
                 Pinned.Items.Remove(pinnedItem);
@@ -342,7 +451,10 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
         // todo persist
     }
 
-    partial void OnSelectedItemChanged(Navigation.INavigationTarget? oldValue, Navigation.INavigationTarget? newValue)
+    partial void OnSelectedItemChanged(
+        Navigation.INavigationTarget? oldValue,
+        Navigation.INavigationTarget? newValue
+    )
     {
         if (oldValue is KubernetesResourceTypeListViewModel oldResourceType)
         {
@@ -362,7 +474,10 @@ public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
         }
     }
 
-    partial void OnSelectedNamespaceFilterChanged(INamespaceFilter? oldValue, INamespaceFilter? newValue)
+    partial void OnSelectedNamespaceFilterChanged(
+        INamespaceFilter? oldValue,
+        INamespaceFilter? newValue
+    )
     {
         HelmReleasesViews?.RefreshFilter(); // todo this should be done in the viewmodel
     }

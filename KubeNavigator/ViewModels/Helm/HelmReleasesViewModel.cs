@@ -1,18 +1,18 @@
-﻿using CommunityToolkit.WinUI;
-using KubeNavigator.ViewModels.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.WinUI;
+using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.ViewModels.Helm;
+
 public partial class HelmReleasesViewModel : ListViewModel
 {
     public HelmReleasesViewModel(WorkspaceViewModel workspace, ClusterViewModel cluster)
         : base(workspace, title: "Helm Releases", isNamespaceScoped: true, cluster.NamespaceFilters)
-    {
-    }
+    { }
 
     public async Task ActivateAsync()
     {
@@ -27,12 +27,16 @@ public partial class HelmReleasesViewModel : ListViewModel
                 //    return false;
                 //}
 
-                if (Workspace.SelectedNamespaceFilter is NamespaceFilter filter && resource.Namespace != filter.Name)
+                if (
+                    Workspace.SelectedNamespaceFilter is NamespaceFilter filter
+                    && resource.Namespace != filter.Name
+                )
                 {
                     return false;
                 }
 
-                return string.IsNullOrEmpty(SearchText) || resource.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+                return string.IsNullOrEmpty(SearchText)
+                    || resource.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
             };
 
             foreach (var item in Items.Cast<HelmReleaseViewModel>())
@@ -55,7 +59,10 @@ public partial class HelmReleasesViewModel : ListViewModel
         });
     }
 
-    private void ResourceViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void ResourceViewModel_PropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e
+    )
     {
         if (e.PropertyName == nameof(KubernetesResourceViewModel.IsSelected))
         {

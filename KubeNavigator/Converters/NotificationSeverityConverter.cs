@@ -1,8 +1,8 @@
-﻿using KubeNavigator.Messages;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using KubeNavigator.Messages;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
-using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace KubeNavigator.Converters;
 

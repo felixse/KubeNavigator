@@ -1,8 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace KubeNavigator.ViewModels.Navigation;
+
 public partial class CustomResourceGroupViewModel : ObservableObject, INavigationTarget
 {
     public CustomResourceGroupViewModel(string groupName)

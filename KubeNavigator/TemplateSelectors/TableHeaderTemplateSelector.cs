@@ -16,7 +16,10 @@ public partial class TableHeaderTemplateSelector : DataTemplateSelector
 
     protected override DataTemplate SelectTemplateCore(object item)
     {
-        if (item is KubernetesResourceTypeListViewModel kubernetesResourceTypeListViewModel && KubernetesResourceTemplate != null)
+        if (
+            item is KubernetesResourceTypeListViewModel kubernetesResourceTypeListViewModel
+            && KubernetesResourceTemplate != null
+        )
         {
             if (kubernetesResourceTypeListViewModel.ResourceType == ResourceType.Pod)
             {

@@ -7,6 +7,4 @@ namespace KubeNavigator.Model.TerminalMessages;
 [JsonDerivedType(typeof(OutputReceived), nameof(OutputReceived))]
 [JsonDerivedType(typeof(ClearRequested), nameof(ClearRequested))]
 [JsonDerivedType(typeof(ThemeChanged), nameof(ThemeChanged))]
-public abstract class OutgoingMessage
-{
-}
+public abstract class OutgoingMessage { }

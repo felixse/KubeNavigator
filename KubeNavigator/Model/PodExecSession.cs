@@ -1,11 +1,12 @@
-﻿using k8s;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.WebSockets;
 using System.Text.Json;
+using k8s;
 
 namespace KubeNavigator.Model;
+
 public sealed partial class PodExecSession : IDisposable
 {
     private readonly WebSocket _webSocket;
@@ -25,7 +26,6 @@ public sealed partial class PodExecSession : IDisposable
         Stream = _demux.GetStream(ChannelIndex.StdOut, ChannelIndex.StdIn);
         _resizeStream = _demux.GetStream(null, ChannelIndex.Resize);
 
-
         _demux.Start();
     }
 
@@ -33,7 +33,9 @@ public sealed partial class PodExecSession : IDisposable
     {
         try
         {
-            _resizeStream.Write(JsonSerializer.SerializeToUtf8Bytes(size, SerializerContext.Default.TerminalSize));
+            _resizeStream.Write(
+                JsonSerializer.SerializeToUtf8Bytes(size, SerializerContext.Default.TerminalSize)
+            );
         }
         catch (Exception e)
         {

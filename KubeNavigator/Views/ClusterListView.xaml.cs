@@ -15,7 +15,11 @@ public sealed partial class ClusterListView : UserControl
 
     private async void OnOpen(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (ViewModel is not null && sender is FrameworkElement element && element.DataContext is ClusterViewModel cluster)
+        if (
+            ViewModel is not null
+            && sender is FrameworkElement element
+            && element.DataContext is ClusterViewModel cluster
+        )
         {
             await ViewModel.ConnectAsync(cluster);
         }
@@ -23,7 +27,11 @@ public sealed partial class ClusterListView : UserControl
 
     private async void OnOpenInNewTab(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (ViewModel is not null && sender is FrameworkElement element && element.DataContext is ClusterViewModel cluster)
+        if (
+            ViewModel is not null
+            && sender is FrameworkElement element
+            && element.DataContext is ClusterViewModel cluster
+        )
         {
             await ViewModel.ConnectInNewTabAsync(cluster);
         }

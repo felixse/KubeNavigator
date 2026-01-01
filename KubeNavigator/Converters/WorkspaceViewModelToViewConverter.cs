@@ -1,8 +1,8 @@
-﻿using KubeNavigator.ViewModels;
+﻿using System;
+using System.Collections.Generic;
+using KubeNavigator.ViewModels;
 using KubeNavigator.Views;
 using Microsoft.UI.Xaml.Data;
-using System;
-using System.Collections.Generic;
 
 namespace KubeNavigator.Converters;
 

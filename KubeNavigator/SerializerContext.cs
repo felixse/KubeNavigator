@@ -1,9 +1,9 @@
-﻿using KubeNavigator.Model;
+﻿using System.Text.Json.Serialization;
+using KubeNavigator.Model;
 using KubeNavigator.Model.Details;
 using KubeNavigator.Model.Helm;
 using KubeNavigator.Model.TerminalMessages;
 using KubeNavigator.Services;
-using System.Text.Json.Serialization;
 
 namespace KubeNavigator;
 
@@ -14,6 +14,4 @@ namespace KubeNavigator;
 [JsonSerializable(typeof(OutgoingMessage))]
 [JsonSerializable(typeof(TerminalSize))]
 [JsonSourceGenerationOptions(WriteIndented = true, PropertyNameCaseInsensitive = true)]
-internal sealed partial class SerializerContext : JsonSerializerContext
-{
-}
+internal sealed partial class SerializerContext : JsonSerializerContext { }

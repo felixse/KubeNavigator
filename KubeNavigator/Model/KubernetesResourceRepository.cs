@@ -1,15 +1,16 @@
-﻿using k8s;
-using k8s.Models;
-using KubeNavigator.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using k8s;
+using k8s.Models;
+using KubeNavigator.Services;
 
 namespace KubeNavigator.Model;
 
-public class KubernetesResourceRepository<T> : IKubernetesResourceRepository where T : IKubernetesObject<V1ObjectMeta>
+public class KubernetesResourceRepository<T> : IKubernetesResourceRepository
+    where T : IKubernetesObject<V1ObjectMeta>
 {
     private readonly HashSet<IKubernetesResourceEventSubscriber> _subscribers = [];
     private readonly KubernetesService _kubernetesService;
@@ -21,14 +22,18 @@ public class KubernetesResourceRepository<T> : IKubernetesResourceRepository whe
 
     private int _instance;
 
-    public KubernetesResourceRepository(ResourceType resourceType, KubernetesService kubernetesService)
+    public KubernetesResourceRepository(
+        ResourceType resourceType,
+        KubernetesService kubernetesService
+    )
     {
         _kubernetesService = kubernetesService;
         ResourceType = resourceType;
         _instance = Random.Shared.Next();
     }
 
-    public IReadOnlyCollection<TItem> GetItems<TItem>() where TItem : IKubernetesObject<V1ObjectMeta>
+    public IReadOnlyCollection<TItem> GetItems<TItem>()
+        where TItem : IKubernetesObject<V1ObjectMeta>
     {
         return [.. _resources.Cast<TItem>()];
     }
@@ -71,75 +76,100 @@ public class KubernetesResourceRepository<T> : IKubernetesResourceRepository whe
 
         Debug.WriteLine($"Starting watcher for {ResourceType.Plural}");
 
-        _watcher = _kubernetesService.WatchResources<T>(ResourceType, (watchEventType, resource) =>
-        {
-            if (watchEventType == WatchEventType.Added)
+        _watcher = _kubernetesService.WatchResources<T>(
+            ResourceType,
+            (watchEventType, resource) =>
             {
-                var index = _resources.FindIndex(r => r.Metadata.Name == resource.Metadata.Name);
-                if (index != -1)
+                if (watchEventType == WatchEventType.Added)
                 {
-                    var currentVersion = int.Parse(_resources[index].Metadata.ResourceVersion);
-                    var receivedVersion = int.Parse(resource.Metadata.ResourceVersion);
-                    if (receivedVersion > currentVersion)
+                    var index = _resources.FindIndex(r =>
+                        r.Metadata.Name == resource.Metadata.Name
+                    );
+                    if (index != -1)
                     {
-                        _resources[index] = resource;
+                        var currentVersion = int.Parse(_resources[index].Metadata.ResourceVersion);
+                        var receivedVersion = int.Parse(resource.Metadata.ResourceVersion);
+                        if (receivedVersion > currentVersion)
+                        {
+                            _resources[index] = resource;
+
+                            foreach (var subscriber in _subscribers)
+                            {
+                                subscriber.OnResourceEvent(
+                                    KubernetesResourceEvent.Modified,
+                                    ResourceType,
+                                    resource
+                                );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _resources.Add(resource);
 
                         foreach (var subscriber in _subscribers)
                         {
-                            subscriber.OnResourceEvent(KubernetesResourceEvent.Modified, ResourceType, resource);
+                            subscriber.OnResourceEvent(
+                                KubernetesResourceEvent.Added,
+                                ResourceType,
+                                resource
+                            );
                         }
+                    }
+                }
+                else if (watchEventType == WatchEventType.Modified)
+                {
+                    var index = _resources.FindIndex(r =>
+                        r.Metadata.Name == resource.Metadata.Name
+                    );
+                    if (index != -1)
+                    {
+                        var currentVersion = int.Parse(_resources[index].Metadata.ResourceVersion);
+                        var receivedVersion = int.Parse(resource.Metadata.ResourceVersion);
+                        if (receivedVersion > currentVersion)
+                        {
+                            _resources[index] = resource;
+
+                            foreach (var subscriber in _subscribers)
+                            {
+                                subscriber.OnResourceEvent(
+                                    KubernetesResourceEvent.Modified,
+                                    ResourceType,
+                                    resource
+                                );
+                            }
+                        }
+                    }
+                }
+                else if (watchEventType == WatchEventType.Deleted)
+                {
+                    var existing = _resources.FirstOrDefault(r =>
+                        r.Metadata.Name == resource.Metadata.Name
+                    );
+                    if (existing != null)
+                    {
+                        _resources.Remove(existing);
+                    }
+
+                    foreach (var subscriber in _subscribers)
+                    {
+                        subscriber.OnResourceEvent(
+                            KubernetesResourceEvent.Deleted,
+                            ResourceType,
+                            resource
+                        );
                     }
                 }
                 else
                 {
-                    _resources.Add(resource);
-
-                    foreach (var subscriber in _subscribers)
-                    {
-                        subscriber.OnResourceEvent(KubernetesResourceEvent.Added, ResourceType, resource);
-                    }
+                    Debug.WriteLine($"Unhandled watch event type: {watchEventType}");
                 }
-            }
-            else if (watchEventType == WatchEventType.Modified)
+            },
+            (ex) =>
             {
-                var index = _resources.FindIndex(r => r.Metadata.Name == resource.Metadata.Name);
-                if (index != -1)
-                {
-                    var currentVersion = int.Parse(_resources[index].Metadata.ResourceVersion);
-                    var receivedVersion = int.Parse(resource.Metadata.ResourceVersion);
-                    if (receivedVersion > currentVersion)
-                    {
-                        _resources[index] = resource;
-
-                        foreach (var subscriber in _subscribers)
-                        {
-                            subscriber.OnResourceEvent(KubernetesResourceEvent.Modified, ResourceType, resource);
-                        }
-                    }
-                }
+                Debug.WriteLine(ex);
             }
-            else if (watchEventType == WatchEventType.Deleted)
-            {
-                var existing = _resources.FirstOrDefault(r => r.Metadata.Name == resource.Metadata.Name);
-                if (existing != null)
-                {
-                    _resources.Remove(existing);
-                }
-
-                foreach (var subscriber in _subscribers)
-                {
-                    subscriber.OnResourceEvent(KubernetesResourceEvent.Deleted, ResourceType, resource);
-                }
-            }
-            else
-            {
-                Debug.WriteLine($"Unhandled watch event type: {watchEventType}");
-            }
-        }, 
-        (ex) =>
-        {
-            Debug.WriteLine(ex);
-        });
+        );
     }
 
     private void StopWatcher()

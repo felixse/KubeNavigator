@@ -1,14 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Model;
 using KubeNavigator.Model.Details;
 using KubeNavigator.ViewModels.Shelf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels.Resources;
 
@@ -32,10 +32,29 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
     public ClusterViewModel Cluster { get; }
 
     public List<ItemCommand> Commands { get; } = [];
-    public KubernetesResourceViewModel(IKubernetesObject<V1ObjectMeta> resource, ResourceType resourceType, ClusterViewModel cluster)
+
+    public KubernetesResourceViewModel(
+        IKubernetesObject<V1ObjectMeta> resource,
+        ResourceType resourceType,
+        ClusterViewModel cluster
+    )
     {
-        Commands.Add(new ItemCommand { Name = "Edit", Symbol = "Edit", Command = EditCommand });
-        Commands.Add(new ItemCommand { Name = "Delete", Symbol = "Delete", Command = DeleteCommand });
+        Commands.Add(
+            new ItemCommand
+            {
+                Name = "Edit",
+                Symbol = "Edit",
+                Command = EditCommand,
+            }
+        );
+        Commands.Add(
+            new ItemCommand
+            {
+                Name = "Delete",
+                Symbol = "Delete",
+                Command = DeleteCommand,
+            }
+        );
         Cluster = cluster;
         Resource = resource;
         ResourceType = resourceType;
@@ -45,7 +64,9 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
     [RelayCommand]
     public void Edit()
     {
-        Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(new EditKubernetesResourceViewModel(this));
+        Cluster.App.WindowManager.ActiveWindow.ShelfHost.OpenShelfItem(
+            new EditKubernetesResourceViewModel(this)
+        );
     }
 
     [RelayCommand]
@@ -61,28 +82,39 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
 
     protected virtual List<IDetailsSection> CreateDetails()
     {
-        return [
-            new DetailsSection{
-                Items = [
-                    new DetailsTextItem {
+        return
+        [
+            new DetailsSection
+            {
+                Items =
+                [
+                    new DetailsTextItem
+                    {
                         Title = "Created",
-                        Value = Resource.CreationTimestamp().ToString()
+                        Value = Resource.CreationTimestamp().ToString(),
                     },
-                    new DetailsTextItem {
-                        Title = "Name",
-                        Value = Resource.Name()
-                    },
-                    new DetailsLinkItem {
+                    new DetailsTextItem { Title = "Name", Value = Resource.Name() },
+                    new DetailsLinkItem
+                    {
                         Title = "Namespace",
                         ResourceName = Resource.Namespace(),
-                        ResourceType = ResourceType.Namespace
+                        ResourceType = ResourceType.Namespace,
                     },
-                    new DetailsCollectionItem {
+                    new DetailsCollectionItem
+                    {
                         Title = "Annotations",
-                        Items = [.. Resource.Metadata.Annotations?.Select(a => new DetailsCollectionItemElement { Value = $"{a.Key}={a.Value}" }) ?? []]
-                    }
-                ]
-            }
+                        Items =
+                        [
+                            .. Resource.Metadata.Annotations?.Select(
+                                a => new DetailsCollectionItemElement
+                                {
+                                    Value = $"{a.Key}={a.Value}",
+                                }
+                            ) ?? [],
+                        ],
+                    },
+                ],
+            },
         ];
     }
 
@@ -162,7 +194,11 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
             }
             else
             {
-                return GetMeaningfulValues([totalDays, hours, duration.Minutes], ["d", "h", "m"], separator);
+                return GetMeaningfulValues(
+                    [totalDays, hours, duration.Minutes],
+                    ["d", "h", "m"],
+                    separator
+                );
             }
         }
 
@@ -176,7 +212,11 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
             }
             else
             {
-                return GetMeaningfulValues([totalDays, duration.Hours, duration.Minutes], ["d", "h", "m"], separator);
+                return GetMeaningfulValues(
+                    [totalDays, duration.Hours, duration.Minutes],
+                    ["d", "h", "m"],
+                    separator
+                );
             }
         }
         else if (totalYears < 8)
@@ -196,10 +236,18 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
         var remainingDays = totalDays - (int)(totalYears * 365.25);
         var remainingHours = duration.Hours;
         var remainingMinutes = duration.Minutes;
-        return GetMeaningfulValues([totalYears, remainingDays, remainingHours, remainingMinutes], ["y", "d", "h", "m"], separator);
+        return GetMeaningfulValues(
+            [totalYears, remainingDays, remainingHours, remainingMinutes],
+            ["y", "d", "h", "m"],
+            separator
+        );
     }
 
-    private static string GetMeaningfulValues(int[] values, string[] suffixes, string separator = " ")
+    private static string GetMeaningfulValues(
+        int[] values,
+        string[] suffixes,
+        string separator = " "
+    )
     {
         var parts = new List<string>();
         for (int i = 0; i < values.Length && i < suffixes.Length; i++)

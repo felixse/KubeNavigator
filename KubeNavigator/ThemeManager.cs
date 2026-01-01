@@ -1,11 +1,11 @@
-using KubeNavigator.Services;
-using KubeNavigator.Model.TerminalMessages;
-using KubeNavigator.Views;
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using KubeNavigator.Model.TerminalMessages;
+using KubeNavigator.Services;
+using KubeNavigator.Views;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
 using Windows.UI.ViewManagement;
 
 namespace KubeNavigator;
@@ -15,7 +15,7 @@ public class ThemeManager
     public enum EffectiveTheme
     {
         Light,
-        Dark
+        Dark,
     }
 
     private readonly List<FrameworkElement> _themeTargets = [];
@@ -96,7 +96,7 @@ public class ThemeManager
             AppTheme.Light => ElementTheme.Light,
             AppTheme.Dark => ElementTheme.Dark,
             AppTheme.System => GetSystemTheme(),
-            _ => ElementTheme.Default
+            _ => ElementTheme.Default,
         };
     }
 
@@ -105,7 +105,7 @@ public class ThemeManager
         var effectiveTheme = theme == AppTheme.System ? GetSystemAppTheme() : theme;
         var themeMessage = new ThemeChanged
         {
-            Theme = effectiveTheme.ToString().ToLowerInvariant()
+            Theme = effectiveTheme.ToString().ToLowerInvariant(),
         };
 
         _dispatcherQueue.TryEnqueue(() =>

@@ -1,10 +1,11 @@
+using System;
 using KubeNavigator.Model;
 using KubeNavigator.Model.TerminalMessages;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.UI.Xaml.Controls;
-using System;
 
 namespace KubeNavigator.Views;
+
 public sealed partial class PodShellView : UserControl, IShelfItemView
 {
     public PodShellView(PodShellViewModel viewModel)
@@ -40,10 +41,10 @@ public sealed partial class PodShellView : UserControl, IShelfItemView
         var initMessage = new InitializeTerminal
         {
             Theme = ViewModel.ThemeManager.GetEffectiveTheme().ToString().ToLowerInvariant(),
-            ReadOnly = false
+            ReadOnly = false,
         };
         Terminal.SendMessage(initMessage);
-        
+
         await ViewModel.StartAsync();
     }
 

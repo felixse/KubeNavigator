@@ -1,4 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.WinUI;
 using k8s;
 using k8s.Models;
@@ -6,21 +12,19 @@ using KubeNavigator.Model;
 using KubeNavigator.Model.Helm;
 using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Resources;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels;
 
 public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEventSubscriber
 {
-    private readonly Dictionary<ResourceType, ObservableCollection<KubernetesResourceViewModel>> _resources = [];
+    private readonly Dictionary<
+        ResourceType,
+        ObservableCollection<KubernetesResourceViewModel>
+    > _resources = [];
 
     [ObservableProperty]
-    public partial ClusterStatus Status { get; private set; } = new ClusterStatus { Status = ConnectionStatus.Disconnected };
+    public partial ClusterStatus Status { get; private set; } =
+        new ClusterStatus { Status = ConnectionStatus.Disconnected };
 
     public ObservableCollection<INamespaceFilter> NamespaceFilters { get; } = [];
 
@@ -58,10 +62,17 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
             var secrets = await Context.GetResourceRepositoryAsync(ResourceType.Secret);
             secrets.AddSubscriber(this);
 
-            foreach (var secret in secrets.GetItems<V1Secret>().Where(s => s.Type == "helm.sh/release.v1"))
+            foreach (
+                var secret in secrets
+                    .GetItems<V1Secret>()
+                    .Where(s => s.Type == "helm.sh/release.v1")
+            )
             {
                 var helmRelease = HelmRelease.FromSecret(secret);
-                var existing = HelmReleases.FirstOrDefault(h => h.HelmRelease.Name == helmRelease.Name && h.HelmRelease.Namespace == helmRelease.Namespace);
+                var existing = HelmReleases.FirstOrDefault(h =>
+                    h.HelmRelease.Name == helmRelease.Name
+                    && h.HelmRelease.Namespace == helmRelease.Namespace
+                );
                 if (existing == null)
                 {
                     HelmReleases.Add(new HelmReleaseViewModel(helmRelease));
@@ -74,7 +85,11 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         }
     }
 
-    public ForwardedPortViewModel CreateForwardedPort(PodViewModel pod, V1ContainerPort port, int localPort)
+    public ForwardedPortViewModel CreateForwardedPort(
+        PodViewModel pod,
+        V1ContainerPort port,
+        int localPort
+    )
     {
         var forwardedPort = new ForwardedPortViewModel(this, pod, port, localPort);
         App.ForwardedPorts.Add(forwardedPort);
@@ -91,20 +106,37 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         pod.UpdateDetails();
     }
 
-    public CancellationTokenSource ForwardContainerPort(V1Pod pod, V1ContainerPort port, int localPort)
+    public CancellationTokenSource ForwardContainerPort(
+        V1Pod pod,
+        V1ContainerPort port,
+        int localPort
+    )
     {
         var cancellationTokenSource = new CancellationTokenSource();
-        Task.Run(async () => await Context.StartListenAsync(pod, port, localPort, cancellationTokenSource.Token), cancellationTokenSource.Token);
+        Task.Run(
+            async () =>
+                await Context.StartListenAsync(pod, port, localPort, cancellationTokenSource.Token),
+            cancellationTokenSource.Token
+        );
 
         return cancellationTokenSource;
     }
 
-    public async Task<ObservableCollection<KubernetesResourceViewModel>> GetResourcesAsync(ResourceType resourceType)
+    public async Task<ObservableCollection<KubernetesResourceViewModel>> GetResourcesAsync(
+        ResourceType resourceType
+    )
     {
-        if (!_resources.TryGetValue(resourceType, out ObservableCollection<KubernetesResourceViewModel>? value))
+        if (
+            !_resources.TryGetValue(
+                resourceType,
+                out ObservableCollection<KubernetesResourceViewModel>? value
+            )
+        )
         {
             var repository = await Context.GetResourceRepositoryAsync(resourceType);
-            var collection = new ObservableCollection<KubernetesResourceViewModel>(CreateResourceViewModelCollection(repository, resourceType));
+            var collection = new ObservableCollection<KubernetesResourceViewModel>(
+                CreateResourceViewModelCollection(repository, resourceType)
+            );
             value = collection;
             _resources.Add(resourceType, value);
         }
@@ -133,30 +165,52 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         repository.RemoveSubscriber(this);
     }
 
-    private IEnumerable<KubernetesResourceViewModel> CreateResourceViewModelCollection(IKubernetesResourceRepository resourceRepository, ResourceType resourceType)
+    private IEnumerable<KubernetesResourceViewModel> CreateResourceViewModelCollection(
+        IKubernetesResourceRepository resourceRepository,
+        ResourceType resourceType
+    )
     {
-        return resourceRepository.GetItems<IKubernetesObject<V1ObjectMeta>>().Select(r => CreateResourceViewModel(r, resourceType));
+        return resourceRepository
+            .GetItems<IKubernetesObject<V1ObjectMeta>>()
+            .Select(r => CreateResourceViewModel(r, resourceType));
     }
 
-    private KubernetesResourceViewModel CreateResourceViewModel(IKubernetesObject<V1ObjectMeta> resource, ResourceType resourceType)
+    private KubernetesResourceViewModel CreateResourceViewModel(
+        IKubernetesObject<V1ObjectMeta> resource,
+        ResourceType resourceType
+    )
     {
         return (resourceType.Group, resourceType.Version, resourceType.Plural) switch
         {
-            (V1Pod.KubeGroup, V1Pod.KubeApiVersion, V1Pod.KubePluralName) => new PodViewModel((V1Pod)resource, this),
+            (V1Pod.KubeGroup, V1Pod.KubeApiVersion, V1Pod.KubePluralName) => new PodViewModel(
+                (V1Pod)resource,
+                this
+            ),
             _ => new KubernetesResourceViewModel(resource, resourceType, this),
         };
     }
 
-    public async Task<KubernetesResourceViewModel?> GetResourceAsync(ResourceType resourceType, string name)
+    public async Task<KubernetesResourceViewModel?> GetResourceAsync(
+        ResourceType resourceType,
+        string name
+    )
     {
         var resources = await GetResourcesAsync(resourceType);
 
         return resources.FirstOrDefault(r => r.Name == name);
     }
 
-    public async Task DeleteResourcesAsync(ResourceType resourceType, IReadOnlyCollection<KubernetesResourceViewModel> resources)
+    public async Task DeleteResourcesAsync(
+        ResourceType resourceType,
+        IReadOnlyCollection<KubernetesResourceViewModel> resources
+    )
     {
-        var confirmed = await App.WindowManager.ActiveWindow.UserConfirmationService.ConfirmResourceDeletionAsync(resourceType, resources.Select(r => r.Name), Name);
+        var confirmed =
+            await App.WindowManager.ActiveWindow.UserConfirmationService.ConfirmResourceDeletionAsync(
+                resourceType,
+                resources.Select(r => r.Name),
+                Name
+            );
         if (!confirmed)
         {
             return;
@@ -165,7 +219,11 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         await Context.DeleteResourcesAsync(resourceType, resources.Select(r => r.Resource));
     }
 
-    public async Task OnResourceEvent(KubernetesResourceEvent resourceEvent, ResourceType resourceType, IKubernetesObject<V1ObjectMeta> resource)
+    public async Task OnResourceEvent(
+        KubernetesResourceEvent resourceEvent,
+        ResourceType resourceType,
+        IKubernetesObject<V1ObjectMeta> resource
+    )
     {
         var collection = await GetResourcesAsync(resourceType);
 
@@ -200,7 +258,9 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 }
                 else if (resourceEvent == KubernetesResourceEvent.Deleted)
                 {
-                    var existing = NamespaceFilters.FirstOrDefault(n => n is NamespaceFilter nf && nf.Name == @namespace.Metadata.Name);
+                    var existing = NamespaceFilters.FirstOrDefault(n =>
+                        n is NamespaceFilter nf && nf.Name == @namespace.Metadata.Name
+                    );
                     if (existing != null)
                     {
                         NamespaceFilters.Remove(existing);
@@ -211,12 +271,19 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                     Debug.WriteLine($"Unhandled namespace event: {resourceEvent}");
                 }
             }
-            else if (resourceType == ResourceType.Secret && resource is V1Secret secret && secret.Type == "helm.sh/release.v1")
+            else if (
+                resourceType == ResourceType.Secret
+                && resource is V1Secret secret
+                && secret.Type == "helm.sh/release.v1"
+            )
             {
                 if (resourceEvent == KubernetesResourceEvent.Added)
                 {
                     var helmRelease = HelmRelease.FromSecret(secret);
-                    var existing = HelmReleases.FirstOrDefault(h => h.HelmRelease.Name == helmRelease.Name && h.HelmRelease.Namespace == helmRelease.Namespace);
+                    var existing = HelmReleases.FirstOrDefault(h =>
+                        h.HelmRelease.Name == helmRelease.Name
+                        && h.HelmRelease.Namespace == helmRelease.Namespace
+                    );
                     if (existing == null)
                     {
                         HelmReleases.Add(new HelmReleaseViewModel(helmRelease));
@@ -230,11 +297,16 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 {
                     var helmRelease = HelmRelease.FromSecret(secret);
 
-                    var existingHelmRelease = HelmReleases.FirstOrDefault(h => h.HelmRelease.Name == helmRelease.Name && h.HelmRelease.Namespace == helmRelease.Namespace);
+                    var existingHelmRelease = HelmReleases.FirstOrDefault(h =>
+                        h.HelmRelease.Name == helmRelease.Name
+                        && h.HelmRelease.Namespace == helmRelease.Namespace
+                    );
 
                     if (existingHelmRelease != null)
                     {
-                        var existingRevision = existingHelmRelease.Revisions.FirstOrDefault(r => r.Version == helmRelease.Version);
+                        var existingRevision = existingHelmRelease.Revisions.FirstOrDefault(r =>
+                            r.Version == helmRelease.Version
+                        );
                         if (existingRevision != null)
                         {
                             if (existingHelmRelease.Revisions.Count == 1)
@@ -254,6 +326,5 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 }
             }
         });
-
     }
 }

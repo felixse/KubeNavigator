@@ -1,7 +1,8 @@
-﻿using Microsoft.UI.Xaml.Data;
-using System;
+﻿using System;
+using Microsoft.UI.Xaml.Data;
 
 namespace KubeNavigator.Converters;
+
 public partial class ToStringConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)

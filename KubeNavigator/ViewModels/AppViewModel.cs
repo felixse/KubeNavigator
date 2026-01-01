@@ -1,4 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using k8s;
 using k8s.KubeConfigModels;
@@ -6,9 +9,6 @@ using KubeNavigator.Model;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels.Resources;
 using Microsoft.UI.Dispatching;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace KubeNavigator.ViewModels;
 
@@ -34,7 +34,14 @@ public partial class AppViewModel : ObservableObject
 
     public LoggingService LoggingService { get; }
 
-    public AppViewModel(Func<IUserConfirmationService> userConfirmationServiceFactory, IWindowManager windowManager, SettingsViewModel settings, DispatcherQueue dispatcherQueue, ThemeManager themeManager, LoggingService loggingService)
+    public AppViewModel(
+        Func<IUserConfirmationService> userConfirmationServiceFactory,
+        IWindowManager windowManager,
+        SettingsViewModel settings,
+        DispatcherQueue dispatcherQueue,
+        ThemeManager themeManager,
+        LoggingService loggingService
+    )
     {
         _userConfirmationServiceFactory = userConfirmationServiceFactory;
         WindowManager = windowManager;
@@ -42,10 +49,19 @@ public partial class AppViewModel : ObservableObject
         DispatcherQueue = dispatcherQueue;
         ThemeManager = themeManager;
         LoggingService = loggingService;
-        var configContent = System.IO.File.ReadAllText(KubernetesClientConfiguration.KubeConfigDefaultLocation);
+        var configContent = System.IO.File.ReadAllText(
+            KubernetesClientConfiguration.KubeConfigDefaultLocation
+        );
         var config = KubernetesYaml.Deserialize<K8SConfiguration>(configContent); // todo move to service, make singleton
 
-        Clusters = [.. config.Contexts.Select(c => new ClusterViewModel(c.Name, this, new KubernetesContext(c.Name, loggingService.LoggerFactory)))];
+        Clusters =
+        [
+            .. config.Contexts.Select(c => new ClusterViewModel(
+                c.Name,
+                this,
+                new KubernetesContext(c.Name, loggingService.LoggerFactory)
+            )),
+        ];
 
         MainWindow = new WindowViewModel(this, _userConfirmationServiceFactory());
     }

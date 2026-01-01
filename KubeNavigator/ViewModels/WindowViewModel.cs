@@ -1,18 +1,20 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using KubeNavigator.Messages;
 using KubeNavigator.Model;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Shelf;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels;
 
-public partial class WindowViewModel : ObservableRecipient,
-    IRecipient<ShowNotificationMessage>, IWindow
+public partial class WindowViewModel
+    : ObservableRecipient,
+        IRecipient<ShowNotificationMessage>,
+        IWindow
 {
     public IUserConfirmationService UserConfirmationService { get; }
 
@@ -47,18 +49,27 @@ public partial class WindowViewModel : ObservableRecipient,
         Notifications.Remove(notification);
     }
 
-    private void OnTabsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    private void OnTabsCollectionChanged(
+        object? sender,
+        System.Collections.Specialized.NotifyCollectionChangedEventArgs e
+    )
     {
         OnPropertyChanged(nameof(WorkspacesCount));
     }
 
-    partial void OnSelectedWorkspaceChanged(WorkspaceViewModel? oldValue, WorkspaceViewModel? newValue)
+    partial void OnSelectedWorkspaceChanged(
+        WorkspaceViewModel? oldValue,
+        WorkspaceViewModel? newValue
+    )
     {
         oldValue?.IsActive = false;
         newValue?.IsActive = true;
     }
 
-    public async Task OpenInNewWorkspaceAsync(INavigationTarget? navigationTarget, ClusterViewModel cluster)
+    public async Task OpenInNewWorkspaceAsync(
+        INavigationTarget? navigationTarget,
+        ClusterViewModel cluster
+    )
     {
         var workspace = new WorkspaceViewModel(this);
         await workspace.SetContextAsync(cluster);
@@ -67,7 +78,9 @@ public partial class WindowViewModel : ObservableRecipient,
         SelectedWorkspace = workspace;
         if (navigationTarget != null)
         {
-            workspace.SelectedItem = workspace.NavigationGroups.SelectMany(c => c.Items).FirstOrDefault(r => r.Title == navigationTarget.Title);
+            workspace.SelectedItem = workspace
+                .NavigationGroups.SelectMany(c => c.Items)
+                .FirstOrDefault(r => r.Title == navigationTarget.Title);
         }
     }
 
@@ -75,12 +88,19 @@ public partial class WindowViewModel : ObservableRecipient,
     {
         App.DispatcherQueue.TryEnqueue(() =>
         {
-            Notifications.Add(new NotificationViewModel(this, dismissAfter: message.Severity == NotificationSeverity.Success ? TimeSpan.FromSeconds(5) : null)
-            {
-                Title = message.Title,
-                Message = message.Message,
-                Severity = message.Severity,
-            });
+            Notifications.Add(
+                new NotificationViewModel(
+                    this,
+                    dismissAfter: message.Severity == NotificationSeverity.Success
+                        ? TimeSpan.FromSeconds(5)
+                        : null
+                )
+                {
+                    Title = message.Title,
+                    Message = message.Message,
+                    Severity = message.Severity,
+                }
+            );
         });
     }
 }

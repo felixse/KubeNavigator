@@ -36,7 +36,7 @@ public partial class DetailsContentTemplateSelector : DataTemplateSelector
             DetailsDictionaryItem => DictionaryTemplate,
             DetailsMarkdownItem => MarkdownTemplate,
             DetailsConditionsItem => ConditionsTemplate,
-            _ => TextTemplate
+            _ => TextTemplate,
         };
 
         return template ?? base.SelectTemplateCore(item);

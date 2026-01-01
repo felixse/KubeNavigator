@@ -1,5 +1,3 @@
 ﻿namespace KubeNavigator.Model.Details;
 
-public interface IDetailsItem
-{
-}
+public interface IDetailsItem { }

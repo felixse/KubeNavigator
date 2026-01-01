@@ -1,5 +1,3 @@
 ﻿namespace KubeNavigator.ViewModels;
 
-public interface INamespaceFilter
-{
-}
+public interface INamespaceFilter { }

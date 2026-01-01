@@ -1,12 +1,12 @@
-﻿using KubeNavigator.ViewModels;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using KubeNavigator.ViewModels;
 using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.Views;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.Converters;
 
@@ -22,10 +22,7 @@ public partial class NavigationTargetToViewConverter : IValueConverter
             if (!views.TryGetValue(resourceTypeList, out UserControl? view))
             {
                 Task.Run(async () => await resourceTypeList.ActivateAsync());
-                view = new ItemListView
-                {
-                    ViewModel = resourceTypeList
-                };
+                view = new ItemListView { ViewModel = resourceTypeList };
                 views.Add(resourceTypeList, view);
             }
 
@@ -36,17 +33,19 @@ public partial class NavigationTargetToViewConverter : IValueConverter
         }
         else if (value is PinnedNavigationTargetViewModel pinnedResourceViewModel)
         {
-            return Convert(pinnedResourceViewModel.NavigationTarget, targetType, parameter, language);
+            return Convert(
+                pinnedResourceViewModel.NavigationTarget,
+                targetType,
+                parameter,
+                language
+            );
         }
         else if (value is HelmReleasesViewModel helmReleases)
         {
             if (!views.TryGetValue(helmReleases, out UserControl? view))
             {
                 Task.Run(async () => await helmReleases.ActivateAsync());
-                view = new ItemListView
-                {
-                    ViewModel = helmReleases
-                };
+                view = new ItemListView { ViewModel = helmReleases };
                 views.Add(helmReleases, view);
             }
 
@@ -59,10 +58,7 @@ public partial class NavigationTargetToViewConverter : IValueConverter
         {
             if (!views.TryGetValue(settingsViewModel, out UserControl? view))
             {
-                view = new SettingsView
-                {
-                    ViewModel = settingsViewModel
-                };
+                view = new SettingsView { ViewModel = settingsViewModel };
                 views.Add(settingsViewModel, view);
             }
 
@@ -75,10 +71,7 @@ public partial class NavigationTargetToViewConverter : IValueConverter
         {
             if (!views.TryGetValue(clusterList, out UserControl? view))
             {
-                view = new ClusterListView
-                {
-                    ViewModel = clusterList
-                };
+                view = new ClusterListView { ViewModel = clusterList };
                 views.Add(clusterList, view);
             }
 
@@ -91,10 +84,7 @@ public partial class NavigationTargetToViewConverter : IValueConverter
         {
             if (!views.TryGetValue(portForwards, out UserControl? view))
             {
-                view = new PortForwardsView
-                {
-                    ViewModel = portForwards
-                };
+                view = new PortForwardsView { ViewModel = portForwards };
                 views.Add(portForwards, view);
             }
 
@@ -105,10 +95,7 @@ public partial class NavigationTargetToViewConverter : IValueConverter
         }
         else if (value is TodoViewModel)
         {
-            return new TextBlock
-            {
-                Text = "TODO"
-            };
+            return new TextBlock { Text = "TODO" };
         }
 
         return null!;

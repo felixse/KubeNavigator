@@ -1,7 +1,7 @@
+using System.Threading.Tasks;
 using CommunityToolkit.WinUI;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.UI.Xaml.Controls;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.Views;
 

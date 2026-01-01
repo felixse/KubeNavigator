@@ -1,7 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace KubeNavigator.Model.Details;
@@ -20,7 +20,10 @@ public partial class DetailsDictionaryItem : ObservableObject, IDetailsItem
     [RelayCommand]
     public void CopyAsJson()
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(Items.ToDictionary(x => x.Key, x => x.Value), SerializerContext.Default.DetailsDictionaryEntry);
+        var json = System.Text.Json.JsonSerializer.Serialize(
+            Items.ToDictionary(x => x.Key, x => x.Value),
+            SerializerContext.Default.DetailsDictionaryEntry
+        );
         var package = new DataPackage();
         package.SetText(json);
         Clipboard.SetContent(package);

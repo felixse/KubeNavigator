@@ -1,14 +1,14 @@
-﻿using KubeNavigator.Model;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using KubeNavigator.Model;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels;
 using KubeNavigator.Views;
 using KubeNavigator.Windows;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
 
 namespace KubeNavigator;
 
@@ -20,23 +20,27 @@ public partial class App : Application, IWindowManager
     private ThemeManager? _themeManager;
     private LoggingService? _loggingService;
 
-    public IWindow ActiveWindow => _activeWindow switch
-    {
-        MainWindow mainWindow => mainWindow.ViewModel,
-        DetailWindow detailsWindow => detailsWindow.ViewModel,
-        _ => throw new NotImplementedException()
-    };
+    public IWindow ActiveWindow =>
+        _activeWindow switch
+        {
+            MainWindow mainWindow => mainWindow.ViewModel,
+            DetailWindow detailsWindow => detailsWindow.ViewModel,
+            _ => throw new NotImplementedException(),
+        };
 
     public App()
     {
         this.InitializeComponent();
         UnhandledException += App_UnhandledException;
-        
+
         _settingsService = new SettingsService();
         _loggingService = new LoggingService();
     }
 
-    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    private void App_UnhandledException(
+        object sender,
+        Microsoft.UI.Xaml.UnhandledExceptionEventArgs e
+    )
     {
         Serilog.Log.Fatal(e.Exception, "Unhandled exception occurred");
     }
@@ -44,24 +48,31 @@ public partial class App : Application, IWindowManager
     protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         await _settingsService.LoadAsync();
-        
+
         var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         _themeManager = new ThemeManager(_settingsService, dispatcherQueue);
-        
+
         Serilog.Log.Information("KubeNavigator starting");
-        
+
         var settings = new SettingsViewModel(_settingsService);
-        var app = new AppViewModel(() => new ConfirmationDialogService(_themeManager), this, settings, dispatcherQueue, _themeManager, _loggingService!);
+        var app = new AppViewModel(
+            () => new ConfirmationDialogService(_themeManager),
+            this,
+            settings,
+            dispatcherQueue,
+            _themeManager,
+            _loggingService!
+        );
         app.DetailWindowViewModels.CollectionChanged += OnDetailWindowsCollectionchanged;
         var mainWindow = new MainWindow(app.MainWindow);
         var bar = DispatcherQueue.GetForCurrentThread();
         mainWindow.Closed += OnWindowClosed;
         mainWindow.Activated += OnWindowActivated;
         _windows.Add(mainWindow);
-        
+
         RegisterWindowForTheming(mainWindow);
         mainWindow.Activate();
-        
+
         Serilog.Log.Information("KubeNavigator started successfully");
     }
 
@@ -73,7 +84,10 @@ public partial class App : Application, IWindowManager
         }
     }
 
-    private void OnDetailWindowsCollectionchanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void OnDetailWindowsCollectionchanged(
+        object? sender,
+        NotifyCollectionChangedEventArgs e
+    )
     {
         foreach (var detail in e.NewItems?.Cast<DetailWindowViewModel>() ?? [])
         {
@@ -81,7 +95,7 @@ public partial class App : Application, IWindowManager
             window.Closed += OnWindowClosed;
             window.Activated += OnWindowActivated;
             _windows.Add(window);
-            
+
             RegisterWindowForTheming(window);
             window.Activate();
         }
@@ -114,7 +128,7 @@ public partial class App : Application, IWindowManager
             window.Closed -= OnWindowClosed;
             window.Activated -= OnWindowActivated;
             _windows.Remove(window);
-            
+
             if (window.Content is FrameworkElement content)
             {
                 _themeManager?.UnregisterThemeTarget(content);

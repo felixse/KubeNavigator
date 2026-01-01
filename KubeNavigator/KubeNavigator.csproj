@@ -8,13 +8,13 @@
     <Platforms>x64;ARM64</Platforms>
     <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
     <PublishProfile>win-$(Platform).pubxml</PublishProfile>
-	<PublishAot>true</PublishAot>
+    <PublishAot>true</PublishAot>
     <UseWinUI>true</UseWinUI>
-	<WinUISDKReferences>false</WinUISDKReferences>
+    <WinUISDKReferences>false</WinUISDKReferences>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
-	<LangVersion>preview</LangVersion>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>preview</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="ApplicationResources.xaml" />
@@ -41,7 +41,7 @@
     <Content Include="Assets\Square44x44Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-	<Content Include="WebViews\Terminal\dist\index.html" />
+    <Content Include="WebViews\Terminal\dist\index.html" />
   </ItemGroup>
 
   <ItemGroup>
@@ -58,15 +58,27 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CliWrap" Version="3.10.0" />
-    <PackageReference Include="CommunityToolkit.Labs.WinUI.Controls.DataTable" Version="0.1.251217-build.2433" />
-    <PackageReference Include="CommunityToolkit.Labs.WinUI.Controls.MarkdownTextBlock" Version="0.1.251217-build.2433" />
+    <PackageReference
+      Include="CommunityToolkit.Labs.WinUI.Controls.DataTable"
+      Version="0.1.251217-build.2433"
+    />
+    <PackageReference
+      Include="CommunityToolkit.Labs.WinUI.Controls.MarkdownTextBlock"
+      Version="0.1.251217-build.2433"
+    />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="CommunityToolkit.WinUI.Behaviors" Version="8.2.251219" />
     <PackageReference Include="CommunityToolkit.WinUI.Collections" Version="8.2.251219" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.HeaderedControls" Version="8.2.251219" />
+    <PackageReference
+      Include="CommunityToolkit.WinUI.Controls.HeaderedControls"
+      Version="8.2.251219"
+    />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.251219" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.2.251219" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
+    <PackageReference
+      Include="CommunityToolkit.WinUI.Controls.SettingsControls"
+      Version="8.2.251219"
+    />
     <PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.2.251219" />
     <PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.2.251219" />
     <PackageReference Include="KubernetesClient" Version="18.0.13" />

@@ -1,10 +1,10 @@
+using System;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels.Resources;
 using Serilog.Events;
-using System;
-using System.Threading.Tasks;
 
 namespace KubeNavigator.ViewModels.Shelf;
 
@@ -54,11 +54,11 @@ public partial class ApplicationLogViewModel : ObservableObject, IShelfItem
             LogEventLevel.Warning => "[WRN]",
             LogEventLevel.Error => "[ERR]",
             LogEventLevel.Fatal => "[FTL]",
-            _ => "[???]"
+            _ => "[???]",
         };
         var message = logEvent.RenderMessage();
         var exception = logEvent.Exception != null ? $"\n{logEvent.Exception}" : string.Empty;
-        
+
         var levelColor = logEvent.Level switch
         {
             LogEventLevel.Verbose => "\x1b[90m",
@@ -67,9 +67,9 @@ public partial class ApplicationLogViewModel : ObservableObject, IShelfItem
             LogEventLevel.Warning => "\x1b[33m",
             LogEventLevel.Error => "\x1b[31m",
             LogEventLevel.Fatal => "\x1b[35m",
-            _ => "\x1b[0m"
+            _ => "\x1b[0m",
         };
-        
+
         return $"\x1b[90m{timestamp}\x1b[0m {levelColor}{level}\x1b[0m {message}{exception}\r\n";
     }
 

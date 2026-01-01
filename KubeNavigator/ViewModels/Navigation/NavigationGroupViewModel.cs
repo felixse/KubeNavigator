@@ -1,13 +1,17 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace KubeNavigator.ViewModels.Navigation;
 
 public partial class NavigationGroupViewModel : ObservableObject
 {
-    public NavigationGroupViewModel(string name, string icon, IEnumerable<INavigationTarget> resources)
+    public NavigationGroupViewModel(
+        string name,
+        string icon,
+        IEnumerable<INavigationTarget> resources
+    )
     {
         Name = name;
         Icon = icon;

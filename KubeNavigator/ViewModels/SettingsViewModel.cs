@@ -1,9 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using KubeNavigator.Services;
-using KubeNavigator.ViewModels.Navigation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using KubeNavigator.Services;
+using KubeNavigator.ViewModels.Navigation;
 
 namespace KubeNavigator.ViewModels;
 
@@ -28,7 +28,6 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
 
     public Task OnNavigatedTo()
     {
-
         return Task.CompletedTask;
     }
 

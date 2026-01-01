@@ -1,8 +1,8 @@
-﻿using KubeNavigator.ViewModels.Shelf;
+﻿using System;
+using System.Collections.Generic;
+using KubeNavigator.ViewModels.Shelf;
 using KubeNavigator.Views;
 using Microsoft.UI.Xaml.Data;
-using System;
-using System.Collections.Generic;
 
 namespace KubeNavigator.Converters;
 
@@ -20,10 +20,14 @@ public partial class ShelfItemToViewConverter : IValueConverter
                 view = viewModel switch
                 {
                     PodLogsViewModel logViewModel => new PodLogView(logViewModel),
-                    EditKubernetesResourceViewModel editViewModel => new ResourceEditView(editViewModel),
+                    EditKubernetesResourceViewModel editViewModel => new ResourceEditView(
+                        editViewModel
+                    ),
                     PodShellViewModel shellViewModel => new PodShellView(shellViewModel),
-                    ApplicationLogViewModel appLogViewModel => new ApplicationLogView(appLogViewModel),
-                    _ => throw new NotImplementedException()
+                    ApplicationLogViewModel appLogViewModel => new ApplicationLogView(
+                        appLogViewModel
+                    ),
+                    _ => throw new NotImplementedException(),
                 };
 
                 views.Add(viewModel, view);
@@ -31,7 +35,6 @@ public partial class ShelfItemToViewConverter : IValueConverter
 
             return view;
         }
-
 
         return null!;
     }

@@ -22,6 +22,8 @@ public partial class DetailsContentTemplateSelector : DataTemplateSelector
 
     public DataTemplate? MarkdownTemplate { get; set; }
 
+    public DataTemplate? ConditionsTemplate { get; set; }
+
     protected override DataTemplate SelectTemplateCore(object item)
     {
         var template = item switch
@@ -33,6 +35,7 @@ public partial class DetailsContentTemplateSelector : DataTemplateSelector
             DetailsTableItem => TableTemplate,
             DetailsDictionaryItem => DictionaryTemplate,
             DetailsMarkdownItem => MarkdownTemplate,
+            DetailsConditionsItem => ConditionsTemplate,
             _ => TextTemplate
         };
 

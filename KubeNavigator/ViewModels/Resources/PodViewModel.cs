@@ -138,12 +138,12 @@ public partial class PodViewModel : KubernetesResourceViewModel
             Value = Status,
             ValueColor = Status switch
             {
-                "Running" => DetailsTextItem.Color.Success,
-                "Succeeded" => DetailsTextItem.Color.Success,
-                "Failed" => DetailsTextItem.Color.Error,
-                "Pending" => DetailsTextItem.Color.Warning,
-                "Terminating" => DetailsTextItem.Color.Default,
-                _ => DetailsTextItem.Color.Default
+                "Running" => Category.Success,
+                "Succeeded" => Category.Success,
+                "Failed" => Category.Error,
+                "Pending" => Category.Warning,
+                "Terminating" => Category.Default,
+                _ => Category.Default
             }
 
         };
@@ -187,10 +187,10 @@ public partial class PodViewModel : KubernetesResourceViewModel
             Value = Pod.Status.QosClass,
         };
 
-        yield return new DetailsCollectionItem
+        yield return new DetailsConditionsItem
         {
             Title = "Conditions",
-            Items = [.. Pod.Status.Conditions?.Select(c => new DetailsCollectionItemElement { Value = $"{c.Type}: {c.Status}" }) ?? []]
+            Items = [.. Pod.Status.Conditions?.Select(c => new DetailsConditionsElement { Type = c.Type, Status = c.Status, Message = c.Message, Reason = c.Reason, LastHeartbeatTime = c.LastProbeTime, LastTransitionTime = c.LastTransitionTime }) ?? []]
         };
 
         yield return new DetailsCollectionItem
@@ -234,9 +234,9 @@ public partial class PodViewModel : KubernetesResourceViewModel
             Title = "Status",
             ValueColor = status.State switch
             {
-                V1ContainerState { Running: V1ContainerStateRunning } => DetailsTextItem.Color.Success,
-                V1ContainerState { Terminated: V1ContainerStateTerminated } => DetailsTextItem.Color.Error,
-                _ => DetailsTextItem.Color.Warning
+                V1ContainerState { Running: V1ContainerStateRunning } => Category.Success,
+                V1ContainerState { Terminated: V1ContainerStateTerminated } => Category.Error,
+                _ => Category.Warning
             },
             Value = statusText
         };

@@ -65,8 +65,8 @@
               <TextBlock VerticalAlignment="Center" Text="Active" />
               <StackPanel Orientation="Horizontal" Spacing="8">
                 <HyperlinkButton
-                  Content="Open in Browser"
                   Command="{x:Bind OpenInBrowserCommand}"
+                  Content="Open in Browser"
                 />
                 <AppBarButton Width="48" Height="48" Command="{x:Bind StopCommand}">
                   <AppBarButton.Icon>

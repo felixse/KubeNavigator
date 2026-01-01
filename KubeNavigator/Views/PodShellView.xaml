@@ -19,7 +19,7 @@
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
-      <Button Grid.Column="0" Content="Clear" Click="ClearButton_Click" />
+      <Button Grid.Column="0" Click="ClearButton_Click" Content="Clear" />
     </Grid>
     <local:TerminalView x:Name="Terminal" Grid.Row="1" />
   </Grid>

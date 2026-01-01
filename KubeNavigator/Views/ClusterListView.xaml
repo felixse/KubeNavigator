@@ -108,8 +108,8 @@
               <SplitButton Click="SplitButton_Click" Content="Open">
                 <SplitButton.Flyout>
                   <MenuFlyout>
-                    <MenuFlyoutItem Text="Open" Click="OnOpen" />
-                    <MenuFlyoutItem Text="Open in new Tab" Click="OnOpenInNewTab" />
+                    <MenuFlyoutItem Click="OnOpen" Text="Open" />
+                    <MenuFlyoutItem Click="OnOpenInNewTab" Text="Open in new Tab" />
                   </MenuFlyout>
                 </SplitButton.Flyout>
               </SplitButton>

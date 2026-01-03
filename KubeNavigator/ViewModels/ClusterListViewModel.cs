@@ -1,8 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
-using KubeNavigator.Messages;
 using KubeNavigator.ViewModels.Navigation;
 
 namespace KubeNavigator.ViewModels;
@@ -30,13 +28,10 @@ public partial class ClusterListViewModel : ObservableObject, INavigationTarget
         }
         catch (System.Exception e)
         {
-            WeakReferenceMessenger.Default.Send(
-                new ShowNotificationMessage
-                {
-                    Message = $"Failed to connect to cluster: {e.Message}",
-                    Title = "Error",
-                    Severity = NotificationSeverity.Error,
-                }
+            Workspace.Window.ShowMessage(
+                "Error",
+                $"Failed to connect to cluster: {e.Message}",
+                NotificationSeverity.Error
             );
         }
     }

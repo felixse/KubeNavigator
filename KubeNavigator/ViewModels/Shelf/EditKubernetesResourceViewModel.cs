@@ -5,9 +5,7 @@ using CliWrap;
 using CliWrap.Buffered;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using k8s.Models;
-using KubeNavigator.Messages;
 using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.ViewModels.Shelf;
@@ -89,13 +87,10 @@ public partial class EditKubernetesResourceViewModel : ObservableObject, IShelfI
 
             File.Delete(filePath);
 
-            WeakReferenceMessenger.Default.Send(
-                new ShowNotificationMessage
-                {
-                    Message = $"{Resource.Resource.Kind} {Resource.Name} has been updated",
-                    Title = "Success",
-                    Severity = NotificationSeverity.Success,
-                }
+            Resource.Cluster.App.WindowManager.ActiveWindow.ShowMessage(
+                "Success",
+                $"{Resource.Resource.Kind} {Resource.Name} has been updated",
+                NotificationSeverity.Success
             );
         }
     }

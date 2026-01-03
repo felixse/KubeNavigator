@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -25,6 +26,8 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
 
     [ObservableProperty]
     public partial IShelfItem? SelectedShelfItem { get; set; }
+
+    public ObservableCollection<NotificationViewModel> Notifications { get; set; } = [];
 
     public DetailWindowViewModel(
         KubernetesResourceViewModel resource,
@@ -68,5 +71,30 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
 
         ShelfItems.Add(item);
         SelectedShelfItem = item;
+    }
+
+    public void ShowMessage(string title, string message, NotificationSeverity severity)
+    {
+        App.DispatcherQueue.TryEnqueue(() =>
+        {
+            Notifications.Add(
+                new NotificationViewModel(
+                    this,
+                    dismissAfter: severity == NotificationSeverity.Success
+                        ? TimeSpan.FromSeconds(5)
+                        : null
+                )
+                {
+                    Title = title,
+                    Message = message,
+                    Severity = severity,
+                }
+            );
+        });
+    }
+
+    public void DismissNotification(NotificationViewModel notification)
+    {
+        Notifications.Remove(notification);
     }
 }

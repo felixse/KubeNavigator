@@ -6,9 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI;
-using KubeNavigator.Messages;
 using KubeNavigator.Model;
 using KubeNavigator.ViewModels.Resources;
 using Nito.AsyncEx;
@@ -76,13 +74,10 @@ public partial class PodShellViewModel : ObservableObject, IShelfItem
 
                 if (!exitedByUser)
                 {
-                    WeakReferenceMessenger.Default.Send(
-                        new ShowNotificationMessage
-                        {
-                            Message = _lastLine ?? "Unknown error",
-                            Title = "Exec Session closed",
-                            Severity = NotificationSeverity.Error,
-                        }
+                    Cluster.App.WindowManager.ActiveWindow.ShowMessage(
+                        "Exec session closed",
+                        _lastLine ?? "Unknown error",
+                        NotificationSeverity.Error
                     );
                 }
 

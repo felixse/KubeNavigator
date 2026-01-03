@@ -2,7 +2,6 @@ using CommunityToolkit.WinUI.Helpers;
 using KubeNavigator.Pages;
 using KubeNavigator.ViewModels;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Windows.UI;
 
 namespace KubeNavigator.Windows;

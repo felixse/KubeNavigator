@@ -1,13 +1,12 @@
 ﻿using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using KubeNavigator.Messages;
 
 namespace KubeNavigator.ViewModels;
 
 public partial class NotificationViewModel : ObservableObject
 {
-    public NotificationViewModel(WindowViewModel window, TimeSpan? dismissAfter)
+    public NotificationViewModel(IWindow window, TimeSpan? dismissAfter)
     {
         Window = window;
         if (dismissAfter != null)
@@ -20,7 +19,7 @@ public partial class NotificationViewModel : ObservableObject
         }
     }
 
-    public WindowViewModel Window { get; }
+    public IWindow Window { get; }
 
     [RelayCommand]
     public void Dismiss()

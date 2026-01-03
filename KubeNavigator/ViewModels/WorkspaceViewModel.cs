@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
@@ -16,7 +15,7 @@ using KubeNavigator.ViewModels.Shelf;
 
 namespace KubeNavigator.ViewModels;
 
-public partial class WorkspaceViewModel : ObservableRecipient, IShelfHost
+public partial class WorkspaceViewModel : ObservableObject, IShelfHost
 {
     private ObservableCollection<KubernetesResourceViewModel>? _customResourceDefinitions;
 

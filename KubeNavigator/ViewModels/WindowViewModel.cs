@@ -3,18 +3,21 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
-using KubeNavigator.Messages;
 using KubeNavigator.Model;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Shelf;
 
 namespace KubeNavigator.ViewModels;
 
-public partial class WindowViewModel
-    : ObservableRecipient,
-        IRecipient<ShowNotificationMessage>,
-        IWindow
+public enum NotificationSeverity
+{
+    Success,
+    Info,
+    Warning,
+    Error,
+}
+
+public partial class WindowViewModel : ObservableObject, IWindow
 {
     public IUserConfirmationService UserConfirmationService { get; }
 
@@ -35,7 +38,6 @@ public partial class WindowViewModel
     {
         App = app;
         UserConfirmationService = userConfirmationService;
-        Messenger.RegisterAll(this);
 
         Notifications = [];
         Workspaces = [new WorkspaceViewModel(this)];
@@ -57,15 +59,6 @@ public partial class WindowViewModel
         OnPropertyChanged(nameof(WorkspacesCount));
     }
 
-    partial void OnSelectedWorkspaceChanged(
-        WorkspaceViewModel? oldValue,
-        WorkspaceViewModel? newValue
-    )
-    {
-        oldValue?.IsActive = false;
-        newValue?.IsActive = true;
-    }
-
     public async Task OpenInNewWorkspaceAsync(
         INavigationTarget? navigationTarget,
         ClusterViewModel cluster
@@ -84,21 +77,21 @@ public partial class WindowViewModel
         }
     }
 
-    void IRecipient<ShowNotificationMessage>.Receive(ShowNotificationMessage message)
+    public void ShowMessage(string title, string message, NotificationSeverity severity)
     {
         App.DispatcherQueue.TryEnqueue(() =>
         {
             Notifications.Add(
                 new NotificationViewModel(
                     this,
-                    dismissAfter: message.Severity == NotificationSeverity.Success
+                    dismissAfter: severity == NotificationSeverity.Success
                         ? TimeSpan.FromSeconds(5)
                         : null
                 )
                 {
-                    Title = message.Title,
-                    Message = message.Message,
-                    Severity = message.Severity,
+                    Title = title,
+                    Message = message,
+                    Severity = severity,
                 }
             );
         });

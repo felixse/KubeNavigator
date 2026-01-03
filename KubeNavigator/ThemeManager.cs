@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using KubeNavigator.Model.TerminalMessages;
 using KubeNavigator.Services;
 using KubeNavigator.Views;

@@ -70,4 +70,5 @@
   <toolkitConverters:CollectionVisibilityConverter x:Key="EmptyToCollapsedConverter" />
   <converters:ToStringConverter x:Key="ToStringConverter" />
   <converters:ShelfItemToViewConverter x:Key="ShelfItemToViewConverter" />
+  <converters:NotificationSeverityConverter x:Key="NotificationSeverityConverter" />
 </ResourceDictionary>

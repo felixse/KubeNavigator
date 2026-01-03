@@ -662,7 +662,6 @@
       </Style>
       <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter" MinimumCount="2" />
       <converters:WorkspaceViewModelToViewConverter x:Key="TabViewModelToViewConverter" />
-      <converters:NotificationSeverityConverter x:Key="NotificationSeverityConverter" />
     </ResourceDictionary>
   </Page.Resources>
   <Grid>

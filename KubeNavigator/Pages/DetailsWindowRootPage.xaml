@@ -76,6 +76,28 @@
           Content="{x:Bind ViewModel.SelectedShelfItem, Mode=OneWay, Converter={StaticResource ShelfItemToViewConverter}}"
         />
       </Border>
+      <ItemsControl
+        Grid.Row="0"
+        Grid.RowSpan="2"
+        ItemsSource="{x:Bind ViewModel.Notifications, Mode=OneWay}"
+        ScrollViewer.VerticalScrollBarVisibility="Auto"
+        ScrollViewer.VerticalScrollMode="Auto"
+      >
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="viewmodels:NotificationViewModel">
+            <InfoBar
+              Title="{x:Bind Title}"
+              Width="400"
+              Margin="16"
+              HorizontalAlignment="Right"
+              CloseButtonCommand="{x:Bind DismissCommand}"
+              IsOpen="True"
+              Message="{x:Bind Message}"
+              Severity="{x:Bind Severity, Converter={StaticResource NotificationSeverityConverter}}"
+            />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
     </Grid>
   </Grid>
 </Page>

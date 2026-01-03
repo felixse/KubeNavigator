@@ -147,6 +147,36 @@ public class KubernetesContext
         return _kubernetesService.OpenPodExecSessionAsync(pod, cancellationToken);
     }
 
+    public Task<string> GetResourceAsYamlAsync(
+        ResourceType resourceType,
+        string resourceName,
+        string? resourceNamespace = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return _kubernetesService.GetResourceAsYamlAsync(
+            resourceType,
+            resourceName,
+            resourceNamespace,
+            cancellationToken
+        );
+    }
+
+    public Task ApplyResourceFromYamlAsync(
+        string yaml,
+        ResourceType resourceType,
+        string? resourceNamespace = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return _kubernetesService.ApplyResourceFromYamlAsync(
+            yaml,
+            resourceType,
+            resourceNamespace,
+            cancellationToken
+        );
+    }
+
     public async Task StartListenAsync(
         V1Pod pod,
         V1ContainerPort port,

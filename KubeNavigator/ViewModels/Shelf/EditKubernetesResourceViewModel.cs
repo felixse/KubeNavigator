@@ -1,11 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
-using CliWrap;
-using CliWrap.Buffered;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using k8s.Models;
+using k8s;
 using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.ViewModels.Shelf;
@@ -32,26 +29,14 @@ public partial class EditKubernetesResourceViewModel : ObservableObject, IShelfI
 
     public async Task<string> LoadResourceBodyAsync()
     {
-        var result = await Cli.Wrap("kubectl")
-            .WithArguments(args =>
-            {
-                args.Add("get");
-                args.Add(Resource.ResourceType.Plural);
-                args.Add(Resource.Resource.Name());
-                if (Resource.ResourceType.IsNamespaceScoped)
-                {
-                    args.Add("-n");
-                    args.Add(Resource.Resource.Namespace());
-                }
-                args.Add($"--context");
-                args.Add(Resource.Cluster.Name);
-                args.Add("-o");
-                args.Add("yaml");
-            })
-            .ExecuteBufferedAsync();
+        var yaml = await Resource.Cluster.Context.GetResourceAsYamlAsync(
+            Resource.ResourceType,
+            Resource.Resource.Metadata.Name,
+            Resource.ResourceType.IsNamespaceScoped ? Resource.Resource.Metadata.NamespaceProperty : null
+        );
 
         ContentLoaded = true;
-        return result.StandardOutput;
+        return yaml;
     }
 
     public Task OnCloseAsync()
@@ -66,32 +51,30 @@ public partial class EditKubernetesResourceViewModel : ObservableObject, IShelfI
         var text = TextRetriever?.Invoke();
         if (!string.IsNullOrWhiteSpace(text))
         {
-            var filePath = Path.GetTempFileName();
-            await File.WriteAllTextAsync(filePath, text);
+            try
+            {
+                await Resource.Cluster.Context.ApplyResourceFromYamlAsync(
+                    text,
+                    Resource.ResourceType,
+                    Resource.ResourceType.IsNamespaceScoped
+                        ? Resource.Resource.Metadata.NamespaceProperty
+                        : null
+                );
 
-            var result = await Cli.Wrap("kubectl")
-                .WithArguments(args =>
-                {
-                    args.Add("apply");
-                    args.Add("-f");
-                    args.Add(filePath);
-                    if (Resource.ResourceType.IsNamespaceScoped)
-                    {
-                        args.Add("-n");
-                        args.Add(Resource.Resource.Namespace());
-                    }
-                    args.Add($"--context");
-                    args.Add(Resource.Cluster.Name);
-                })
-                .ExecuteBufferedAsync();
-
-            File.Delete(filePath);
-
-            Resource.Cluster.App.WindowManager.ActiveWindow.ShowMessage(
-                "Success",
-                $"{Resource.Resource.Kind} {Resource.Name} has been updated",
-                NotificationSeverity.Success
-            );
+                Resource.Cluster.App.WindowManager.ActiveWindow.ShowMessage(
+                    "Success",
+                    $"{Resource.Resource.Kind} {Resource.Name} has been updated",
+                    NotificationSeverity.Success
+                );
+            }
+            catch (Exception ex)
+            {
+                Resource.Cluster.App.WindowManager.ActiveWindow.ShowMessage(
+                    "Error",
+                    $"Failed to update {Resource.Resource.Kind} {Resource.Name}: {ex.Message}",
+                    NotificationSeverity.Error
+                );
+            }
         }
     }
 

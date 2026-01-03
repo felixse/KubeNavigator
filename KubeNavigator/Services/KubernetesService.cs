@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CliWrap;
+using CliWrap.Buffered;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Model;
@@ -267,6 +269,135 @@ public partial class KubernetesService
                 ex
             );
             throw;
+        }
+    }
+
+    public async Task<string> GetResourceAsYamlAsync(
+        ResourceType resourceType,
+        string resourceName,
+        string? resourceNamespace = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            Log.GettingResourceYaml(
+                _logger,
+                resourceName,
+                resourceNamespace ?? string.Empty,
+                resourceType.Plural,
+                _contextName
+            );
+
+            var result = await Cli.Wrap("kubectl")
+                .WithArguments(args =>
+                {
+                    args.Add("get");
+                    args.Add(resourceType.Plural);
+                    args.Add(resourceName);
+                    if (resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(resourceNamespace))
+                    {
+                        args.Add("-n");
+                        args.Add(resourceNamespace);
+                    }
+                    args.Add("--context");
+                    args.Add(_contextName);
+                    args.Add("-o");
+                    args.Add("yaml");
+                })
+                .ExecuteBufferedAsync(cancellationToken);
+
+            Log.ResourceYamlRetrieved(
+                _logger,
+                resourceName,
+                resourceNamespace ?? string.Empty,
+                resourceType.Plural,
+                _contextName
+            );
+            return result.StandardOutput;
+        }
+        catch (Exception ex)
+        {
+            Log.GetResourceYamlFailed(
+                _logger,
+                resourceName,
+                resourceNamespace ?? string.Empty,
+                resourceType.Plural,
+                _contextName,
+                ex
+            );
+            throw;
+        }
+    }
+
+    public async Task ApplyResourceFromYamlAsync(
+        string yaml,
+        ResourceType resourceType,
+        string? resourceNamespace = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            Log.ApplyingResourceYaml(_logger, resourceType.Plural, _contextName);
+
+            var filePath = Path.GetTempFileName();
+            await File.WriteAllTextAsync(filePath, yaml, cancellationToken);
+
+            try
+            {
+                var result = await Cli.Wrap("kubectl")
+                    .WithArguments(args =>
+                    {
+                        args.Add("apply");
+                        args.Add("-f");
+                        args.Add(filePath);
+                        if (resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(resourceNamespace))
+                        {
+                            args.Add("-n");
+                            args.Add(resourceNamespace);
+                        }
+                        args.Add("--context");
+                        args.Add(_contextName);
+                    })
+                    .ExecuteBufferedAsync(cancellationToken);
+
+                // Extract resource name from the result or yaml for logging
+                var resourceNameFromYaml = ExtractResourceNameFromYaml(yaml);
+
+                Log.ResourceYamlApplied(
+                    _logger,
+                    resourceNameFromYaml,
+                    resourceNamespace ?? string.Empty,
+                    resourceType.Plural,
+                    _contextName
+                );
+            }
+            finally
+            {
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.ApplyResourceYamlFailed(_logger, resourceType.Plural, _contextName, ex);
+            throw;
+        }
+    }
+
+    private static string ExtractResourceNameFromYaml(string yaml)
+    {
+        try
+        {
+            var resource = KubernetesYaml.Deserialize<GenericKubernetesObject>(yaml);
+            return resource.Name();
+        }
+        catch
+        {
+            return "unknown";
         }
     }
 
@@ -544,6 +675,82 @@ public partial class KubernetesService
             string podName,
             string @namespace,
             int port,
+            string contextName,
+            Exception exception
+        );
+
+        [LoggerMessage(
+            EventId = 2025,
+            Level = LogLevel.Information,
+            Message = "Getting YAML for {ResourceType} resource {ResourceName} in namespace {Namespace} in cluster {ContextName}"
+        )]
+        public static partial void GettingResourceYaml(
+            ILogger logger,
+            string resourceName,
+            string @namespace,
+            string resourceType,
+            string contextName
+        );
+
+        [LoggerMessage(
+            EventId = 2026,
+            Level = LogLevel.Information,
+            Message = "Retrieved YAML for {ResourceType} resource {ResourceName} in namespace {Namespace} in cluster {ContextName}"
+        )]
+        public static partial void ResourceYamlRetrieved(
+            ILogger logger,
+            string resourceName,
+            string @namespace,
+            string resourceType,
+            string contextName
+        );
+
+        [LoggerMessage(
+            EventId = 2027,
+            Level = LogLevel.Error,
+            Message = "Failed to get YAML for {ResourceType} resource {ResourceName} in namespace {Namespace} in cluster {ContextName}"
+        )]
+        public static partial void GetResourceYamlFailed(
+            ILogger logger,
+            string resourceName,
+            string @namespace,
+            string resourceType,
+            string contextName,
+            Exception exception
+        );
+
+        [LoggerMessage(
+            EventId = 2028,
+            Level = LogLevel.Information,
+            Message = "Applying YAML for {ResourceType} resource in cluster {ContextName}"
+        )]
+        public static partial void ApplyingResourceYaml(
+            ILogger logger,
+            string resourceType,
+            string contextName
+        );
+
+        [LoggerMessage(
+            EventId = 2029,
+            Level = LogLevel.Information,
+            Message = "Applied YAML for {ResourceType} resource {ResourceName} in namespace {Namespace} in cluster {ContextName}"
+        )]
+        public static partial void ResourceYamlApplied(
+            ILogger logger,
+            string resourceName,
+            string @namespace,
+            string resourceType,
+            string contextName
+        );
+
+        [LoggerMessage(
+            EventId = 2030,
+            Level = LogLevel.Error,
+            Message = "Failed to apply YAML for {ResourceType} resource in cluster {ContextName}"
+        )]
+        public static partial void ApplyResourceYamlFailed(
+            ILogger logger,
+            string resourceType,
             string contextName,
             Exception exception
         );

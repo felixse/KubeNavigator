@@ -8,6 +8,7 @@ using k8s.KubeConfigModels;
 using KubeNavigator.Model;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels.Resources;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 
 namespace KubeNavigator.ViewModels;
@@ -34,6 +35,8 @@ public partial class AppViewModel : ObservableObject
 
     public LoggingService LoggingService { get; }
 
+    public HelmService HelmService { get; }
+
     public AppViewModel(
         Func<IUserConfirmationService> userConfirmationServiceFactory,
         IWindowManager windowManager,
@@ -49,6 +52,8 @@ public partial class AppViewModel : ObservableObject
         DispatcherQueue = dispatcherQueue;
         ThemeManager = themeManager;
         LoggingService = loggingService;
+        HelmService = new HelmService(LoggerFactoryExtensions.CreateLogger<HelmService>(loggingService.LoggerFactory));
+
         var configContent = System.IO.File.ReadAllText(
             KubernetesClientConfiguration.KubeConfigDefaultLocation
         );

@@ -68,7 +68,10 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                     .Where(s => s.Type == "helm.sh/release.v1")
             )
             {
-                var helmRelease = HelmRelease.FromSecret(secret);
+                var helmRelease = App.HelmService.ParseReleaseFromSecret(secret);
+                if (helmRelease == null)
+                    continue;
+
                 var existing = HelmReleases.FirstOrDefault(h =>
                     h.HelmRelease.Name == helmRelease.Name
                     && h.HelmRelease.Namespace == helmRelease.Namespace
@@ -279,7 +282,10 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
             {
                 if (resourceEvent == KubernetesResourceEvent.Added)
                 {
-                    var helmRelease = HelmRelease.FromSecret(secret);
+                    var helmRelease = App.HelmService.ParseReleaseFromSecret(secret);
+                    if (helmRelease == null)
+                        return;
+
                     var existing = HelmReleases.FirstOrDefault(h =>
                         h.HelmRelease.Name == helmRelease.Name
                         && h.HelmRelease.Namespace == helmRelease.Namespace
@@ -295,7 +301,9 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 }
                 else if (resourceEvent == KubernetesResourceEvent.Deleted)
                 {
-                    var helmRelease = HelmRelease.FromSecret(secret);
+                    var helmRelease = App.HelmService.ParseReleaseFromSecret(secret);
+                    if (helmRelease == null)
+                        return;
 
                     var existingHelmRelease = HelmReleases.FirstOrDefault(h =>
                         h.HelmRelease.Name == helmRelease.Name

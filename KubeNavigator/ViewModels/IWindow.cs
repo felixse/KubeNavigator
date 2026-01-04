@@ -1,4 +1,4 @@
-﻿using KubeNavigator.Model;
+﻿using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Shelf;
 
 namespace KubeNavigator.ViewModels;

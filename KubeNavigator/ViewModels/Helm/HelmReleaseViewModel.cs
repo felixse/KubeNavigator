@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using KubeNavigator.Model.Helm;
+using KubeNavigator.Models.Helm;
 
 namespace KubeNavigator.ViewModels.Helm;
 

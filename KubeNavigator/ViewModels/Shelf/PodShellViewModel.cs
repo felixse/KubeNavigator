@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.WinUI;
 using KubeNavigator.Model;
+using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Resources;
 using Nito.AsyncEx;
 

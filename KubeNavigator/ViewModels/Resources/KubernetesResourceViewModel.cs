@@ -6,8 +6,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using k8s;
 using k8s.Models;
-using KubeNavigator.Model;
-using KubeNavigator.Model.Details;
+using KubeNavigator.Models;
+using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Shelf;
 
 namespace KubeNavigator.ViewModels.Resources;

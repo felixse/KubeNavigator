@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using k8s.Models;
-using KubeNavigator.Model;
+using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.ViewModels;

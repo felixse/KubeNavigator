@@ -1,6 +1,6 @@
 using System;
-using KubeNavigator.Model;
-using KubeNavigator.Model.TerminalMessages;
+using KubeNavigator.Models;
+using KubeNavigator.Models.TerminalMessages;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.UI.Xaml.Controls;
 

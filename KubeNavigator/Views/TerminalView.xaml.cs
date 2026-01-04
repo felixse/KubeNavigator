@@ -1,8 +1,8 @@
 using System;
 using System.Text.Json;
 using CommunityToolkit.WinUI;
-using KubeNavigator.Model;
-using KubeNavigator.Model.TerminalMessages;
+using KubeNavigator.Models;
+using KubeNavigator.Models.TerminalMessages;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;

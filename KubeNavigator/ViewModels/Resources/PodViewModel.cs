@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using CommunityToolkit.Mvvm.Input;
 using k8s.Models;
-using KubeNavigator.Model;
-using KubeNavigator.Model.Details;
+using KubeNavigator.Models;
+using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.Extensions.Logging;
 

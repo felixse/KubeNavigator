@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using k8s;
 using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.ViewModels.Shelf;
@@ -32,7 +31,9 @@ public partial class EditKubernetesResourceViewModel : ObservableObject, IShelfI
         var yaml = await Resource.Cluster.Context.GetResourceAsYamlAsync(
             Resource.ResourceType,
             Resource.Resource.Metadata.Name,
-            Resource.ResourceType.IsNamespaceScoped ? Resource.Resource.Metadata.NamespaceProperty : null
+            Resource.ResourceType.IsNamespaceScoped
+                ? Resource.Resource.Metadata.NamespaceProperty
+                : null
         );
 
         ContentLoaded = true;

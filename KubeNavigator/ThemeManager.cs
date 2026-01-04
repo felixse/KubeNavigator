@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using KubeNavigator.Model.TerminalMessages;
+using KubeNavigator.Models.TerminalMessages;
 using KubeNavigator.Services;
 using KubeNavigator.Views;
 using Microsoft.UI.Dispatching;

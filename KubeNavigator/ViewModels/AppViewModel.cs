@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using k8s;
 using k8s.KubeConfigModels;
-using KubeNavigator.Model;
+using KubeNavigator.Models;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels.Resources;
 using Microsoft.Extensions.Logging;
@@ -52,7 +52,9 @@ public partial class AppViewModel : ObservableObject
         DispatcherQueue = dispatcherQueue;
         ThemeManager = themeManager;
         LoggingService = loggingService;
-        HelmService = new HelmService(LoggerFactoryExtensions.CreateLogger<HelmService>(loggingService.LoggerFactory));
+        HelmService = new HelmService(
+            LoggerFactoryExtensions.CreateLogger<HelmService>(loggingService.LoggerFactory)
+        );
 
         var configContent = System.IO.File.ReadAllText(
             KubernetesClientConfiguration.KubeConfigDefaultLocation

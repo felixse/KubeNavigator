@@ -9,6 +9,7 @@ using CliWrap.Buffered;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Model;
+using KubeNavigator.Models;
 using Microsoft.Extensions.Logging;
 
 namespace KubeNavigator.Services;
@@ -352,7 +353,10 @@ public partial class KubernetesService
                         args.Add("apply");
                         args.Add("-f");
                         args.Add(filePath);
-                        if (resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(resourceNamespace))
+                        if (
+                            resourceType.IsNamespaceScoped
+                            && !string.IsNullOrEmpty(resourceNamespace)
+                        )
                         {
                             args.Add("-n");
                             args.Add(resourceNamespace);

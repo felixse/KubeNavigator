@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
 using k8s.Models;
-using KubeNavigator.Model.Helm;
+using KubeNavigator.Models.Helm;
 using Microsoft.Extensions.Logging;
 
 namespace KubeNavigator.Services;

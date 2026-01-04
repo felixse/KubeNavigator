@@ -1,5 +1,5 @@
 using System;
-using KubeNavigator.Model.TerminalMessages;
+using KubeNavigator.Models.TerminalMessages;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.UI.Xaml.Controls;
 

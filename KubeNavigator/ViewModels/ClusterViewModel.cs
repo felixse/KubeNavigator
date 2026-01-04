@@ -8,8 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.WinUI;
 using k8s;
 using k8s.Models;
-using KubeNavigator.Model;
-using KubeNavigator.Model.Helm;
+using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Resources;
 

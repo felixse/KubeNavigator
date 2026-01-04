@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
-using KubeNavigator.Model;
-using KubeNavigator.Model.Details;
-using KubeNavigator.Model.Helm;
-using KubeNavigator.Model.TerminalMessages;
+using KubeNavigator.Models;
+using KubeNavigator.Models.Helm;
+using KubeNavigator.Models.TerminalMessages;
 using KubeNavigator.Services;
+using KubeNavigator.ViewModels.Details;
 
 namespace KubeNavigator;
 

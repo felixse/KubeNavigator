@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using KubeNavigator.Model;
+using KubeNavigator.Models;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels;
 using KubeNavigator.Views;

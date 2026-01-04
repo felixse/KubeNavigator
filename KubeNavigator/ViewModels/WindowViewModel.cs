@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using KubeNavigator.Model;
+using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Shelf;
 

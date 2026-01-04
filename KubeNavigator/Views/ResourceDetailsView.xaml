@@ -6,7 +6,7 @@
   xmlns:controls="using:CommunityToolkit.WinUI.Controls"
   xmlns:converters="using:KubeNavigator.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:details="using:KubeNavigator.Model.Details"
+  xmlns:details="using:KubeNavigator.ViewModels.Details"
   xmlns:local="using:KubeNavigator.Views"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:templateselectors="using:KubeNavigator.TemplateSelectors"

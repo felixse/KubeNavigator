@@ -1,4 +1,4 @@
-using KubeNavigator.Model;
+using KubeNavigator.Models;
 using Microsoft.UI.Xaml.Controls;
 
 namespace KubeNavigator.Views;

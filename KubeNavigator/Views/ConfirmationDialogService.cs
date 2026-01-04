@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using KubeNavigator.Model;
+using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Resources;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;

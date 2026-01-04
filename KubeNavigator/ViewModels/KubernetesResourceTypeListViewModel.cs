@@ -9,7 +9,7 @@ using CommunityToolkit.WinUI;
 using CommunityToolkit.WinUI.Collections;
 using k8s;
 using k8s.Models;
-using KubeNavigator.Model;
+using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Resources;
 using Microsoft.UI.Dispatching;
 

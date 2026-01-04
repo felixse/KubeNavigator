@@ -16,23 +16,6 @@
     <LangVersion>preview</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <ItemGroup>
-    <None Remove="ApplicationResources.xaml" />
-    <None Remove="DetailWindow.xaml" />
-    <None Remove="Pages\DetailsWindowRootPage.xaml" />
-    <None Remove="Resources\PodResources.xaml" />
-    <None Remove="RootPage.xaml" />
-    <None Remove="Views\ApplicationLogView.xaml" />
-    <None Remove="Views\MainView.xaml" />
-    <None Remove="Views\PodLogView.xaml" />
-    <None Remove="Views\PodShellView.xaml" />
-    <None Remove="Views\PortForwardDialog.xaml" />
-    <None Remove="Views\PortForwardsView.xaml" />
-    <None Remove="Views\ResourceDetailsView.xaml" />
-    <None Remove="Views\ResourceEditView.xaml" />
-    <None Remove="Views\SettingsView.xaml" />
-    <None Remove="Views\TerminalView.xaml" />
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -141,7 +124,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Windows\" />
     <Folder Include="WebViews\Terminal\dist\assets\" />
   </ItemGroup>
   <ItemGroup>
@@ -173,17 +155,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Resources\PodResources.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <Page Update="ApplicationResources.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Pages\DetailsWindowRootPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

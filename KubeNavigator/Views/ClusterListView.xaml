@@ -7,7 +7,7 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:local="using:KubeNavigator.Views"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:model="using:KubeNavigator.Model"
+  xmlns:models="using:KubeNavigator.Models"
   xmlns:templateselectors="using:KubeNavigator.TemplateSelectors"
   xmlns:viewmodels="using:KubeNavigator.ViewModels"
   mc:Ignorable="d"
@@ -15,7 +15,7 @@
   <UserControl.Resources>
     <templateselectors:ClusterConnectionStatusTemplateSelector x:Key="ClusterConnectionStatusTemplateSelector">
       <templateselectors:ClusterConnectionStatusTemplateSelector.DefaultTemplate>
-        <DataTemplate x:DataType="model:ClusterStatus">
+        <DataTemplate x:DataType="models:ClusterStatus">
           <TextBlock
             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
             Text="{x:Bind Status}"
@@ -23,7 +23,7 @@
         </DataTemplate>
       </templateselectors:ClusterConnectionStatusTemplateSelector.DefaultTemplate>
       <templateselectors:ClusterConnectionStatusTemplateSelector.ConnectingTemplate>
-        <DataTemplate x:DataType="model:ClusterStatus">
+        <DataTemplate x:DataType="models:ClusterStatus">
           <StackPanel Orientation="Horizontal" Spacing="4">
             <TextBlock VerticalAlignment="Center" Text="{x:Bind Status}" />
             <ProgressRing Width="16" Height="16" VerticalAlignment="Center" IsActive="True" />
@@ -31,7 +31,7 @@
         </DataTemplate>
       </templateselectors:ClusterConnectionStatusTemplateSelector.ConnectingTemplate>
       <templateselectors:ClusterConnectionStatusTemplateSelector.ConnectedTemplate>
-        <DataTemplate x:DataType="model:ClusterStatus">
+        <DataTemplate x:DataType="models:ClusterStatus">
           <TextBlock
             Foreground="{ThemeResource SystemFillColorSuccessBrush}"
             Text="{x:Bind Status}"
@@ -39,7 +39,7 @@
         </DataTemplate>
       </templateselectors:ClusterConnectionStatusTemplateSelector.ConnectedTemplate>
       <templateselectors:ClusterConnectionStatusTemplateSelector.ErrorTemplate>
-        <DataTemplate x:DataType="model:ClusterStatus">
+        <DataTemplate x:DataType="models:ClusterStatus">
           <StackPanel Orientation="Horizontal" Spacing="4">
             <TextBlock
               VerticalAlignment="Center"

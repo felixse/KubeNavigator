@@ -1,6 +1,6 @@
 using CommunityToolkit.WinUI.Controls;
-using KubeNavigator.Model.Details;
 using KubeNavigator.ViewModels;
+using KubeNavigator.ViewModels.Details;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;

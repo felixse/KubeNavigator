@@ -107,6 +107,8 @@ public class KubernetesContext
             {
                 (V1Pod.KubeGroup, V1Pod.KubeApiVersion, V1Pod.KubePluralName) =>
                     new KubernetesResourceRepository<V1Pod>(resourceType, _kubernetesService),
+                (V1Service.KubeGroup, V1Service.KubeApiVersion, V1Service.KubePluralName) =>
+                    new KubernetesResourceRepository<V1Service>(resourceType, _kubernetesService),
                 (V1Secret.KubeGroup, V1Secret.KubeApiVersion, V1Secret.KubePluralName) =>
                     new KubernetesResourceRepository<V1Secret>(resourceType, _kubernetesService),
                 (V1Namespace.KubeGroup, V1Namespace.KubeApiVersion, V1Namespace.KubePluralName) =>
@@ -179,8 +181,8 @@ public class KubernetesContext
     }
 
     public async Task StartListenAsync(
-        V1Pod pod,
-        V1ContainerPort port,
+        IKubernetesObject<V1ObjectMeta> resource,
+        int targetPort,
         int localPort,
         CancellationToken cancellationToken
     )
@@ -194,7 +196,7 @@ public class KubernetesContext
         {
             var socket = await listener.AcceptSocketAsync(cancellationToken);
             Task.Run(
-                async () => await RunSocketAsync(socket, pod, port, cancellationToken),
+                async () => await RunSocketAsync(socket, resource, targetPort, cancellationToken),
                 cancellationToken
             );
         }
@@ -202,15 +204,15 @@ public class KubernetesContext
 
     private async Task RunSocketAsync(
         Socket socket,
-        V1Pod pod,
-        V1ContainerPort port,
+        IKubernetesObject<V1ObjectMeta> resource,
+        int targetPort,
         CancellationToken cancellationToken
     )
     {
         var arrayPool = ArrayPool<byte>.Shared;
         var webSocket = await _kubernetesService.OpenPodPortForwardAsync(
-            pod,
-            port.ContainerPort,
+            resource,
+            targetPort,
             cancellationToken
         );
         var demux = new StreamDemuxer(webSocket, StreamType.PortForward);

@@ -61,7 +61,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
     public V1Pod Pod => (V1Pod)Resource;
 
     public List<V1ContainerStatus> ContainerStatuses =>
-        Pod.Status.ContainerStatuses.ToList() ?? Enumerable.Empty<V1ContainerStatus>().ToList();
+        Pod.Status?.ContainerStatuses?.ToList() ?? Enumerable.Empty<V1ContainerStatus>().ToList();
 
     public int Restarts => Pod.Status.ContainerStatuses?.Sum(c => c.RestartCount) ?? 0;
 
@@ -345,9 +345,9 @@ public partial class PodViewModel : KubernetesResourceViewModel
                         this,
                         Cluster,
                         Cluster.App.ForwardedPorts.FirstOrDefault(fp =>
-                            fp.Pod == this && fp.Port == p
+                            fp.Resource == this && fp.TargetPort == p.ContainerPort
                         )
-                    )),
+                    )) ?? [],
                 ],
             };
         }

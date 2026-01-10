@@ -53,7 +53,7 @@
         <DataTemplate x:DataType="viewmodels:ForwardedPortViewModel">
           <controls:DataRow HorizontalAlignment="Left" Background="Transparent">
             <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Pod.Name}" />
+            <TextBlock VerticalAlignment="Center" Text="{x:Bind Resource.Name}" />
           </controls:DataRow>
         </DataTemplate>
       </templateselectors:TableTemplateSelector.ForwardedPortTemplate>

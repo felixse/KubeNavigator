@@ -4,6 +4,7 @@ using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using k8s;
 using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Resources;
@@ -21,19 +22,34 @@ public partial class PortViewModel : ObservableObject
     {
         Name = port.Name;
         HostPort = port.HostPort;
-        ContainerPort = port.ContainerPort;
+        TargetPort = new PodTargetPort(port.ContainerPort, pod);
         Protocol = port.Protocol;
-        Port = port;
-        Pod = pod;
         Cluster = cluster;
         ForwardedPort = forwardedPort;
+        Resource = pod;
+    }
+
+    public PortViewModel(
+        V1ServicePort port,
+        ServiceViewModel service,
+        ClusterViewModel cluster,
+        ForwardedPortViewModel? forwardedPort
+    )
+    {
+        Name = port.Name;
+        //HostPort = port.HostPort; todo
+        TargetPort = new ServiceTargetPod(service, port);
+        Protocol = port.Protocol;
+        Cluster = cluster;
+        ForwardedPort = forwardedPort;
+        Resource = service;
     }
 
     public string? Name { get; }
 
     public int? HostPort { get; }
 
-    public int ContainerPort { get; }
+    public ITargetPort TargetPort { get; }
 
     public string? Protocol { get; }
 
@@ -41,7 +57,7 @@ public partial class PortViewModel : ObservableObject
     {
         get
         {
-            var target = HostPort ?? ContainerPort;
+            var target = HostPort?.ToString() ?? TargetPort.Value;
             var name = !string.IsNullOrEmpty(Name) ? $"{Name} :" : string.Empty;
             var suffix = ForwardedPort?.LocalPort switch
             {
@@ -55,8 +71,9 @@ public partial class PortViewModel : ObservableObject
 
     [ObservableProperty]
     public partial ForwardedPortViewModel? ForwardedPort { get; private set; }
-    public V1ContainerPort Port { get; }
-    public PodViewModel Pod { get; }
+
+    public KubernetesResourceViewModel Resource { get; private set; }
+
     public ClusterViewModel Cluster { get; }
 
     [RelayCommand]
@@ -90,7 +107,7 @@ public partial class PortViewModel : ObservableObject
                 : null;
         var options =
             await Cluster.App.WindowManager.ActiveWindow.UserConfirmationService.GetPortForwardOptionsAsync(
-                Pod,
+                Resource,
                 currentOptions
             );
 
@@ -101,7 +118,15 @@ public partial class PortViewModel : ObservableObject
 
         if (ForwardedPort == null)
         {
-            ForwardedPort = Cluster.CreateForwardedPort(Pod, Port, options.Port);
+            var (targetPort, targetResource) = await TargetPort.GetPortAndResourceAsync();
+
+            ForwardedPort = Cluster.CreateForwardedPort(
+                Resource,
+                targetResource,
+                targetPort,
+                options.Port,
+                Protocol
+            );
         }
         else
         {
@@ -144,7 +169,15 @@ public partial class PortViewModel : ObservableObject
                     .Any(x => x.Port == randomPort)
             );
 
-            ForwardedPort = Cluster.CreateForwardedPort(Pod, Port, randomPort);
+            var (targetPort, targetResource) = await TargetPort.GetPortAndResourceAsync();
+
+            ForwardedPort = Cluster.CreateForwardedPort(
+                Resource,
+                targetResource,
+                targetPort,
+                randomPort,
+                Protocol
+            );
             ForwardedPort.Start();
             await ForwardedPort.OpenInBrowserAsync();
         }

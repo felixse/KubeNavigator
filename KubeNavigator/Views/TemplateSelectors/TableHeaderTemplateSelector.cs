@@ -26,6 +26,11 @@ public partial class TableHeaderTemplateSelector : DataTemplateSelector
                 var podTableHeader = Application.Current.Resources["PodTableHeader"];
                 return (DataTemplate)podTableHeader;
             }
+            else if (kubernetesResourceTypeListViewModel.ResourceType == ResourceType.Service)
+            {
+                var serviceTableHeader = Application.Current.Resources["ServiceTableHeader"];
+                return (DataTemplate)serviceTableHeader;
+            }
             return KubernetesResourceTemplate;
         }
         else if (item is HelmReleasesViewModel && HelmReleaseTemplate != null)

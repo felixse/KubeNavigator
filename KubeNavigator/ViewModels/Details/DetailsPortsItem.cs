@@ -4,5 +4,5 @@ namespace KubeNavigator.ViewModels.Details;
 
 public class DetailsPortsItem : IDetailsItem
 {
-    public required ICollection<PortViewModel> Ports { get; set; }
+    public required List<PortViewModel> Ports { get; set; }
 }

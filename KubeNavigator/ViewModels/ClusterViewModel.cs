@@ -9,6 +9,7 @@ using CommunityToolkit.WinUI;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Models;
+using KubeNavigator.Properties;
 using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Resources;
 
@@ -88,36 +89,53 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
     }
 
     public ForwardedPortViewModel CreateForwardedPort(
-        PodViewModel pod,
-        V1ContainerPort port,
-        int localPort
+        KubernetesResourceViewModel resource,
+        IKubernetesObject<V1ObjectMeta> targetResource,
+        int targetPort,
+        int localPort,
+        string? protocol
     )
     {
-        var forwardedPort = new ForwardedPortViewModel(this, pod, port, localPort);
+        var forwardedPort = new ForwardedPortViewModel(
+            this,
+            resource,
+            targetResource,
+            localPort,
+            targetPort,
+            protocol
+        );
         App.ForwardedPorts.Add(forwardedPort);
 
         return forwardedPort;
     }
 
-    public void DeleteForwardedPort(ForwardedPortViewModel forwardedPort, PodViewModel pod)
+    public void DeleteForwardedPort(
+        ForwardedPortViewModel forwardedPort,
+        KubernetesResourceViewModel resource
+    )
     {
         forwardedPort.Stop();
         App.ForwardedPorts.Remove(forwardedPort);
 
         // update details to remove the forwarded port
-        pod.UpdateDetails();
+        resource.UpdateDetails();
     }
 
     public CancellationTokenSource ForwardContainerPort(
-        V1Pod pod,
-        V1ContainerPort port,
+        IKubernetesObject<V1ObjectMeta> resource,
+        int targetPort,
         int localPort
     )
     {
         var cancellationTokenSource = new CancellationTokenSource();
         Task.Run(
             async () =>
-                await Context.StartListenAsync(pod, port, localPort, cancellationTokenSource.Token),
+                await Context.StartListenAsync(
+                    resource,
+                    targetPort,
+                    localPort,
+                    cancellationTokenSource.Token
+                ),
             cancellationTokenSource.Token
         );
 
@@ -188,6 +206,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 (V1Pod)resource,
                 this
             ),
+            (V1Service.KubeGroup, V1Service.KubeApiVersion, V1Service.KubePluralName) =>
+                new ServiceViewModel((V1Service)resource, this),
             _ => new KubernetesResourceViewModel(resource, resourceType, this),
         };
     }

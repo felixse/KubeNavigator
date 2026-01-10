@@ -40,11 +40,11 @@ public class ConfirmationDialogService : IUserConfirmationService
     }
 
     public async Task<PortForwardOptions?> GetPortForwardOptionsAsync(
-        PodViewModel pod,
+        KubernetesResourceViewModel resource,
         PortForwardOptions? options
     )
     {
-        var dialog = new PortForwardDialog(pod)
+        var dialog = new PortForwardDialog(resource)
         {
             XamlRoot = Page?.XamlRoot,
             RequestedTheme =

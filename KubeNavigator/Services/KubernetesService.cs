@@ -230,8 +230,8 @@ public partial class KubernetesService
     }
 
     public async Task<System.Net.WebSockets.WebSocket> OpenPodPortForwardAsync(
-        V1Pod pod,
-        int containerPort,
+        IKubernetesObject<V1ObjectMeta> resource,
+        int targetPort,
         CancellationToken cancellationToken = default
     )
     {
@@ -239,22 +239,22 @@ public partial class KubernetesService
         {
             Log.OpeningPodPortForward(
                 _logger,
-                pod.Name(),
-                pod.Namespace(),
-                containerPort,
+                resource.Name(),
+                resource.Namespace(),
+                targetPort,
                 _contextName
             );
             var webSocket = await _kubernetes.WebSocketNamespacedPodPortForwardAsync(
-                pod.Name(),
-                pod.Namespace(),
-                [containerPort],
+                resource.Name(),
+                resource.Namespace(),
+                [targetPort],
                 cancellationToken: cancellationToken
             );
             Log.PodPortForwardOpened(
                 _logger,
-                pod.Name(),
-                pod.Namespace(),
-                containerPort,
+                resource.Name(),
+                resource.Namespace(),
+                targetPort,
                 _contextName
             );
             return webSocket;
@@ -263,9 +263,9 @@ public partial class KubernetesService
         {
             Log.OpenPodPortForwardFailed(
                 _logger,
-                pod.Name(),
-                pod.Namespace(),
-                containerPort,
+                resource.Name(),
+                resource.Namespace(),
+                targetPort,
                 _contextName,
                 ex
             );

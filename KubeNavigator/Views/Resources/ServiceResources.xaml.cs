@@ -2,9 +2,9 @@
 
 namespace KubeNavigator.Views.Resources;
 
-partial class PodResources : ResourceDictionary
+partial class ServiceResources : ResourceDictionary
 {
-    public PodResources()
+    public ServiceResources()
     {
         this.InitializeComponent();
     }

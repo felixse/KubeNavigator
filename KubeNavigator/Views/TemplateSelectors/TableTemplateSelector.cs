@@ -23,6 +23,11 @@ public partial class TableTemplateSelector : DataTemplateSelector
                 var podTableRow = Application.Current.Resources["PodTableRow"];
                 return (DataTemplate)podTableRow;
             }
+            else if (item is ServiceViewModel)
+            {
+                var serviceTableRow = Application.Current.Resources["ServiceTableRow"];
+                return (DataTemplate)serviceTableRow;
+            }
             return KubernetesResourceTemplate;
         }
         else if (item is HelmReleaseViewModel && HelmReleaseTemplate != null)

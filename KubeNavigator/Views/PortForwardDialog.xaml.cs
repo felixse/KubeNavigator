@@ -8,10 +8,10 @@ namespace KubeNavigator.Views;
 
 public sealed partial class PortForwardDialog : ContentDialog
 {
-    public PortForwardDialog(PodViewModel pod)
+    public PortForwardDialog(KubernetesResourceViewModel resource)
     {
         this.InitializeComponent();
-        Pod = pod;
+        Resource = resource;
 
         PortNumberBox.NumberFormatter = new DecimalFormatter
         {
@@ -20,7 +20,7 @@ public sealed partial class PortForwardDialog : ContentDialog
         };
 
         Title = $"Port Forwarding";
-        SubTitleTextBlock.Text = $"Pod: {Pod.Name}";
+        SubTitleTextBlock.Text = $"{Resource.ResourceType.SingularDisplayName}: {Resource.Name}";
         Port = new Random().Next(49152, 65535);
 
         PrimaryButtonText = "Start";
@@ -28,7 +28,7 @@ public sealed partial class PortForwardDialog : ContentDialog
         DefaultButton = ContentDialogButton.Primary;
     }
 
-    public PodViewModel Pod { get; }
+    public KubernetesResourceViewModel Resource { get; }
 
     public bool OpenInBrowser
     {

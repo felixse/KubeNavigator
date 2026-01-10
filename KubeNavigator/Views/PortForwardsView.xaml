@@ -55,10 +55,10 @@
           >
             <controls:DataRow>
               <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
-              <TextBlock VerticalAlignment="Center" Text="{x:Bind Pod.Name}" />
-              <TextBlock VerticalAlignment="Center" Text="{x:Bind Pod.Namespace}" />
+              <TextBlock VerticalAlignment="Center" Text="{x:Bind Resource.Name}" />
+              <TextBlock VerticalAlignment="Center" Text="{x:Bind Resource.Namespace}" />
               <TextBlock VerticalAlignment="Center" Text="Pod" />
-              <TextBlock VerticalAlignment="Center" Text="{x:Bind PodPort}" />
+              <TextBlock VerticalAlignment="Center" Text="{x:Bind TargetPort}" />
               <TextBlock VerticalAlignment="Center" Text="{x:Bind LocalPort}" />
               <TextBlock VerticalAlignment="Center" Text="{x:Bind Protocol}" />
               <TextBlock VerticalAlignment="Center" Text="{x:Bind Cluster.Name}" />

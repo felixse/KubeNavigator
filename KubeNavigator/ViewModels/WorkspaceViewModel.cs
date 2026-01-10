@@ -162,7 +162,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             "Network",
             "\uED5D",
             [
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Service),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.Service,
+                    (x) => new ServiceViewModel((V1Service)x, Cluster)
+                ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Endpoint),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Ingress),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.IngressClass),

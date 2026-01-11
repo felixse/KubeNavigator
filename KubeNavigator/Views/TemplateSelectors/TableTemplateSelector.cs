@@ -33,6 +33,11 @@ public partial class TableTemplateSelector : DataTemplateSelector
                 var configMapTableRow = Application.Current.Resources["ConfigMapTableRow"];
                 return (DataTemplate)configMapTableRow;
             }
+            else if (item is SecretViewModel)
+            {
+                var secretTableRow = Application.Current.Resources["SecretTableRow"];
+                return (DataTemplate)secretTableRow;
+            }
             return KubernetesResourceTemplate;
         }
         else if (item is HelmReleaseViewModel && HelmReleaseTemplate != null)

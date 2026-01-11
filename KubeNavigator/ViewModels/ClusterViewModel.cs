@@ -209,6 +209,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 new ServiceViewModel((V1Service)resource, this),
             (V1ConfigMap.KubeGroup, V1ConfigMap.KubeApiVersion, V1ConfigMap.KubePluralName) =>
                 new ConfigMapViewModel((V1ConfigMap)resource, this),
+            (V1Secret.KubeGroup, V1Secret.KubeApiVersion, V1Secret.KubePluralName) =>
+                new SecretViewModel((V1Secret)resource, this),
             _ => new KubernetesResourceViewModel(resource, resourceType, this),
         };
     }

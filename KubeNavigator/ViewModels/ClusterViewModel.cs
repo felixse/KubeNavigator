@@ -9,7 +9,6 @@ using CommunityToolkit.WinUI;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Models;
-using KubeNavigator.Properties;
 using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Resources;
 
@@ -208,6 +207,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
             ),
             (V1Service.KubeGroup, V1Service.KubeApiVersion, V1Service.KubePluralName) =>
                 new ServiceViewModel((V1Service)resource, this),
+            (V1ConfigMap.KubeGroup, V1ConfigMap.KubeApiVersion, V1ConfigMap.KubePluralName) =>
+                new ConfigMapViewModel((V1ConfigMap)resource, this),
             _ => new KubernetesResourceViewModel(resource, resourceType, this),
         };
     }

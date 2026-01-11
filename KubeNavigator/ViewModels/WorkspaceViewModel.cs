@@ -129,7 +129,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             "Config",
             "\uF259",
             [
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ConfigMap),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.ConfigMap,
+                    (x) => new ServiceViewModel((V1Service)x, Cluster)
+                ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Secret),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ResourceQuota),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.LimitRange),

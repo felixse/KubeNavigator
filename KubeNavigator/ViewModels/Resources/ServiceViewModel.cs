@@ -3,7 +3,6 @@ using System.Linq;
 using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
-using Windows.UI.WebUI;
 
 namespace KubeNavigator.ViewModels.Resources;
 

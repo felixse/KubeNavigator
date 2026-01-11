@@ -31,6 +31,11 @@ public partial class TableHeaderTemplateSelector : DataTemplateSelector
                 var serviceTableHeader = Application.Current.Resources["ServiceTableHeader"];
                 return (DataTemplate)serviceTableHeader;
             }
+            else if (kubernetesResourceTypeListViewModel.ResourceType == ResourceType.ConfigMap)
+            {
+                var configMapTableHeader = Application.Current.Resources["ConfigMapTableHeader"];
+                return (DataTemplate)configMapTableHeader;
+            }
             return KubernetesResourceTemplate;
         }
         else if (item is HelmReleasesViewModel && HelmReleaseTemplate != null)

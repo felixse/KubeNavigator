@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using k8s;
-using k8s.Models;
 using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.Models;

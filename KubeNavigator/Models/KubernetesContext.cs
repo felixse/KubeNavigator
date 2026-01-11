@@ -113,6 +113,8 @@ public class KubernetesContext
                     new KubernetesResourceRepository<V1Secret>(resourceType, _kubernetesService),
                 (V1Namespace.KubeGroup, V1Namespace.KubeApiVersion, V1Namespace.KubePluralName) =>
                     new KubernetesResourceRepository<V1Namespace>(resourceType, _kubernetesService),
+                (V1ConfigMap.KubeGroup, V1ConfigMap.KubeApiVersion, V1ConfigMap.KubePluralName) =>
+                    new KubernetesResourceRepository<V1ConfigMap>(resourceType, _kubernetesService),
                 (
                     V1CustomResourceDefinition.KubeGroup,
                     V1CustomResourceDefinition.KubeApiVersion,
@@ -200,6 +202,11 @@ public class KubernetesContext
                 cancellationToken
             );
         }
+    }
+
+    public async Task SaveConfigMapAsync(V1ConfigMap configMap)
+    {
+        await _kubernetesService.SaveConfigMapAsync(configMap);
     }
 
     private async Task RunSocketAsync(

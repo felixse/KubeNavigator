@@ -28,6 +28,11 @@ public partial class TableTemplateSelector : DataTemplateSelector
                 var serviceTableRow = Application.Current.Resources["ServiceTableRow"];
                 return (DataTemplate)serviceTableRow;
             }
+            else if (item is ConfigMapViewModel)
+            {
+                var configMapTableRow = Application.Current.Resources["ConfigMapTableRow"];
+                return (DataTemplate)configMapTableRow;
+            }
             return KubernetesResourceTemplate;
         }
         else if (item is HelmReleaseViewModel && HelmReleaseTemplate != null)

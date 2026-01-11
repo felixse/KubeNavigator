@@ -13,6 +13,7 @@
         <local:ApplicationResources />
         <resources:PodResources />
         <resources:ServiceResources />
+        <resources:ConfigMapResources />
         <!--  Other merged dictionaries here  -->
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>

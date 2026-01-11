@@ -5,6 +5,8 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Serilog;
+using WinUIEditor;
 
 namespace KubeNavigator.Views;
 
@@ -52,6 +54,18 @@ public sealed partial class ResourceDetailsView : UserControl
         )
         {
             await ViewModel.NavigateAsync(linkItem);
+        }
+    }
+
+    private void CodeEditorControl_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (
+            sender is CodeEditorControl codeEditor
+            && codeEditor.DataContext is DetailsEditorItem editorItem
+        )
+        {
+            codeEditor.Editor.SetText(editorItem.Value);
+            editorItem.TextRetriever = () => codeEditor.Editor.GetText(long.MaxValue);
         }
     }
 }

@@ -11,6 +11,7 @@ using k8s.Models;
 using KubeNavigator.Model;
 using KubeNavigator.Models;
 using Microsoft.Extensions.Logging;
+using Windows.Devices.Bluetooth.Advertisement;
 
 namespace KubeNavigator.Services;
 
@@ -390,6 +391,15 @@ public partial class KubernetesService
             Log.ApplyResourceYamlFailed(_logger, resourceType.Plural, _contextName, ex);
             throw;
         }
+    }
+
+    public async Task SaveConfigMapAsync(V1ConfigMap configMap)
+    {
+        await _kubernetes.CoreV1.ReplaceNamespacedConfigMapAsync(
+            configMap,
+            configMap.Metadata.Name,
+            configMap.Metadata.Namespace()
+        );
     }
 
     private static string ExtractResourceNameFromYaml(string yaml)

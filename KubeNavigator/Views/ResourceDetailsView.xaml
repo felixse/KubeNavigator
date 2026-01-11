@@ -7,6 +7,7 @@
   xmlns:converters="using:KubeNavigator.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:details="using:KubeNavigator.ViewModels.Details"
+  xmlns:editor="using:WinUIEditor"
   xmlns:local="using:KubeNavigator.Views"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:templateselectors="using:KubeNavigator.TemplateSelectors"
@@ -449,14 +450,44 @@
           </controls:DataRow>
         </DataTemplate>
       </templateselectors:DetailsContentTemplateSelector.ConditionsTemplate>
+      <templateselectors:DetailsContentTemplateSelector.EditorTemplate>
+        <DataTemplate x:DataType="details:DetailsEditorItem">
+          <controls:DataRow Margin="0,4,0,4">
+            <Grid />
+            <Grid RowSpacing="4">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+              </Grid.RowDefinitions>
+              <TextBlock
+                Grid.Row="0"
+                VerticalAlignment="Top"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind Title}"
+              />
+              <editor:CodeEditorControl
+                Grid.Row="1"
+                Height="200"
+                BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="4"
+                DataContext="{x:Bind Mode=OneWay}"
+                HighlightingLanguage="yaml"
+                Loaded="CodeEditorControl_Loaded"
+              />
+            </Grid>
+          </controls:DataRow>
+        </DataTemplate>
+      </templateselectors:DetailsContentTemplateSelector.EditorTemplate>
     </templateselectors:DetailsContentTemplateSelector>
     <templateselectors:DetailsSectionTemplateSelector x:Key="DetailsSectionTemplateSelector">
       <templateselectors:DetailsSectionTemplateSelector.SectionTemplate>
         <DataTemplate x:DataType="details:DetailsSection">
-          <Grid>
+          <Grid RowSpacing="8">
             <Grid.RowDefinitions>
               <RowDefinition Height="Auto" />
               <RowDefinition Height="*" />
+              <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <TextBlock
               Style="{ThemeResource SubtitleTextBlockStyle}"
@@ -475,6 +506,17 @@
                 </controls:DataTable>
               </controls:HeaderedItemsControl.Header>
             </controls:HeaderedItemsControl>
+            <Grid
+              Grid.Row="2"
+              Margin="8,0,0,0"
+              Visibility="{x:Bind SaveCommand, Converter={StaticResource NullToCollapsedConverter}}"
+            >
+              <Button
+                Command="{x:Bind SaveCommand}"
+                Content="Save"
+                Style="{ThemeResource AccentButtonStyle}"
+              />
+            </Grid>
           </Grid>
         </DataTemplate>
       </templateselectors:DetailsSectionTemplateSelector.SectionTemplate>

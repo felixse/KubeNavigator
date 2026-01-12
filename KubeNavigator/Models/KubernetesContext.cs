@@ -217,6 +217,11 @@ public class KubernetesContext
         await _kubernetesService.SaveConfigMapAsync(configMap);
     }
 
+    public async Task SaveSecretAsync(V1Secret secret)
+    {
+        await _kubernetesService.SaveSecretAsync(secret);
+    }
+
     private async Task RunSocketAsync(
         Socket socket,
         IKubernetesObject<V1ObjectMeta> resource,

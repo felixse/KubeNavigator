@@ -402,6 +402,15 @@ public partial class KubernetesService
         );
     }
 
+    public async Task SaveSecretAsync(V1Secret secret)
+    {
+        await _kubernetes.CoreV1.ReplaceNamespacedSecretAsync(
+            secret,
+            secret.Metadata.Name,
+            secret.Metadata.Namespace()
+        );
+    }
+
     private static string ExtractResourceNameFromYaml(string yaml)
     {
         try

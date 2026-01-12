@@ -32,16 +32,16 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
                 .Items.OfType<DetailsEditorItem>()
                 .ToDictionary(
                     item => item.Title,
-                    item => item.TextRetriever?.Invoke() ?? item.Value
+                    item => Encoding.UTF8.GetBytes(item.TextRetriever?.Invoke() ?? item.Value)
                 );
-            //Secret.Data = newData;
+            Secret.Data = newData;
 
-            //await Cluster.Context.SaveConfigMapAsync(ConfigMap);
-            //Cluster.App.WindowManager.ActiveWindow.ShowMessage(
-            //    "Success",
-            //    "ConfigMap saved successfully.",
-            //    NotificationSeverity.Success
-            //);
+            await Cluster.Context.SaveSecretAsync(Secret);
+            Cluster.App.WindowManager.ActiveWindow.ShowMessage(
+                "Success",
+                "Secret saved successfully.",
+                NotificationSeverity.Success
+            );
         }
         else
         {

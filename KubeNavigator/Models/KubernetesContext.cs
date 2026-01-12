@@ -116,6 +116,14 @@ public class KubernetesContext
                 (V1ConfigMap.KubeGroup, V1ConfigMap.KubeApiVersion, V1ConfigMap.KubePluralName) =>
                     new KubernetesResourceRepository<V1ConfigMap>(resourceType, _kubernetesService),
                 (
+                    Eventsv1Event.KubeGroup,
+                    Eventsv1Event.KubeApiVersion,
+                    Eventsv1Event.KubePluralName
+                ) => new KubernetesResourceRepository<Eventsv1Event>(
+                    resourceType,
+                    _kubernetesService
+                ),
+                (
                     V1CustomResourceDefinition.KubeGroup,
                     V1CustomResourceDefinition.KubeApiVersion,
                     V1CustomResourceDefinition.KubePluralName

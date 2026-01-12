@@ -98,7 +98,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                 new TodoViewModel("Overview"),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Node),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Namespace),
-                new TodoViewModel("Events"),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.Event,
+                    (x) => new SecretViewModel((Eventsv1Event)x, Cluster)
+                ),
             ]
         );
         var workloads = new NavigationGroupViewModel(
@@ -139,7 +144,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     this,
                     cluster,
                     ResourceType.Secret,
-                    (x) => new SecretViewModel((V1Secret)x, Cluster)
+                    (x) => new EventViewModel((Eventsv1Event)x, Cluster)
                 ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ResourceQuota),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.LimitRange),

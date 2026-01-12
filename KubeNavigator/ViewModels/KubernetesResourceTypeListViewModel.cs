@@ -148,7 +148,7 @@ public partial class KubernetesResourceTypeListViewModel
 
         foreach (var item in Items?.Cast<KubernetesResourceViewModel>() ?? [])
         {
-            item.Age = item.CalculateAge();
+            item.RefreshTimestamps();
         }
     }
 

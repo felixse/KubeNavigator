@@ -15,6 +15,7 @@
         <resources:ServiceResources />
         <resources:ConfigMapResources />
         <resources:SecretResources />
+        <resources:EventResources />
         <!--  Other merged dictionaries here  -->
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>

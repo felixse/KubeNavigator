@@ -41,6 +41,11 @@ public partial class TableHeaderTemplateSelector : DataTemplateSelector
                 var secretTableHeader = Application.Current.Resources["SecretTableHeader"];
                 return (DataTemplate)secretTableHeader;
             }
+            else if (kubernetesResourceTypeListViewModel.ResourceType == ResourceType.Event)
+            {
+                var eventTableHeader = Application.Current.Resources["EventTableHeader"];
+                return (DataTemplate)eventTableHeader;
+            }
             return KubernetesResourceTemplate;
         }
         else if (item is HelmReleasesViewModel && HelmReleaseTemplate != null)

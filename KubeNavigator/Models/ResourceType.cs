@@ -1,4 +1,6 @@
-﻿using k8s.Models;
+﻿using System;
+using HtmlAgilityPack;
+using k8s.Models;
 
 namespace KubeNavigator.Models;
 
@@ -57,6 +59,17 @@ public record ResourceType(
             PluralDisplayName: "Daemon Sets",
             SingularDisplayName: "Daemon Set"
         );
+
+    public static ResourceType Event =>
+        new(
+            Eventsv1Event.KubeGroup,
+            Eventsv1Event.KubeApiVersion,
+            Eventsv1Event.KubePluralName,
+            IsNamespaceScoped: true,
+            PluralDisplayName: "Events",
+            SingularDisplayName: "Event"
+        );
+
     public static ResourceType StatefulSet =>
         new(
             V1StatefulSet.KubeGroup,
@@ -327,4 +340,48 @@ public record ResourceType(
             PluralDisplayName: "Definitions",
             SingularDisplayName: "Custom Resource Definition"
         );
+
+    public static ResourceType? FromKind(string kind)
+    {
+        return kind switch
+        {
+            "Node" => Node,
+            "Namespace" => Namespace,
+            "Pod" => Pod,
+            "Deployment" => Deployment,
+            "DaemonSet" => DaemonSet,
+            "Event" => Event,
+            "StatefulSet" => StatefulSet,
+            "ReplicaSet" => ReplicaSet,
+            "ReplicationController" => ReplicationController,
+            "Job" => Job,
+            "CronJob" => CronJob,
+            "ConfigMap" => ConfigMap,
+            "Secret" => Secret,
+            "ResourceQuota" => ResourceQuota,
+            "LimitRange" => LimitRange,
+            "HorizontalPodAutoscaler" => HorizontalPodAutoscaler,
+            "PodDisruptionBudget" => PodDisruptionBudget,
+            "PriorityClass" => PriorityClass,
+            "RuntimeClass" => RuntimeClass,
+            "Lease" => Lease,
+            "MutatingWebhookConfiguration" => MutatingWebhookConfiguration,
+            "ValidatingWebhookConfiguration" => ValidatingWebhookConfiguration,
+            "Service" => Service,
+            "Endpoint" => Endpoint,
+            "Ingress" => Ingress,
+            "IngressClass" => IngressClass,
+            "NetworkPolicy" => NetworkPolicy,
+            "PersistentVolumeClaim" => PersistentVolumeClaim,
+            "PersistentVolume" => PersistentVolume,
+            "StorageClass" => StorageClass,
+            "ServiceAccount" => ServiceAccount,
+            "ClusterRole" => ClusterRole,
+            "Role" => Role,
+            "ClusterRoleBinding" => ClusterRoleBinding,
+            "RoleBinding" => RoleBinding,
+            "CustomResourceDefinition" => CustomResourceDefinition,
+            _ => null,
+        };
+    }
 }

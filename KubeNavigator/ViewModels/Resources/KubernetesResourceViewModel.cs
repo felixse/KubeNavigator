@@ -58,7 +58,7 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
         Cluster = cluster;
         Resource = resource;
         ResourceType = resourceType;
-        Age = CalculateAge();
+        Age = FormatDuration(resource.CreationTimestamp());
     }
 
     [RelayCommand]
@@ -78,6 +78,11 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
     public void UpdateDetails()
     {
         Details = CreateDetails(); // todo remove details property, let the detailsviewmodel handle this instead
+    }
+
+    public virtual void RefreshTimestamps()
+    {
+        Age = FormatDuration(Resource.CreationTimestamp());
     }
 
     protected virtual List<IDetailsSection> CreateDetails()
@@ -118,9 +123,9 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
         ];
     }
 
-    public string CalculateAge()
+    protected static string FormatDuration(DateTime? timestamp)
     {
-        var nullableAge = DateTime.UtcNow - Resource.CreationTimestamp();
+        var nullableAge = DateTime.UtcNow - timestamp;
         if (nullableAge is TimeSpan age)
         {
             return FormatDuration(age);

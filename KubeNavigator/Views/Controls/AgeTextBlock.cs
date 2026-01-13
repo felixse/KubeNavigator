@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -7,7 +8,11 @@ namespace KubeNavigator.Views.Controls;
 
 public partial class AgeTextBlock : UserControl
 {
-    private DispatcherQueueTimer? _timer;
+    private static readonly object _lockObject = new object();
+    private static readonly List<WeakReference<AgeTextBlock>> _instances = new();
+    private static DispatcherQueueTimer? _sharedTimer;
+    private static DispatcherQueue? _dispatcherQueue;
+
     private DateTime? _timestamp;
     private readonly TextBlock _textBlock;
 
@@ -44,25 +49,56 @@ public partial class AgeTextBlock : UserControl
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (_timer == null)
+        lock (_lockObject)
         {
-            _timer = DispatcherQueue.CreateTimer();
-            _timer.Interval = TimeSpan.FromSeconds(1);
-            _timer.Tick += OnTimerTick;
+            // Register this instance
+            _instances.Add(new WeakReference<AgeTextBlock>(this));
+
+            // Initialize shared timer if needed
+            if (_sharedTimer == null)
+            {
+                _dispatcherQueue = DispatcherQueue;
+                _sharedTimer = _dispatcherQueue.CreateTimer();
+                _sharedTimer.Interval = TimeSpan.FromSeconds(1);
+                _sharedTimer.Tick += OnSharedTimerTick;
+                _sharedTimer.Start();
+            }
         }
 
         UpdateAge();
-        _timer.Start();
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
-        _timer?.Stop();
+        // Instance will be cleaned up on next timer tick
     }
 
-    private void OnTimerTick(DispatcherQueueTimer sender, object args)
+    private static void OnSharedTimerTick(DispatcherQueueTimer sender, object args)
     {
-        UpdateAge();
+        lock (_lockObject)
+        {
+            // Clean up dead references and update alive instances
+            for (int i = _instances.Count - 1; i >= 0; i--)
+            {
+                if (_instances[i].TryGetTarget(out var control))
+                {
+                    control.UpdateAge();
+                }
+                else
+                {
+                    // Remove dead reference
+                    _instances.RemoveAt(i);
+                }
+            }
+
+            // Stop timer if no instances remain
+            if (_instances.Count == 0 && _sharedTimer != null)
+            {
+                _sharedTimer.Stop();
+                _sharedTimer = null;
+                _dispatcherQueue = null;
+            }
+        }
     }
 
     private void UpdateAge()

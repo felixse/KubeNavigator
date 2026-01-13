@@ -12,10 +12,7 @@ namespace KubeNavigator.ViewModels.Resources;
 internal partial class EventViewModel : KubernetesResourceViewModel
 {
     public EventViewModel(IKubernetesObject<V1ObjectMeta> resource, ClusterViewModel cluster)
-        : base(resource, ResourceType.Event, cluster)
-    {
-        LastSeen = FormatDuration(Event.DeprecatedLastTimestamp);
-    }
+        : base(resource, ResourceType.Event, cluster) { }
 
     public Eventsv1Event Event => (Eventsv1Event)Resource;
 
@@ -29,14 +26,7 @@ internal partial class EventViewModel : KubernetesResourceViewModel
 
     public int Count => Event.DeprecatedCount ?? 0;
 
-    [ObservableProperty]
-    public partial string LastSeen { get; private set; }
-
-    public override void RefreshTimestamps()
-    {
-        base.RefreshTimestamps();
-        LastSeen = FormatDuration(Event.DeprecatedLastTimestamp);
-    }
+    public DateTime? LastSeen => Event.DeprecatedLastTimestamp;
 
     public override List<IDetailsSection> CreateDetails()
     {

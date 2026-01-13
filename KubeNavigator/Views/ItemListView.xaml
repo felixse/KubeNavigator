@@ -7,6 +7,7 @@
   xmlns:communityConverters="using:CommunityToolkit.WinUI.Converters"
   xmlns:controls="using:CommunityToolkit.WinUI.Controls"
   xmlns:converters="using:KubeNavigator.Converters"
+  xmlns:customcontrols="using:KubeNavigator.Views.Controls"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:helm="using:KubeNavigator.ViewModels.Helm"
   xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
@@ -45,7 +46,7 @@
             <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
             <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
             <TextBlock VerticalAlignment="Center" Text="{x:Bind Namespace}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Age, Mode=OneWay}" />
+            <customcontrols:AgeTextBlock VerticalAlignment="Center" Timestamp="{x:Bind Age}" />
           </controls:DataRow>
         </DataTemplate>
       </templateselectors:TableTemplateSelector.KubernetesResourceTemplate>

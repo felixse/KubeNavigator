@@ -23,8 +23,6 @@ public partial class KubernetesResourceTypeListViewModel
 
     public bool Loaded { get; set; } // todo this is not set if this is a pinned tab, use the activated method instead?
 
-    private readonly DispatcherQueueTimer _timer;
-
     [ObservableProperty]
     public partial bool IsPinned { get; private set; }
 
@@ -54,12 +52,6 @@ public partial class KubernetesResourceTypeListViewModel
 
         _itemViewModelFactory = itemViewModelFactory ??= (x) =>
             new KubernetesResourceViewModel(x, ResourceType, Cluster);
-
-        _timer = Workspace.Window.App.DispatcherQueue.CreateTimer();
-        _timer.Interval = TimeSpan.FromSeconds(1);
-        _timer.Tick += Timer_Tick;
-        _timer.Start();
-        Timer_Tick(_timer, this);
     }
 
     public async Task ActivateAsync()
@@ -138,17 +130,6 @@ public partial class KubernetesResourceTypeListViewModel
             {
                 OnPropertyChanged(nameof(IsAllSelected));
             }
-        }
-    }
-
-    private void Timer_Tick(DispatcherQueueTimer sender, object args)
-    {
-        if (!Loaded)
-            return;
-
-        foreach (var item in Items?.Cast<KubernetesResourceViewModel>() ?? [])
-        {
-            item.RefreshTimestamps();
         }
     }
 

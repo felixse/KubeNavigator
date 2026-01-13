@@ -70,6 +70,7 @@ public class KubernetesContext
 
             Status = new ClusterStatus { Status = ConnectionStatus.Connecting };
 
+            await _kubernetesService.InitializeAsync();
             var connected = await _kubernetesService.TestConnectionAsync();
 
             if (connected)

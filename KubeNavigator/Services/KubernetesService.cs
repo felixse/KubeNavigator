@@ -18,20 +18,24 @@ namespace KubeNavigator.Services;
 public partial class KubernetesService
 {
     private readonly ILogger<KubernetesService> _logger;
-    private readonly IKubernetes _kubernetes;
+    private IKubernetes? _kubernetes;
     private readonly string _contextName;
 
     public KubernetesService(string contextName, ILogger<KubernetesService> logger)
     {
         _contextName = contextName;
         _logger = logger;
+    }
 
-        Log.CreatingKubernetesClient(_logger, contextName);
-        var config = KubernetesClientConfiguration.BuildConfigFromConfigFile(
-            currentContext: contextName
+    public async Task InitializeAsync()
+    {
+        Log.CreatingKubernetesClient(_logger, _contextName);
+        var config = await KubernetesClientConfiguration.BuildConfigFromConfigFileAsync(
+            new FileInfo(KubernetesClientConfiguration.KubeConfigDefaultLocation),
+            _contextName
         );
         _kubernetes = new Kubernetes(config);
-        Log.KubernetesClientCreated(_logger, contextName);
+        Log.KubernetesClientCreated(_logger, _contextName);
     }
 
     public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)

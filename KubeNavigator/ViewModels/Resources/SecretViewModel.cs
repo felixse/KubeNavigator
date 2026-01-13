@@ -22,34 +22,31 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
     public string Type => Secret.Type;
 
     [RelayCommand]
-    public async Task SaveAsync()
+    public async Task SaveAsync(DetailsSection? dataSection)
     {
-        var data = Details.Find(x => x is DetailsSection section && section.Header == "Data");
-
-        if (data is DetailsSection dataSection)
-        {
-            var newData = dataSection
-                .Items.OfType<DetailsEditorItem>()
-                .ToDictionary(
-                    item => item.Title,
-                    item => Encoding.UTF8.GetBytes(item.TextRetriever?.Invoke() ?? item.Value)
-                );
-            Secret.Data = newData;
-
-            await Cluster.Context.SaveSecretAsync(Secret);
-            Cluster.App.WindowManager.ActiveWindow.ShowMessage(
-                "Success",
-                "Secret saved successfully.",
-                NotificationSeverity.Success
-            );
-        }
-        else
+        if (dataSection == null)
         {
             // todo log error
+            return;
         }
+
+        var newData = dataSection
+            .Items.OfType<DetailsEditorItem>()
+            .ToDictionary(
+                item => item.Title,
+                item => Encoding.UTF8.GetBytes(item.TextRetriever?.Invoke() ?? item.Value)
+            );
+        Secret.Data = newData;
+
+        await Cluster.Context.SaveSecretAsync(Secret);
+        Cluster.App.WindowManager.ActiveWindow.ShowMessage(
+            "Success",
+            "Secret saved successfully.",
+            NotificationSeverity.Success
+        );
     }
 
-    protected override List<IDetailsSection> CreateDetails()
+    public override List<IDetailsSection> CreateDetails()
     {
         return
         [

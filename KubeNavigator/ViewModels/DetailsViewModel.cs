@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using KubeNavigator.ViewModels.Details;
+using DetailsTypes = KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
 
@@ -12,6 +12,9 @@ namespace KubeNavigator.ViewModels;
 public partial class DetailsViewModel : ObservableObject
 {
     private readonly Action? onClose;
+
+    [ObservableProperty]
+    private List<DetailsTypes.IDetailsSection> details = [];
 
     public DetailsViewModel(
         KubernetesResourceViewModel selectedResource,
@@ -23,6 +26,8 @@ public partial class DetailsViewModel : ObservableObject
         Cluster = selectedResource.Cluster;
         ShelfHost = shelfHost;
         this.onClose = onClose;
+        SubscribeToDetailsRefresh(selectedResource);
+        UpdateDetails();
     }
 
     public KubernetesResourceViewModel SelectedResource => NavigationStack.Peek();
@@ -35,7 +40,7 @@ public partial class DetailsViewModel : ObservableObject
     public IShelfHost ShelfHost { get; }
 
     [RelayCommand]
-    public async Task NavigateAsync(DetailsLinkItem link)
+    public async Task NavigateAsync(DetailsTypes.DetailsLinkItem link)
     {
         if (link.ResourceName == null)
         {
@@ -47,9 +52,12 @@ public partial class DetailsViewModel : ObservableObject
 
         if (resource != null)
         {
+            UnsubscribeFromDetailsRefresh(SelectedResource);
             NavigationStack.Push(resource);
+            SubscribeToDetailsRefresh(resource);
             OnPropertyChanged(nameof(SelectedResource));
             OnPropertyChanged(nameof(CanGoBack));
+            UpdateDetails();
         }
         else
         {
@@ -62,10 +70,33 @@ public partial class DetailsViewModel : ObservableObject
     {
         if (NavigationStack.Count > 1)
         {
+            UnsubscribeFromDetailsRefresh(SelectedResource);
             NavigationStack.Pop();
+            SubscribeToDetailsRefresh(SelectedResource);
             OnPropertyChanged(nameof(SelectedResource));
             OnPropertyChanged(nameof(CanGoBack));
+            UpdateDetails();
         }
+    }
+
+    private void SubscribeToDetailsRefresh(KubernetesResourceViewModel resource)
+    {
+        resource.DetailsRefreshRequested += OnDetailsRefreshRequested;
+    }
+
+    private void UnsubscribeFromDetailsRefresh(KubernetesResourceViewModel resource)
+    {
+        resource.DetailsRefreshRequested -= OnDetailsRefreshRequested;
+    }
+
+    private void OnDetailsRefreshRequested(object? sender, EventArgs e)
+    {
+        UpdateDetails();
+    }
+
+    private void UpdateDetails()
+    {
+        Details = SelectedResource.CreateDetails();
     }
 
     public void Close()

@@ -115,9 +115,7 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
     {
         forwardedPort.Stop();
         App.ForwardedPorts.Remove(forwardedPort);
-
-        // update details to remove the forwarded port
-        resource.UpdateDetails();
+        resource.RequestDetailsRefresh();
     }
 
     public CancellationTokenSource ForwardContainerPort(

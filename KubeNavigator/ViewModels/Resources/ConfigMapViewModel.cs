@@ -19,34 +19,31 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
     public string Keys => string.Join(", ", ConfigMap.Data?.Keys ?? []);
 
     [RelayCommand]
-    public async Task SaveAsync()
+    public async Task SaveAsync(DetailsSection? dataSection)
     {
-        var data = Details.Find(x => x is DetailsSection section && section.Header == "Data");
-
-        if (data is DetailsSection dataSection)
-        {
-            var newData = dataSection
-                .Items.OfType<DetailsEditorItem>()
-                .ToDictionary(
-                    item => item.Title,
-                    item => item.TextRetriever?.Invoke() ?? item.Value
-                );
-            ConfigMap.Data = newData;
-
-            await Cluster.Context.SaveConfigMapAsync(ConfigMap);
-            Cluster.App.WindowManager.ActiveWindow.ShowMessage(
-                "Success",
-                "ConfigMap saved successfully.",
-                NotificationSeverity.Success
-            );
-        }
-        else
+        if (dataSection == null)
         {
             // todo log error
+            return;
         }
+
+        var newData = dataSection
+            .Items.OfType<DetailsEditorItem>()
+            .ToDictionary(
+                item => item.Title,
+                item => item.TextRetriever?.Invoke() ?? item.Value
+            );
+        ConfigMap.Data = newData;
+
+        await Cluster.Context.SaveConfigMapAsync(ConfigMap);
+        Cluster.App.WindowManager.ActiveWindow.ShowMessage(
+            "Success",
+            "ConfigMap saved successfully.",
+            NotificationSeverity.Success
+        );
     }
 
-    protected override List<IDetailsSection> CreateDetails()
+    public override List<IDetailsSection> CreateDetails()
     {
         return
         [

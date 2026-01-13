@@ -32,7 +32,7 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
             ? "Terminating"
             : string.Join(", ", Service.Status?.Conditions?.Select(c => c.Type) ?? []);
 
-    protected override List<IDetailsSection> CreateDetails()
+    public override List<IDetailsSection> CreateDetails()
     {
         var sections = new List<IDetailsSection>
         {

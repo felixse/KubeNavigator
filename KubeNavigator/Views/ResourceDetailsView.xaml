@@ -513,6 +513,7 @@
             >
               <Button
                 Command="{x:Bind SaveCommand}"
+                CommandParameter="{x:Bind}"
                 Content="Save"
                 Style="{ThemeResource AccentButtonStyle}"
               />
@@ -568,7 +569,7 @@
     <ItemsControl
       Margin="8"
       ItemTemplateSelector="{StaticResource DetailsSectionTemplateSelector}"
-      ItemsSource="{x:Bind ViewModel.SelectedResource.Details, Mode=OneWay}"
+      ItemsSource="{x:Bind ViewModel.Details, Mode=OneWay}"
     />
   </ScrollViewer>
 </UserControl>

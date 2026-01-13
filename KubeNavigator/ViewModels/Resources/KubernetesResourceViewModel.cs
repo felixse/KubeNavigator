@@ -14,6 +14,8 @@ namespace KubeNavigator.ViewModels.Resources;
 
 public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
 {
+    public event EventHandler? DetailsRefreshRequested;
+
     public string Name => Resource.Name();
     public string Namespace => Resource.Namespace();
 
@@ -22,9 +24,6 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
 
     [ObservableProperty]
     public partial bool IsSelected { get; set; }
-
-    [ObservableProperty]
-    public partial List<IDetailsSection> Details { get; private set; } = [];
 
     [ObservableProperty]
     public partial IKubernetesObject<V1ObjectMeta> Resource { get; set; }
@@ -75,17 +74,17 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
         await Cluster.DeleteResourcesAsync(ResourceType, [this]);
     }
 
-    public void UpdateDetails()
-    {
-        Details = CreateDetails(); // todo remove details property, let the detailsviewmodel handle this instead
-    }
-
     public virtual void RefreshTimestamps()
     {
         Age = FormatDuration(Resource.CreationTimestamp());
     }
 
-    protected virtual List<IDetailsSection> CreateDetails()
+    public void RequestDetailsRefresh()
+    {
+        DetailsRefreshRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    public virtual List<IDetailsSection> CreateDetails()
     {
         return
         [
@@ -132,11 +131,6 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
         }
 
         return string.Empty;
-    }
-
-    partial void OnResourceChanged(IKubernetesObject<V1ObjectMeta> value)
-    {
-        UpdateDetails();
     }
 
     private static string FormatDuration(TimeSpan duration, bool compact = true)

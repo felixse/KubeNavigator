@@ -38,7 +38,7 @@ internal partial class EventViewModel : KubernetesResourceViewModel
         LastSeen = FormatDuration(Event.DeprecatedLastTimestamp);
     }
 
-    protected override List<IDetailsSection> CreateDetails()
+    public override List<IDetailsSection> CreateDetails()
     {
         return
         [

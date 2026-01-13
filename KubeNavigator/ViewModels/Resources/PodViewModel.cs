@@ -75,7 +75,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
     public string ControlledBy =>
         Pod.Metadata.OwnerReferences?.FirstOrDefault()?.Name ?? string.Empty;
 
-    protected override List<IDetailsSection> CreateDetails()
+    public override List<IDetailsSection> CreateDetails()
     {
         return
         [

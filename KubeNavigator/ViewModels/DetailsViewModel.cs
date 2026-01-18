@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DetailsTypes = KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
+using DetailsTypes = KubeNavigator.ViewModels.Details;
 
 namespace KubeNavigator.ViewModels;
 
@@ -14,7 +14,7 @@ public partial class DetailsViewModel : ObservableObject
     private readonly Action? onClose;
 
     [ObservableProperty]
-    private List<DetailsTypes.IDetailsSection> details = [];
+    public partial List<DetailsTypes.IDetailsSection> Details { get; private set; } = [];
 
     public DetailsViewModel(
         KubernetesResourceViewModel selectedResource,
@@ -27,7 +27,7 @@ public partial class DetailsViewModel : ObservableObject
         ShelfHost = shelfHost;
         this.onClose = onClose;
         SubscribeToDetailsRefresh(selectedResource);
-        UpdateDetails();
+        UpdateDetailsAsync();
     }
 
     public KubernetesResourceViewModel SelectedResource => NavigationStack.Peek();
@@ -57,7 +57,7 @@ public partial class DetailsViewModel : ObservableObject
             SubscribeToDetailsRefresh(resource);
             OnPropertyChanged(nameof(SelectedResource));
             OnPropertyChanged(nameof(CanGoBack));
-            UpdateDetails();
+            await UpdateDetailsAsync();
         }
         else
         {
@@ -66,7 +66,7 @@ public partial class DetailsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public void GoBack()
+    public async Task GoBackAsync()
     {
         if (NavigationStack.Count > 1)
         {
@@ -75,7 +75,7 @@ public partial class DetailsViewModel : ObservableObject
             SubscribeToDetailsRefresh(SelectedResource);
             OnPropertyChanged(nameof(SelectedResource));
             OnPropertyChanged(nameof(CanGoBack));
-            UpdateDetails();
+            await UpdateDetailsAsync();
         }
     }
 
@@ -89,14 +89,14 @@ public partial class DetailsViewModel : ObservableObject
         resource.DetailsRefreshRequested -= OnDetailsRefreshRequested;
     }
 
-    private void OnDetailsRefreshRequested(object? sender, EventArgs e)
+    private async void OnDetailsRefreshRequested(object? sender, EventArgs e)
     {
-        UpdateDetails();
+        await UpdateDetailsAsync();
     }
 
-    private void UpdateDetails()
+    private async Task UpdateDetailsAsync()
     {
-        Details = SelectedResource.CreateDetails();
+        Details = await SelectedResource.CreateDetailsAsync();
     }
 
     public void Close()

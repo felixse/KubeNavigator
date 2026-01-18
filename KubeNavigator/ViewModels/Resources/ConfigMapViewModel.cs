@@ -29,10 +29,7 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
 
         var newData = dataSection
             .Items.OfType<DetailsEditorItem>()
-            .ToDictionary(
-                item => item.Title,
-                item => item.TextRetriever?.Invoke() ?? item.Value
-            );
+            .ToDictionary(item => item.Title, item => item.TextRetriever?.Invoke() ?? item.Value);
         ConfigMap.Data = newData;
 
         await Cluster.Context.SaveConfigMapAsync(ConfigMap);
@@ -43,8 +40,9 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
         );
     }
 
-    public override List<IDetailsSection> CreateDetails()
+    public override async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
+        var events = await GetEventsSectionAsync();
         return
         [
             new DetailsSection { Items = [.. GetConfigMapItems()] },
@@ -54,6 +52,7 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
                 Items = [.. GetDataItems()],
                 SaveCommand = SaveCommand,
             },
+            events,
         ];
     }
 

@@ -24,9 +24,9 @@ public sealed partial class DetailWindow : Window
         RootFrame.Navigate(typeof(DetailsWindowRootPage), viewModel);
     }
 
-    private void AppTitleBar_BackRequested(TitleBar sender, object args)
+    private async void AppTitleBar_BackRequested(TitleBar sender, object args)
     {
-        ViewModel.Details.GoBack();
+        await ViewModel.Details.GoBackAsync();
     }
 
     private void AppTitleBar_Loaded(object sender, RoutedEventArgs e)

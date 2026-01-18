@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using k8s.Models;
 using KubeNavigator.Models;
@@ -75,8 +76,9 @@ public partial class PodViewModel : KubernetesResourceViewModel
     public string ControlledBy =>
         Pod.Metadata.OwnerReferences?.FirstOrDefault()?.Name ?? string.Empty;
 
-    public override List<IDetailsSection> CreateDetails()
+    public override async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
+        var events = await GetEventsSectionAsync();
         return
         [
             new DetailsSection { Items = [.. GetPodItems()] },
@@ -87,7 +89,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 [
                     .. Pod.Spec.Containers.Select(c => new DetailsGroup
                     {
-                        Title = c.Name,
+                        Header = new DetailsGroupHeader { Title = c.Name },
                         Items = [.. GetContainerItems(c)],
                     }),
                 ],
@@ -99,12 +101,13 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 [
                     .. Pod.Spec.Volumes?.Select(v => new DetailsGroup
                     {
-                        Title = v.Name,
+                        Header = new DetailsGroupHeader { Title = v.Name, Symbol = "\uEDA2" },
                         Items = [.. GetVolumeItems(v)],
                     })
                         ?? [],
                 ],
             },
+            events,
         ];
     }
 

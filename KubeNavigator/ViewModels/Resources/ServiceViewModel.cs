@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
@@ -32,8 +33,9 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
             ? "Terminating"
             : string.Join(", ", Service.Status?.Conditions?.Select(c => c.Type) ?? []);
 
-    public override List<IDetailsSection> CreateDetails()
+    public override async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
+        var events = await GetEventsSectionAsync();
         var sections = new List<IDetailsSection>
         {
             new DetailsSection { Items = [.. GetServiceItems()] },
@@ -73,6 +75,8 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
         sections.Add(
             new DetailsSection { Header = "Connection", Items = [.. GetConnectionItems()] }
         );
+
+        sections.AddRange(events);
 
         return sections;
     }

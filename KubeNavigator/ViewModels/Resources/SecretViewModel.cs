@@ -46,8 +46,9 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
         );
     }
 
-    public override List<IDetailsSection> CreateDetails()
+    public override async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
+        var events = await GetEventsSectionAsync();
         return
         [
             new DetailsSection { Items = [.. GetConfigMapItems()] },
@@ -57,6 +58,7 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
                 Items = [.. GetDataItems()],
                 SaveCommand = SaveCommand,
             },
+            events,
         ];
     }
 

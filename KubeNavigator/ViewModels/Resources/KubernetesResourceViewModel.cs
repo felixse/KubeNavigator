@@ -9,6 +9,7 @@ using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Shelf;
+using Microsoft.Extensions.Logging;
 
 namespace KubeNavigator.ViewModels.Resources;
 
@@ -76,8 +77,9 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
         DetailsRefreshRequested?.Invoke(this, EventArgs.Empty);
     }
 
-    public virtual List<IDetailsSection> CreateDetails()
+    public virtual async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
+        var events = await GetEventsSectionAsync();
         return
         [
             new DetailsSection
@@ -111,6 +113,55 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
                     },
                 ],
             },
+            events,
         ];
+    }
+
+    protected async Task<IDetailsSection> GetEventsSectionAsync()
+    {
+        var events = await Cluster.Context.GetEventsForResourceAsync(Resource);
+        return new GroupedDetailsSection
+        {
+            Title = "Events",
+            Groups =
+            [
+                .. events.Select(e => new DetailsGroup
+                {
+                    Header = new DetailsGroupHeader
+                    {
+                        Title = e.Note,
+                        Category = e.Type == "Warning" ? Category.Warning : Category.Default,
+                    },
+                    Items = [.. GetEventItems(e)],
+                }),
+            ],
+        };
+    }
+
+    private static IEnumerable<IDetailsItem> GetEventItems(Eventsv1Event @event)
+    {
+        yield return new DetailsTextItem
+        {
+            Title = "Source",
+            Value = $"{@event.ReportingController} {@event.ReportingInstance}",
+        };
+
+        yield return new DetailsTextItem
+        {
+            Title = "Count",
+            Value = @event.DeprecatedCount?.ToString(),
+        };
+
+        yield return new DetailsTextItem
+        {
+            Title = "Sub-object",
+            Value = @event.Regarding.FieldPath,
+        };
+
+        yield return new DetailsTextItem
+        {
+            Title = "Last seen",
+            Value = @event.DeprecatedLastTimestamp?.ToString(),
+        };
     }
 }

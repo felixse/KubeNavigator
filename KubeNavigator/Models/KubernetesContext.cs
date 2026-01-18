@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -159,6 +160,27 @@ public class KubernetesContext
     public Task<PodExecSession> ExecAsync(V1Pod pod, CancellationToken cancellationToken)
     {
         return _kubernetesService.OpenPodExecSessionAsync(pod, cancellationToken);
+    }
+
+    public async Task<IEnumerable<Eventsv1Event>> GetEventsForResourceAsync(
+        IKubernetesObject<V1ObjectMeta> resource
+    )
+    {
+        var eventRepository = await GetResourceRepositoryAsync(ResourceType.Event);
+
+        if (eventRepository == null)
+        {
+            // todo log
+            return [];
+        }
+
+        return eventRepository
+            .GetItems<Eventsv1Event>()
+            .Where(e =>
+                e.Regarding?.Kind == resource.GetKubernetesTypeMetadata().Kind
+                && e.Regarding?.Name == resource.Metadata.Name
+                && e.Regarding?.NamespaceProperty == resource.Metadata.NamespaceProperty
+            );
     }
 
     public Task<string> GetResourceAsYamlAsync(

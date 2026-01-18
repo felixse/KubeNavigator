@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using k8s;
 using k8s.Models;
@@ -28,7 +29,7 @@ internal partial class EventViewModel : KubernetesResourceViewModel
 
     public DateTime? LastSeen => Event.DeprecatedLastTimestamp;
 
-    public override List<IDetailsSection> CreateDetails()
+    public override async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
         return
         [

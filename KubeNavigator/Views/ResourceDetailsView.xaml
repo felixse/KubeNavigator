@@ -540,10 +540,24 @@
                       <TransitionCollection />
                     </Expander.Transitions>
                     <Expander.Header>
-                      <TextBlock
-                        Style="{ThemeResource BodyStrongTextBlockStyle}"
-                        Text="{x:Bind Title}"
-                      />
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon
+                          FontSize="16"
+                          Glyph="{x:Bind Header.Symbol}"
+                          Visibility="{x:Bind Header.Symbol, Converter={StaticResource NullToCollapsedConverter}}"
+                        />
+                        <controls:SwitchPresenter Value="{x:Bind Header.CategoryString}">
+                          <controls:Case Value="Warning">
+                            <TextBlock
+                              Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                              Text="{x:Bind Header.Title}"
+                            />
+                          </controls:Case>
+                          <controls:Case IsDefault="True">
+                            <TextBlock Text="{x:Bind Header.Title}" />
+                          </controls:Case>
+                        </controls:SwitchPresenter>
+                      </StackPanel>
                     </Expander.Header>
                     <controls:HeaderedItemsControl
                       ItemTemplateSelector="{StaticResource DetailsContentTemplateSelector}"

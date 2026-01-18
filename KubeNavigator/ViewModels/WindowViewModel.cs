@@ -22,7 +22,7 @@ public partial class WindowViewModel : ObservableObject, IWindow
 {
     public IUserConfirmationService UserConfirmationService { get; }
 
-    public IShelfHost? ShelfHost => SelectedWorkspace;
+    public IShelfHost ShelfHost => SelectedWorkspace;
 
     public ObservableCollection<WorkspaceViewModel> Workspaces { get; set; }
 

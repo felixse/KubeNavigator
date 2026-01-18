@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
@@ -93,6 +92,9 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         SelectedItem = FooterItems.First(f => f is ClusterListViewModel);
         ShelfItems.Add(new ApplicationLogViewModel(App.LoggingService, App.ThemeManager));
         SelectedShelfItem = ShelfItems.First();
+        AppCommands = new ObservableCollection<IAppCommand>(
+            FooterItems.Select(x => new NavigateToViewAppCommand(x, this))
+        );
 
         _fuse = new Fuse(threshold: 0.2);
     }
@@ -377,6 +379,11 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     [RelayCommand]
     public void SelectNextCommand()
     {
+        if (SelectedCommand == null)
+        {
+            return;
+        }
+
         var index = FilteredAppCommands.IndexOf(SelectedCommand);
         if (index < FilteredAppCommands.Count - 1)
         {
@@ -388,6 +395,11 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     [RelayCommand]
     public void SelectPreviousCommand()
     {
+        if (SelectedCommand == null)
+        {
+            return;
+        }
+
         var index = FilteredAppCommands.IndexOf(SelectedCommand);
         if (index > 0)
         {
@@ -400,7 +412,10 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     public async Task ExecuteSelectedCommand()
     {
         Window.IsCommandPanelOpen = false;
-        await SelectedCommand?.ExecuteAsync();
+        if (SelectedCommand != null)
+        {
+            await SelectedCommand.ExecuteAsync();
+        }
     }
 
     private void AddCustomResourceDefinitionToNavigation(V1CustomResourceDefinition crd)
@@ -456,7 +471,14 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     partial void OnCommandTextChanged(string? oldValue, string? newValue)
     {
         FilteredAppCommands.RefreshFilter();
-        SelectedCommand = (IAppCommand)FilteredAppCommands.FirstOrDefault();
+        if (FilteredAppCommands.FirstOrDefault() is IAppCommand appCommand)
+        {
+            SelectedCommand = appCommand;
+        }
+        else
+        {
+            SelectedCommand = null;
+        }
     }
 
     private void OnShelfItemsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

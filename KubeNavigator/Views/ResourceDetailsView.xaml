@@ -471,7 +471,7 @@
                 BorderBrush="{ThemeResource ControlElevationBorderBrush}"
                 BorderThickness="1"
                 CornerRadius="4"
-                DataContext="{x:Bind Mode=OneWay}"
+                DataContext="{x:Bind}"
                 HighlightingLanguage="yaml"
                 Loaded="CodeEditorControl_Loaded"
               />

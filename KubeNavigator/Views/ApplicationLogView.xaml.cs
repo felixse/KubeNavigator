@@ -17,17 +17,11 @@ public sealed partial class ApplicationLogView : UserControl, IShelfItemView
         ViewModel.LogReceived += ViewModel_LogReceived;
         Terminal.OnInitialized += Terminal_OnInitialized;
         Terminal.Loaded += Terminal_Loaded;
-        Terminal.Unloaded += Terminal_Unloaded;
     }
 
     private void Terminal_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         ViewModel.ThemeManager.RegisterTerminal(Terminal);
-    }
-
-    private void Terminal_Unloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        ViewModel.ThemeManager.UnregisterTerminal(Terminal);
     }
 
     private void Terminal_OnInitialized(object? sender, EventArgs e)
@@ -54,7 +48,7 @@ public sealed partial class ApplicationLogView : UserControl, IShelfItemView
         ViewModel.LogReceived -= ViewModel_LogReceived;
         Terminal.OnInitialized -= Terminal_OnInitialized;
         Terminal.Loaded -= Terminal_Loaded;
-        Terminal.Unloaded -= Terminal_Unloaded;
+        ViewModel.ThemeManager.UnregisterTerminal(Terminal);
     }
 
     private void OnClearButtonClicked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

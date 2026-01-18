@@ -18,17 +18,11 @@ public sealed partial class PodShellView : UserControl, IShelfItemView
         Terminal.OnTextReceived += Terminal_OnTextReceived;
         Terminal.OnSizeChanged += Terminal_OnSizeChanged;
         Terminal.Loaded += Terminal_Loaded;
-        Terminal.Unloaded += Terminal_Unloaded;
     }
 
     private void Terminal_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         ViewModel.ThemeManager.RegisterTerminal(Terminal);
-    }
-
-    private void Terminal_Unloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        ViewModel.ThemeManager.UnregisterTerminal(Terminal);
     }
 
     private void Terminal_OnTextReceived(object? sender, string e)
@@ -62,7 +56,7 @@ public sealed partial class PodShellView : UserControl, IShelfItemView
         Terminal.OnTextReceived -= Terminal_OnTextReceived;
         Terminal.OnSizeChanged -= Terminal_OnSizeChanged;
         Terminal.Loaded -= Terminal_Loaded;
-        Terminal.Unloaded -= Terminal_Unloaded;
+        ViewModel.ThemeManager.UnregisterTerminal(Terminal);
     }
 
     private void ViewModel_TextReceived(object? sender, string e)

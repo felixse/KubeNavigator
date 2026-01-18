@@ -535,12 +535,20 @@
               </ItemsRepeater.Layout>
               <ItemsRepeater.ItemTemplate>
                 <DataTemplate x:DataType="details:DetailsGroup">
-                  <Expander HorizontalAlignment="Stretch" IsExpanded="True">
-                    <Expander.Transitions>
-                      <TransitionCollection />
-                    </Expander.Transitions>
-                    <Expander.Header>
-                      <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Border
+                    HorizontalAlignment="Stretch"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                  >
+                    <StackPanel>
+                      <StackPanel
+                        Padding="16"
+                        Background="{ThemeResource ExpanderHeaderBackground}"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                      >
                         <FontIcon
                           FontSize="16"
                           Glyph="{x:Bind Header.Symbol}"
@@ -558,19 +566,26 @@
                           </controls:Case>
                         </controls:SwitchPresenter>
                       </StackPanel>
-                    </Expander.Header>
-                    <controls:HeaderedItemsControl
-                      ItemTemplateSelector="{StaticResource DetailsContentTemplateSelector}"
-                      ItemsSource="{x:Bind Items}"
-                    >
-                      <controls:HeaderedItemsControl.Header>
-                        <controls:DataTable ColumnSpacing="16">
-                          <controls:DataColumn DesiredWidth="Auto" />
-                          <controls:DataColumn DesiredWidth="*" />
-                        </controls:DataTable>
-                      </controls:HeaderedItemsControl.Header>
-                    </controls:HeaderedItemsControl>
-                  </Expander>
+                      <Border
+                        Height="1"
+                        BorderBrush="{ThemeResource ExpanderHeaderBorderBrush}"
+                        BorderThickness="1"
+                      />
+                      <Border Padding="16" Background="{ThemeResource ExpanderContentBackground}">
+                        <controls:HeaderedItemsControl
+                          ItemTemplateSelector="{StaticResource DetailsContentTemplateSelector}"
+                          ItemsSource="{x:Bind Items}"
+                        >
+                          <controls:HeaderedItemsControl.Header>
+                            <controls:DataTable ColumnSpacing="16">
+                              <controls:DataColumn DesiredWidth="Auto" />
+                              <controls:DataColumn DesiredWidth="*" />
+                            </controls:DataTable>
+                          </controls:HeaderedItemsControl.Header>
+                        </controls:HeaderedItemsControl>
+                      </Border>
+                    </StackPanel>
+                  </Border>
                 </DataTemplate>
               </ItemsRepeater.ItemTemplate>
             </ItemsRepeater>

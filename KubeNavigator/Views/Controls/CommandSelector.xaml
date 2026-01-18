@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+  x:Class="KubeNavigator.Views.Controls.CommandSelector"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:appcommands="using:KubeNavigator.ViewModels.AppCommands"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:local="using:KubeNavigator.Views.Controls"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:media="using:CommunityToolkit.WinUI.Media"
+  xmlns:ui="using:CommunityToolkit.WinUI"
+  xmlns:viewModels="using:KubeNavigator.ViewModels"
+  mc:Ignorable="d"
+>
+  <Grid>
+    <Button
+      Width="600"
+      Command="{x:Bind ViewModel.OpenCommandPanelCommand}"
+      Content="Enter command (ctrl+p)"
+    >
+      <Button.KeyboardAccelerators>
+        <KeyboardAccelerator Key="P" Modifiers="Control" />
+      </Button.KeyboardAccelerators>
+    </Button>
+    <Popup
+      x:Name="SelectorPopup"
+      IsLightDismissEnabled="True"
+      IsOpen="{x:Bind ViewModel.IsCommandPanelOpen, Mode=TwoWay}"
+      Opened="SelectorPopup_Opened"
+    >
+      <StackPanel
+        x:Name="Selector"
+        Width="600"
+        HorizontalAlignment="Stretch"
+        Background="{ThemeResource AcrylicInAppFillColorBaseBrush}"
+        BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+        BorderThickness="1"
+        CornerRadius="4"
+      >
+        <TextBox
+          x:Name="Query"
+          Background="Transparent"
+          BorderThickness="0"
+          FontSize="16"
+          KeyDown="Query_KeyDown"
+          PlaceholderText="Enter command"
+          Text="{x:Bind ViewModel.SelectedWorkspace.CommandText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+        >
+          <TextBox.Resources>
+            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+            <SolidColorBrush x:Key="TextControlBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+          </TextBox.Resources>
+        </TextBox>
+        <Border
+          Height="1"
+          BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+          BorderThickness="1"
+          Visibility="{x:Bind ViewModel.SelectedWorkspace.FilteredAppCommands, Mode=OneWay, Converter={StaticResource EmptyToCollapsedConverter}}"
+        />
+        <ListView
+          x:Name="Commands"
+          MaxHeight="300"
+          Background="Transparent"
+          ItemsSource="{x:Bind ViewModel.SelectedWorkspace.FilteredAppCommands, Mode=OneWay}"
+          SelectedItem="{x:Bind ViewModel.SelectedWorkspace.SelectedCommand, Mode=TwoWay}"
+          SelectionChanged="ListBox_SelectionChanged"
+          SelectionMode="Single"
+          UseSystemFocusVisuals="False"
+        >
+          <ListView.ItemTemplate>
+            <DataTemplate x:DataType="appcommands:IAppCommand">
+              <StackPanel Margin="8" DoubleTapped="OnCommandDoubleTapped">
+                <TextBlock Text="{x:Bind Name}" />
+                <TextBlock
+                  Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}"
+                  Text="{x:Bind Context}"
+                />
+              </StackPanel>
+            </DataTemplate>
+          </ListView.ItemTemplate>
+          <ListView.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel>
+                <StackPanel.ChildrenTransitions>
+                  <TransitionCollection />
+                </StackPanel.ChildrenTransitions>
+              </StackPanel>
+            </ItemsPanelTemplate>
+          </ListView.ItemsPanel>
+        </ListView>
+      </StackPanel>
+    </Popup>
+  </Grid>
+</UserControl>

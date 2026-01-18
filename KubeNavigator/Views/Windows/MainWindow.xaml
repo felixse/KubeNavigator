@@ -3,6 +3,7 @@
   x:Class="KubeNavigator.Windows.MainWindow"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:controls="using:KubeNavigator.Views.Controls"
   xmlns:converters="using:KubeNavigator.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:local="using:KubeNavigator.Windows"
@@ -21,7 +22,7 @@
     </Grid.RowDefinitions>
     <TitleBar x:Name="AppTitleBar" Title="KubeNavigator" IsBackButtonVisible="False">
       <TitleBar.Content>
-        <AutoSuggestBox Width="600" Margin="8" PlaceholderText="Enter command" QueryIcon="Find" />
+        <controls:CommandSelector ViewModel="{x:Bind ViewModel}" />
       </TitleBar.Content>
     </TitleBar>
     <Frame x:Name="RootFrame" Grid.Row="1" />

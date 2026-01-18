@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Shelf;
@@ -28,7 +29,10 @@ public partial class WindowViewModel : ObservableObject, IWindow
     public ObservableCollection<NotificationViewModel> Notifications { get; set; }
 
     [ObservableProperty]
-    public partial WorkspaceViewModel? SelectedWorkspace { get; set; }
+    public partial WorkspaceViewModel SelectedWorkspace { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsCommandPanelOpen { get; set; }
 
     public AppViewModel App { get; }
 
@@ -44,6 +48,13 @@ public partial class WindowViewModel : ObservableObject, IWindow
         Workspaces.CollectionChanged += OnTabsCollectionChanged;
 
         SelectedWorkspace = Workspaces[0];
+    }
+
+    [RelayCommand]
+    public void OpenCommandPanel()
+    {
+        SelectedWorkspace.CommandText = string.Empty;
+        IsCommandPanelOpen = true;
     }
 
     public void DismissNotification(NotificationViewModel notification)

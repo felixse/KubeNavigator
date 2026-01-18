@@ -138,7 +138,6 @@
       </templateselectors:NavigationViewMenuItemTemplateSelector>
       <converters1:NavigationTargetToViewConverter x:Key="NavigationTargetToViewConverter" />
       <converters1:CountToVisibilityConverter x:Key="CountToVisibilityConverter" MinimumCount="1" />
-      <media:AttachedCardShadow x:Key="CommonShadow" Offset="4" />
     </ResourceDictionary>
   </UserControl.Resources>
   <Grid x:Name="Root">

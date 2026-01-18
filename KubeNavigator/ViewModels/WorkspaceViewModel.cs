@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
@@ -6,8 +7,10 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.Collections;
+using FuseSharp;
 using k8s.Models;
 using KubeNavigator.Models;
+using KubeNavigator.ViewModels.AppCommands;
 using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Resources;
@@ -24,12 +27,26 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     [ObservableProperty]
     public partial DetailsViewModel? Details { get; private set; }
 
+    [ObservableProperty]
+    public partial string? CommandText { get; set; }
+
+    [ObservableProperty]
+    public partial AdvancedCollectionView FilteredAppCommands { get; set; }
+
+    [ObservableProperty]
+    public partial ObservableCollection<IAppCommand> AppCommands { get; set; }
+
+    [ObservableProperty]
+    public partial IAppCommand? SelectedCommand { get; set; }
+
     public ObservableCollection<IShelfItem> ShelfItems { get; } = [];
 
     public int ShelfItemsCount => ShelfItems.Count;
 
     [ObservableProperty]
     public partial IShelfItem? SelectedShelfItem { get; set; }
+
+    private readonly Fuse _fuse;
 
     [ObservableProperty]
     public partial ClusterViewModel? Cluster { get; private set; }
@@ -76,6 +93,8 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         SelectedItem = FooterItems.First(f => f is ClusterListViewModel);
         ShelfItems.Add(new ApplicationLogViewModel(App.LoggingService, App.ThemeManager));
         SelectedShelfItem = ShelfItems.First();
+
+        _fuse = new Fuse(threshold: 0.2);
     }
 
     public async Task SetContextAsync(ClusterViewModel cluster)
@@ -248,6 +267,34 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         NavigationGroups.Add(accessControl);
         NavigationGroups.Add(CustomResourcesNavigationGroup);
 
+        AppCommands = new ObservableCollection<IAppCommand>(
+            NavigationGroups
+                .SelectMany(x => x.Items)
+                .Where(x => x is KubernetesResourceTypeListViewModel)
+                .Cast<KubernetesResourceTypeListViewModel>()
+                .Select(x => new ViewResourceAppCommand(x.ResourceType, this))
+        );
+        foreach (var footerItem in FooterItems)
+        {
+            AppCommands.Add(new NavigateToViewAppCommand(footerItem, this));
+        }
+
+        FilteredAppCommands = new AdvancedCollectionView(AppCommands);
+        FilteredAppCommands.Filter = (obj) =>
+        {
+            if (string.IsNullOrWhiteSpace(CommandText))
+            {
+                return true;
+            }
+            else if (obj is IAppCommand command)
+            {
+                var result = _fuse.Search(CommandText, command.Name);
+
+                return result?.Score < 0.4;
+            }
+            return false;
+        };
+
         _customResourceDefinitions = await cluster.GetResourcesAsync(
             ResourceType.CustomResourceDefinition
         );
@@ -327,6 +374,35 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         }
     }
 
+    [RelayCommand]
+    public void SelectNextCommand()
+    {
+        var index = FilteredAppCommands.IndexOf(SelectedCommand);
+        if (index < FilteredAppCommands.Count - 1)
+        {
+            var next = FilteredAppCommands.ElementAt(index + 1);
+            SelectedCommand = (IAppCommand)next;
+        }
+    }
+
+    [RelayCommand]
+    public void SelectPreviousCommand()
+    {
+        var index = FilteredAppCommands.IndexOf(SelectedCommand);
+        if (index > 0)
+        {
+            var next = FilteredAppCommands.ElementAt(index - 1);
+            SelectedCommand = (IAppCommand)next;
+        }
+    }
+
+    [RelayCommand]
+    public async Task ExecuteSelectedCommand()
+    {
+        Window.IsCommandPanelOpen = false;
+        await SelectedCommand?.ExecuteAsync();
+    }
+
     private void AddCustomResourceDefinitionToNavigation(V1CustomResourceDefinition crd)
     {
         if (Cluster == null)
@@ -375,6 +451,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                 )
             );
         }
+    }
+
+    partial void OnCommandTextChanged(string? oldValue, string? newValue)
+    {
+        FilteredAppCommands.RefreshFilter();
+        SelectedCommand = (IAppCommand)FilteredAppCommands.FirstOrDefault();
     }
 
     private void OnShelfItemsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

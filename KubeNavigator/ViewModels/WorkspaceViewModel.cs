@@ -471,14 +471,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     partial void OnCommandTextChanged(string? oldValue, string? newValue)
     {
         FilteredAppCommands.RefreshFilter();
-        if (FilteredAppCommands.FirstOrDefault() is IAppCommand appCommand)
-        {
-            SelectedCommand = appCommand;
-        }
-        else
-        {
-            SelectedCommand = null;
-        }
+        SelectedCommand = FilteredAppCommands.Cast<IAppCommand>().FirstOrDefault();
     }
 
     private void OnShelfItemsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

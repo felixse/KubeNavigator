@@ -1,7 +1,8 @@
 {
   "profiles": {
     "KubeNavigator (Package)": {
-      "commandName": "MsixPackage"
+      "commandName": "MsixPackage",
+      "nativeDebugging": true
     },
     "KubeNavigator (Unpackaged)": {
       "commandName": "Project"

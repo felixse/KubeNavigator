@@ -95,6 +95,21 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         AppCommands = new ObservableCollection<IAppCommand>(
             FooterItems.Select(x => new NavigateToViewAppCommand(x, this))
         );
+        FilteredAppCommands = new AdvancedCollectionView(AppCommands);
+        FilteredAppCommands.Filter = (obj) =>
+        {
+            if (string.IsNullOrWhiteSpace(CommandText))
+            {
+                return true;
+            }
+            else if (obj is IAppCommand command)
+            {
+                var result = _fuse.Search(CommandText, command.Name);
+
+                return result?.Score < 0.4;
+            }
+            return false;
+        };
 
         _fuse = new Fuse(threshold: 0.2);
     }
@@ -280,22 +295,6 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         {
             AppCommands.Add(new NavigateToViewAppCommand(footerItem, this));
         }
-
-        FilteredAppCommands = new AdvancedCollectionView(AppCommands);
-        FilteredAppCommands.Filter = (obj) =>
-        {
-            if (string.IsNullOrWhiteSpace(CommandText))
-            {
-                return true;
-            }
-            else if (obj is IAppCommand command)
-            {
-                var result = _fuse.Search(CommandText, command.Name);
-
-                return result?.Score < 0.4;
-            }
-            return false;
-        };
 
         _customResourceDefinitions = await cluster.GetResourcesAsync(
             ResourceType.CustomResourceDefinition

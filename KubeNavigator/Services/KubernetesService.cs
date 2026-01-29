@@ -11,7 +11,6 @@ using k8s.Models;
 using KubeNavigator.Model;
 using KubeNavigator.Models;
 using Microsoft.Extensions.Logging;
-using Windows.Devices.Bluetooth.Advertisement;
 
 namespace KubeNavigator.Services;
 
@@ -69,9 +68,14 @@ public partial class KubernetesService
                 resourceType.Version,
                 resourceType.Plural
             );
-            var items = await client.ListAsync<GenericKubernetesItems<T>>();
-            Log.ResourcesListed(_logger, items.Items.Count, resourceType.Plural, _contextName);
-            return items;
+            var list = await client.ListAsync<GenericKubernetesItems<T>>();
+            foreach (var item in list.Items)
+            {
+                item.Kind = resourceType.Kind;
+                item.ApiVersion = resourceType.Version;
+            }
+            Log.ResourcesListed(_logger, list.Items.Count, resourceType.Plural, _contextName);
+            return list;
         }
         catch (Exception ex)
         {

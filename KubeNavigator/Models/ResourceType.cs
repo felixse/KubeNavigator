@@ -6,6 +6,7 @@ namespace KubeNavigator.Models;
 
 // todo this should be called resourcetypeinfo
 public record ResourceType(
+    string Kind,
     string Group,
     string Version,
     string Plural,
@@ -16,6 +17,7 @@ public record ResourceType(
 {
     public static ResourceType Node =>
         new(
+            V1Node.KubeKind,
             V1Node.KubeGroup,
             V1Node.KubeApiVersion,
             V1Node.KubePluralName,
@@ -25,6 +27,7 @@ public record ResourceType(
         );
     public static ResourceType Namespace =>
         new(
+            V1Namespace.KubeKind,
             V1Namespace.KubeGroup,
             V1Namespace.KubeApiVersion,
             V1Namespace.KubePluralName,
@@ -34,6 +37,7 @@ public record ResourceType(
         );
     public static ResourceType Pod =>
         new(
+            V1Pod.KubeKind,
             V1Pod.KubeGroup,
             V1Pod.KubeApiVersion,
             V1Pod.KubePluralName,
@@ -43,6 +47,7 @@ public record ResourceType(
         );
     public static ResourceType Deployment =>
         new(
+            V1Deployment.KubeKind,
             V1Deployment.KubeGroup,
             V1Deployment.KubeApiVersion,
             V1Deployment.KubePluralName,
@@ -52,6 +57,7 @@ public record ResourceType(
         );
     public static ResourceType DaemonSet =>
         new(
+            V1DaemonSet.KubeKind,
             V1DaemonSet.KubeGroup,
             V1DaemonSet.KubeApiVersion,
             V1DaemonSet.KubePluralName,
@@ -62,6 +68,7 @@ public record ResourceType(
 
     public static ResourceType Event =>
         new(
+            Eventsv1Event.KubeKind,
             Eventsv1Event.KubeGroup,
             Eventsv1Event.KubeApiVersion,
             Eventsv1Event.KubePluralName,
@@ -72,6 +79,7 @@ public record ResourceType(
 
     public static ResourceType StatefulSet =>
         new(
+            V1StatefulSet.KubeKind,
             V1StatefulSet.KubeGroup,
             V1StatefulSet.KubeApiVersion,
             V1StatefulSet.KubePluralName,
@@ -81,6 +89,7 @@ public record ResourceType(
         );
     public static ResourceType ReplicaSet =>
         new(
+            V1ReplicaSet.KubeKind,
             V1ReplicaSet.KubeGroup,
             V1ReplicaSet.KubeApiVersion,
             V1ReplicaSet.KubePluralName,
@@ -90,6 +99,7 @@ public record ResourceType(
         );
     public static ResourceType ReplicationController =>
         new(
+            V1ReplicationController.KubeKind,
             V1ReplicationController.KubeGroup,
             V1ReplicationController.KubeApiVersion,
             V1ReplicationController.KubePluralName,
@@ -99,6 +109,7 @@ public record ResourceType(
         );
     public static ResourceType Job =>
         new(
+            V1Job.KubeKind,
             V1Job.KubeGroup,
             V1Job.KubeApiVersion,
             V1Job.KubePluralName,
@@ -108,6 +119,7 @@ public record ResourceType(
         );
     public static ResourceType CronJob =>
         new(
+            V1CronJob.KubeKind,
             V1CronJob.KubeGroup,
             V1CronJob.KubeApiVersion,
             V1CronJob.KubePluralName,
@@ -117,6 +129,7 @@ public record ResourceType(
         );
     public static ResourceType ConfigMap =>
         new(
+            V1ConfigMap.KubeKind,
             V1ConfigMap.KubeGroup,
             V1ConfigMap.KubeApiVersion,
             V1ConfigMap.KubePluralName,
@@ -126,6 +139,7 @@ public record ResourceType(
         );
     public static ResourceType Secret =>
         new(
+            V1Secret.KubeKind,
             V1Secret.KubeGroup,
             V1Secret.KubeApiVersion,
             V1Secret.KubePluralName,
@@ -135,6 +149,7 @@ public record ResourceType(
         );
     public static ResourceType ResourceQuota =>
         new(
+            V1ResourceQuota.KubeKind,
             V1ResourceQuota.KubeGroup,
             V1ResourceQuota.KubeApiVersion,
             V1ResourceQuota.KubePluralName,
@@ -144,6 +159,7 @@ public record ResourceType(
         );
     public static ResourceType LimitRange =>
         new(
+            V1LimitRange.KubeKind,
             V1LimitRange.KubeGroup,
             V1LimitRange.KubeApiVersion,
             V1LimitRange.KubePluralName,
@@ -153,6 +169,7 @@ public record ResourceType(
         );
     public static ResourceType HorizontalPodAutoscaler =>
         new(
+            V1HorizontalPodAutoscaler.KubeKind,
             V1HorizontalPodAutoscaler.KubeGroup,
             V1HorizontalPodAutoscaler.KubeApiVersion,
             V1HorizontalPodAutoscaler.KubePluralName,
@@ -162,6 +179,7 @@ public record ResourceType(
         );
     public static ResourceType PodDisruptionBudget =>
         new(
+            V1PodDisruptionBudget.KubeKind,
             V1PodDisruptionBudget.KubeGroup,
             V1PodDisruptionBudget.KubeApiVersion,
             V1PodDisruptionBudget.KubePluralName,
@@ -171,6 +189,7 @@ public record ResourceType(
         );
     public static ResourceType PriorityClass =>
         new(
+            V1PriorityClass.KubeKind,
             V1PriorityClass.KubeGroup,
             V1PriorityClass.KubeApiVersion,
             V1PriorityClass.KubePluralName,
@@ -180,6 +199,7 @@ public record ResourceType(
         );
     public static ResourceType RuntimeClass =>
         new(
+            V1RuntimeClass.KubeKind,
             V1RuntimeClass.KubeGroup,
             V1RuntimeClass.KubeApiVersion,
             V1RuntimeClass.KubePluralName,
@@ -189,6 +209,7 @@ public record ResourceType(
         );
     public static ResourceType Lease =>
         new(
+            V1Lease.KubeKind,
             V1Lease.KubeGroup,
             V1Lease.KubeApiVersion,
             V1Lease.KubePluralName,
@@ -198,6 +219,7 @@ public record ResourceType(
         );
     public static ResourceType MutatingWebhookConfiguration =>
         new(
+            V1MutatingWebhookConfiguration.KubeKind,
             V1MutatingWebhookConfiguration.KubeGroup,
             V1MutatingWebhookConfiguration.KubeApiVersion,
             V1MutatingWebhookConfiguration.KubePluralName,
@@ -207,6 +229,7 @@ public record ResourceType(
         );
     public static ResourceType ValidatingWebhookConfiguration =>
         new(
+            V1ValidatingWebhookConfiguration.KubeKind,
             V1ValidatingWebhookConfiguration.KubeGroup,
             V1ValidatingWebhookConfiguration.KubeApiVersion,
             V1ValidatingWebhookConfiguration.KubePluralName,
@@ -216,6 +239,7 @@ public record ResourceType(
         );
     public static ResourceType Service =>
         new(
+            V1Service.KubeKind,
             V1Service.KubeGroup,
             V1Service.KubeApiVersion,
             V1Service.KubePluralName,
@@ -225,6 +249,7 @@ public record ResourceType(
         );
     public static ResourceType Endpoint =>
         new(
+            V1Endpoints.KubeKind,
             V1Endpoints.KubeGroup,
             V1Endpoints.KubeApiVersion,
             V1Endpoints.KubePluralName,
@@ -234,6 +259,7 @@ public record ResourceType(
         );
     public static ResourceType Ingress =>
         new(
+            V1Ingress.KubeKind,
             V1Ingress.KubeGroup,
             V1Ingress.KubeApiVersion,
             V1Ingress.KubePluralName,
@@ -243,6 +269,7 @@ public record ResourceType(
         );
     public static ResourceType IngressClass =>
         new(
+            V1IngressClass.KubeKind,
             V1IngressClass.KubeGroup,
             V1IngressClass.KubeApiVersion,
             V1IngressClass.KubePluralName,
@@ -252,6 +279,7 @@ public record ResourceType(
         );
     public static ResourceType NetworkPolicy =>
         new(
+            V1NetworkPolicy.KubeKind,
             V1NetworkPolicy.KubeGroup,
             V1NetworkPolicy.KubeApiVersion,
             V1NetworkPolicy.KubePluralName,
@@ -261,6 +289,7 @@ public record ResourceType(
         );
     public static ResourceType PersistentVolumeClaim =>
         new(
+            V1PersistentVolumeClaim.KubeKind,
             V1PersistentVolumeClaim.KubeGroup,
             V1PersistentVolumeClaim.KubeApiVersion,
             V1PersistentVolumeClaim.KubePluralName,
@@ -270,6 +299,7 @@ public record ResourceType(
         );
     public static ResourceType PersistentVolume =>
         new(
+            V1PersistentVolume.KubeKind,
             V1PersistentVolume.KubeGroup,
             V1PersistentVolume.KubeApiVersion,
             V1PersistentVolume.KubePluralName,
@@ -279,6 +309,7 @@ public record ResourceType(
         );
     public static ResourceType StorageClass =>
         new(
+            V1StorageClass.KubeKind,
             V1StorageClass.KubeGroup,
             V1StorageClass.KubeApiVersion,
             V1StorageClass.KubePluralName,
@@ -288,6 +319,7 @@ public record ResourceType(
         );
     public static ResourceType ServiceAccount =>
         new(
+            V1ServiceAccount.KubeKind,
             V1ServiceAccount.KubeGroup,
             V1ServiceAccount.KubeApiVersion,
             V1ServiceAccount.KubePluralName,
@@ -297,6 +329,7 @@ public record ResourceType(
         );
     public static ResourceType ClusterRole =>
         new(
+            V1ClusterRole.KubeKind,
             V1ClusterRole.KubeGroup,
             V1ClusterRole.KubeApiVersion,
             V1ClusterRole.KubePluralName,
@@ -306,6 +339,7 @@ public record ResourceType(
         );
     public static ResourceType Role =>
         new(
+            V1Role.KubeKind,
             V1Role.KubeGroup,
             V1Role.KubeApiVersion,
             V1Role.KubePluralName,
@@ -315,6 +349,7 @@ public record ResourceType(
         );
     public static ResourceType ClusterRoleBinding =>
         new(
+            V1ClusterRoleBinding.KubeKind,
             V1ClusterRoleBinding.KubeGroup,
             V1ClusterRoleBinding.KubeApiVersion,
             V1ClusterRoleBinding.KubePluralName,
@@ -324,6 +359,7 @@ public record ResourceType(
         );
     public static ResourceType RoleBinding =>
         new(
+            V1RoleBinding.KubeKind,
             V1RoleBinding.KubeGroup,
             V1RoleBinding.KubeApiVersion,
             V1RoleBinding.KubePluralName,
@@ -333,6 +369,7 @@ public record ResourceType(
         );
     public static ResourceType CustomResourceDefinition =>
         new(
+            V1CustomResourceDefinition.KubeKind,
             V1CustomResourceDefinition.KubeGroup,
             V1CustomResourceDefinition.KubeApiVersion,
             V1CustomResourceDefinition.KubePluralName,

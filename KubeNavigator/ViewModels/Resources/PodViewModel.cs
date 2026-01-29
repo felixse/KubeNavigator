@@ -173,6 +173,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
                     _ => new ResourceType(
                         "Unknown",
                         "Unknown",
+                        "Unknown",
                         "unknown",
                         true,
                         "Unknowns",

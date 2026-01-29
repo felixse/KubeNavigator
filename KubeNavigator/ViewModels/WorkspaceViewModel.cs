@@ -455,6 +455,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     this,
                     Cluster,
                     new ResourceType(
+                        crd.Spec.Names.Kind,
                         crd.Spec.Group,
                         crd.Spec.Versions.First().Name,
                         crd.Spec.Names.Plural,

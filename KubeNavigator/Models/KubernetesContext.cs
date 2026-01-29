@@ -177,7 +177,7 @@ public class KubernetesContext
         return eventRepository
             .GetItems<Eventsv1Event>()
             .Where(e =>
-                e.Regarding?.Kind == resource.GetKubernetesTypeMetadata().Kind
+                e.Regarding?.Kind == resource.Kind
                 && e.Regarding?.Name == resource.Metadata.Name
                 && e.Regarding?.NamespaceProperty == resource.Metadata.NamespaceProperty
             );

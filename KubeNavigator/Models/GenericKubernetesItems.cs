@@ -4,10 +4,14 @@ using k8s.Models;
 
 namespace KubeNavigator.Models;
 
-public class GenericKubernetesItems<T> : IItems<T>, IKubernetesObject
+public class GenericKubernetesItems<T> : KubernetesList<T>, IKubernetesObject
     where T : IKubernetesObject
 {
-    public required IList<T> Items { get; set; }
-    public required string ApiVersion { get; set; }
-    public required string Kind { get; set; }
+    public GenericKubernetesItems(
+        IList<T> items,
+        string apiVersion = null,
+        string kind = null,
+        V1ListMeta metadata = null
+    )
+        : base(items, apiVersion, kind, metadata) { }
 }

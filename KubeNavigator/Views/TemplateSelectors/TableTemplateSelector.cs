@@ -43,6 +43,11 @@ public partial class TableTemplateSelector : DataTemplateSelector
                 var eventTableRow = Application.Current.Resources["EventTableRow"];
                 return (DataTemplate)eventTableRow;
             }
+            else if (item is NamespaceViewModel)
+            {
+                var namespaceTableRow = Application.Current.Resources["NamespaceTableRow"];
+                return (DataTemplate)namespaceTableRow;
+            }
             return KubernetesResourceTemplate;
         }
         else if (item is HelmReleaseViewModel && HelmReleaseTemplate != null)

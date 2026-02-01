@@ -46,6 +46,11 @@ public partial class TableHeaderTemplateSelector : DataTemplateSelector
                 var eventTableHeader = Application.Current.Resources["EventTableHeader"];
                 return (DataTemplate)eventTableHeader;
             }
+            else if (kubernetesResourceTypeListViewModel.ResourceType == ResourceType.Namespace)
+            {
+                var namespaceTableHeader = Application.Current.Resources["NamespaceTableHeader"];
+                return (DataTemplate)namespaceTableHeader;
+            }
             return KubernetesResourceTemplate;
         }
         else if (item is HelmReleasesViewModel && HelmReleaseTemplate != null)

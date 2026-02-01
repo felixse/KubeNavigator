@@ -16,6 +16,7 @@
         <resources:ConfigMapResources />
         <resources:SecretResources />
         <resources:EventResources />
+        <resources:NamespaceResources />
         <!--  Other merged dictionaries here  -->
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>

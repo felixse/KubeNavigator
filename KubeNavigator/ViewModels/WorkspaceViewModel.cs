@@ -14,6 +14,7 @@ using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
+using Windows.UI.WebUI;
 
 namespace KubeNavigator.ViewModels;
 
@@ -133,7 +134,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             [
                 new TodoViewModel("Overview"),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Node),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Namespace),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.Namespace,
+                    (x) => new NamespaceViewModel((V1Namespace)x, Cluster)
+                ),
                 new KubernetesResourceTypeListViewModel(
                     this,
                     cluster,

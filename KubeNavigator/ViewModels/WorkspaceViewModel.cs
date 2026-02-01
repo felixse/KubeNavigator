@@ -132,7 +132,6 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             "Cluster",
             "\uE968",
             [
-                new TodoViewModel("Overview"),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Node),
                 new KubernetesResourceTypeListViewModel(
                     this,
@@ -152,7 +151,6 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             "Workloads",
             "\uEE40",
             [
-                new TodoViewModel("Overview"),
                 new KubernetesResourceTypeListViewModel(
                     this,
                     cluster,
@@ -251,7 +249,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         var helm = new NavigationGroupViewModel(
             "Helm",
             "\uEE94",
-            [new TodoViewModel("Charts"), new HelmReleasesViewModel(this, cluster)]
+            [new HelmReleasesViewModel(this, cluster)]
         );
         var accessControl = new NavigationGroupViewModel(
             "Access Control",

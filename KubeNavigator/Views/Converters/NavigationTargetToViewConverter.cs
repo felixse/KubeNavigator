@@ -93,10 +93,6 @@ public partial class NavigationTargetToViewConverter : IValueConverter
             portForwards.OnNavigatedTo();
             return view;
         }
-        else if (value is TodoViewModel)
-        {
-            return new TextBlock { Text = "TODO" };
-        }
 
         return null!;
     }

@@ -16,14 +16,54 @@
       <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
         <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
       </controls:DataColumn>
-      <controls:DataColumn CanResize="True" Content="Type" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Message" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Namespace" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Involved Object" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Source" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Count" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Age" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Last Seen" DesiredWidth="Auto" />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Type"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Message"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Namespace"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Involved Object"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Source"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Count"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Age"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Last Seen"
+        DesiredWidth="Auto"
+      />
     </controls:DataTable>
   </DataTemplate>
   <DataTemplate x:Key="EventTableRow" x:DataType="resources:EventViewModel">

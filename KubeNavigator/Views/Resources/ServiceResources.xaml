@@ -18,14 +18,54 @@
       <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
         <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
       </controls:DataColumn>
-      <controls:DataColumn CanResize="True" Content="Name" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Namespace" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Type" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Cluster IP" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="External IP" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Ports" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Age" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Status" DesiredWidth="Auto" />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Name"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Namespace"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Type"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Cluster IP"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="External IP"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Ports"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Age"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Status"
+        DesiredWidth="Auto"
+      />
     </controls:DataTable>
   </DataTemplate>
   <DataTemplate x:Key="ServiceTableRow" x:DataType="resources:ServiceViewModel">

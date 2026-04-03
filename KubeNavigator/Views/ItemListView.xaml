@@ -81,9 +81,24 @@
             <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
               <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
             </controls:DataColumn>
-            <controls:DataColumn CanResize="True" Content="Name" DesiredWidth="Auto" />
-            <controls:DataColumn CanResize="True" Content="Namespace" DesiredWidth="Auto" />
-            <controls:DataColumn CanResize="True" Content="Age" DesiredWidth="Auto" />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Name"
+              DesiredWidth="Auto"
+            />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Namespace"
+              DesiredWidth="Auto"
+            />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Age"
+              DesiredWidth="Auto"
+            />
           </controls:DataTable>
         </DataTemplate>
       </templateselectors:TableHeaderTemplateSelector.KubernetesResourceTemplate>
@@ -93,7 +108,12 @@
             <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
               <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
             </controls:DataColumn>
-            <controls:DataColumn CanResize="True" Content="Pod Name" DesiredWidth="Auto" />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Pod Name"
+              DesiredWidth="Auto"
+            />
           </controls:DataTable>
         </DataTemplate>
       </templateselectors:TableHeaderTemplateSelector.ForwardedPortTemplate>
@@ -103,14 +123,54 @@
             <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
               <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
             </controls:DataColumn>
-            <controls:DataColumn CanResize="True" Content="Name" DesiredWidth="Auto" />
-            <controls:DataColumn CanResize="True" Content="Namespace" DesiredWidth="Auto" />
-            <controls:DataColumn CanResize="True" Content="Chart" DesiredWidth="Auto" />
-            <controls:DataColumn CanResize="True" Content="Revision" DesiredWidth="Auto" />
-            <controls:DataColumn CanResize="True" Content="Version" DesiredWidth="Auto" />
-            <controls:DataColumn CanResize="True" Content="App Version" DesiredWidth="Auto" />
-            <controls:DataColumn CanResize="True" Content="Status" DesiredWidth="Auto" />
-            <controls:DataColumn CanResize="True" Content="Updated" DesiredWidth="Auto" />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Name"
+              DesiredWidth="Auto"
+            />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Namespace"
+              DesiredWidth="Auto"
+            />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Chart"
+              DesiredWidth="Auto"
+            />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Revision"
+              DesiredWidth="Auto"
+            />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Version"
+              DesiredWidth="Auto"
+            />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="App Version"
+              DesiredWidth="Auto"
+            />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Status"
+              DesiredWidth="Auto"
+            />
+            <controls:DataColumn
+              CanResize="True"
+              FontWeight="SemiBold"
+              Content="Updated"
+              DesiredWidth="Auto"
+            />
           </controls:DataTable>
         </DataTemplate>
       </templateselectors:TableHeaderTemplateSelector.HelmReleaseTemplate>

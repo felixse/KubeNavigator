@@ -15,15 +15,60 @@
       <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
         <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
       </controls:DataColumn>
-      <controls:DataColumn CanResize="True" Content="Name" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Namespace" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Containers" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Restarts" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Controlled By" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Node" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="QoS" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Age" DesiredWidth="Auto" />
-      <controls:DataColumn CanResize="True" Content="Status" DesiredWidth="Auto" />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Name"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Namespace"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Containers"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Restarts"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Controlled By"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Node"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="QoS"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Age"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Status"
+        DesiredWidth="Auto"
+      />
     </controls:DataTable>
   </DataTemplate>
   <DataTemplate x:Key="PodTableRow" x:DataType="resources:PodViewModel">

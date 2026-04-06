@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
 using DetailsTypes = KubeNavigator.ViewModels.Details;
@@ -16,26 +17,21 @@ public partial class DetailsViewModel : ObservableObject
     [ObservableProperty]
     public partial List<DetailsTypes.IDetailsSection> Details { get; private set; } = [];
 
-    public DetailsViewModel(
-        KubernetesResourceViewModel selectedResource,
-        IShelfHost shelfHost,
-        Action? onClose = null
-    )
+    public DetailsViewModel(IDetailsSource source, IShelfHost shelfHost, Action? onClose = null)
     {
-        NavigationStack.Push(selectedResource);
-        Cluster = selectedResource.Cluster;
+        NavigationStack.Push(source);
+        Cluster = source.Cluster;
         ShelfHost = shelfHost;
         this.onClose = onClose;
-        SubscribeToDetailsRefresh(selectedResource);
+        SubscribeToDetailsRefresh(source);
         UpdateDetailsAsync();
     }
 
-    public KubernetesResourceViewModel SelectedResource => NavigationStack.Peek();
+    public IDetailsSource SelectedItem => NavigationStack.Peek();
 
     public bool CanGoBack => NavigationStack.Count > 1;
 
-    public Stack<KubernetesResourceViewModel> NavigationStack { get; } =
-        new Stack<KubernetesResourceViewModel>();
+    public Stack<IDetailsSource> NavigationStack { get; } = new Stack<IDetailsSource>();
     public ClusterViewModel Cluster { get; }
     public IShelfHost ShelfHost { get; }
 
@@ -52,10 +48,10 @@ public partial class DetailsViewModel : ObservableObject
 
         if (resource != null)
         {
-            UnsubscribeFromDetailsRefresh(SelectedResource);
+            UnsubscribeFromDetailsRefresh(SelectedItem);
             NavigationStack.Push(resource);
             SubscribeToDetailsRefresh(resource);
-            OnPropertyChanged(nameof(SelectedResource));
+            OnPropertyChanged(nameof(SelectedItem));
             OnPropertyChanged(nameof(CanGoBack));
             await UpdateDetailsAsync();
         }
@@ -70,21 +66,21 @@ public partial class DetailsViewModel : ObservableObject
     {
         if (NavigationStack.Count > 1)
         {
-            UnsubscribeFromDetailsRefresh(SelectedResource);
+            UnsubscribeFromDetailsRefresh(SelectedItem);
             NavigationStack.Pop();
-            SubscribeToDetailsRefresh(SelectedResource);
-            OnPropertyChanged(nameof(SelectedResource));
+            SubscribeToDetailsRefresh(SelectedItem);
+            OnPropertyChanged(nameof(SelectedItem));
             OnPropertyChanged(nameof(CanGoBack));
             await UpdateDetailsAsync();
         }
     }
 
-    private void SubscribeToDetailsRefresh(KubernetesResourceViewModel resource)
+    private void SubscribeToDetailsRefresh(IDetailsSource resource)
     {
         resource.DetailsRefreshRequested += OnDetailsRefreshRequested;
     }
 
-    private void UnsubscribeFromDetailsRefresh(KubernetesResourceViewModel resource)
+    private void UnsubscribeFromDetailsRefresh(IDetailsSource resource)
     {
         resource.DetailsRefreshRequested -= OnDetailsRefreshRequested;
     }
@@ -96,7 +92,7 @@ public partial class DetailsViewModel : ObservableObject
 
     private async Task UpdateDetailsAsync()
     {
-        Details = await SelectedResource.CreateDetailsAsync();
+        Details = await SelectedItem.CreateDetailsAsync();
     }
 
     public void Close()

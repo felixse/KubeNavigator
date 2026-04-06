@@ -9,11 +9,10 @@ using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Shelf;
-using Microsoft.Extensions.Logging;
 
 namespace KubeNavigator.ViewModels.Resources;
 
-public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
+public partial class KubernetesResourceViewModel : ObservableObject, ISelectable, IDetailsSource
 {
     public event EventHandler? DetailsRefreshRequested;
 
@@ -28,6 +27,12 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
     public partial IKubernetesObject<V1ObjectMeta> Resource { get; set; }
     public ResourceType ResourceType { get; }
     public ClusterViewModel Cluster { get; }
+
+    public string WindowTitle => $"{ResourceType.SingularDisplayName}: {Name}";
+
+    public string PanelTitle => Name;
+
+    public string PanelSubtitle => ResourceType.SingularDisplayName;
 
     public List<ItemCommand> Commands { get; } = [];
 

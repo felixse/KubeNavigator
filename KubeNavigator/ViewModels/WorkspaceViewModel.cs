@@ -10,6 +10,7 @@ using FuseSharp;
 using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.AppCommands;
+using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Resources;
@@ -533,10 +534,10 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
 
     public void OpenDetails(ISelectable item, ListViewModel source)
     {
-        if (item is KubernetesResourceViewModel resource) // todo support other types, introduce IDetails?
+        if (item is IDetailsSource detailsSource)
         {
             Details = new DetailsViewModel(
-                resource,
+                detailsSource,
                 this,
                 () =>
                 {
@@ -576,9 +577,9 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         Navigation.INavigationTarget? newValue
     )
     {
-        if (oldValue is KubernetesResourceTypeListViewModel oldResourceType)
+        if (oldValue is ListViewModel oldList)
         {
-            oldResourceType.SelectedItem = null;
+            oldList.SelectedItem = null;
         }
 
         Details = null;

@@ -321,20 +321,20 @@
                 <StackPanel Grid.Column="1" Margin="8,4,0,4">
                   <TextBlock
                     Style="{ThemeResource BodyStrongTextBlockStyle}"
-                    Text="{x:Bind ViewModel.Details.SelectedResource.Name, Mode=OneWay}"
+                    Text="{x:Bind ViewModel.Details.SelectedItem.PanelTitle, Mode=OneWay}"
                   />
                   <TextBlock
                     FontSize="12"
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{x:Bind ViewModel.Details.SelectedResource.ResourceType.SingularDisplayName, Mode=OneWay}"
+                    Text="{x:Bind ViewModel.Details.SelectedItem.PanelSubtitle, Mode=OneWay}"
                   />
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                   <ItemsRepeater
                     Grid.Column="2"
-                    ItemsSource="{x:Bind ViewModel.Details.SelectedResource.Commands, Mode=OneWay}"
+                    ItemsSource="{x:Bind ViewModel.Details.SelectedItem.Commands, Mode=OneWay}"
                   >
                     <ItemsRepeater.ItemTemplate>
                       <DataTemplate x:DataType="viewmodels:ItemCommand">
@@ -359,7 +359,7 @@
                   <AppBarButton
                     Width="36"
                     Command="{x:Bind ViewModel.App.CreateDetailsWindowCommand}"
-                    CommandParameter="{x:Bind ViewModel.Details.SelectedResource, Mode=OneWay}"
+                    CommandParameter="{x:Bind ViewModel.Details.SelectedItem, Mode=OneWay}"
                     LabelPosition="Collapsed"
                     ToolTipService.ToolTip="Open in new Window"
                   >

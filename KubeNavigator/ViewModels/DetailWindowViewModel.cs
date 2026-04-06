@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KubeNavigator.Models;
+using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
 
@@ -30,24 +31,21 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
     public ObservableCollection<NotificationViewModel> Notifications { get; set; } = [];
 
     public DetailWindowViewModel(
-        KubernetesResourceViewModel resource,
+        IDetailsSource detailsSource,
         IUserConfirmationService userConfirmationService
     )
     {
-        App = resource.Cluster.App;
-        Details = new DetailsViewModel(resource, this);
+        App = detailsSource.Cluster.App;
+        Details = new DetailsViewModel(detailsSource, this);
 
         Details.PropertyChanged += (s, e) =>
         {
-            if (e.PropertyName == nameof(DetailsViewModel.SelectedResource))
+            if (e.PropertyName == nameof(DetailsViewModel.SelectedItem))
             {
-                Title =
-                    $"{Details.SelectedResource.ResourceType.SingularDisplayName}: {Details.SelectedResource.Name}";
+                Title = detailsSource.WindowTitle;
             }
         };
-        Title =
-            $"{Details.SelectedResource.ResourceType.SingularDisplayName}: {Details.SelectedResource.Name}";
-        UserConfirmationService = userConfirmationService;
+        Title = detailsSource.WindowTitle;
     }
 
     public async Task CloseShelfItemAsync(IShelfItem item)

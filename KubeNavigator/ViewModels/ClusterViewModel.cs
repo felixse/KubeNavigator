@@ -77,7 +77,7 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 );
                 if (existing == null)
                 {
-                    HelmReleases.Add(new HelmReleaseViewModel(helmRelease));
+                    HelmReleases.Add(new HelmReleaseViewModel(helmRelease, this));
                 }
                 else
                 {
@@ -316,7 +316,7 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                     );
                     if (existing == null)
                     {
-                        HelmReleases.Add(new HelmReleaseViewModel(helmRelease));
+                        HelmReleases.Add(new HelmReleaseViewModel(helmRelease, this));
                     }
                     else
                     {

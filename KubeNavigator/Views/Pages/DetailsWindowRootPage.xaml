@@ -26,7 +26,7 @@
       </Grid.RowDefinitions>
       <ItemsRepeater
         Grid.Column="2"
-        ItemsSource="{x:Bind ViewModel.Details.SelectedResource.Commands, Mode=OneWay}"
+        ItemsSource="{x:Bind ViewModel.Details.SelectedItem.Commands, Mode=OneWay}"
       >
         <ItemsRepeater.ItemTemplate>
           <DataTemplate x:DataType="viewmodels:ItemCommand">

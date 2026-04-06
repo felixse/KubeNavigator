@@ -7,6 +7,7 @@ using k8s;
 using k8s.KubeConfigModels;
 using KubeNavigator.Models;
 using KubeNavigator.Services;
+using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Resources;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
@@ -74,9 +75,12 @@ public partial class AppViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public void CreateDetailsWindow(KubernetesResourceViewModel resource)
+    public void CreateDetailsWindow(IDetailsSource detailsSource)
     {
-        var detailsWindow = new DetailWindowViewModel(resource, _userConfirmationServiceFactory());
+        var detailsWindow = new DetailWindowViewModel(
+            detailsSource,
+            _userConfirmationServiceFactory()
+        );
         DetailWindowViewModels.Add(detailsWindow);
     }
 }

@@ -34,6 +34,7 @@
     <None Remove="Views\ResourceEditView.xaml" />
     <None Remove="Views\Resources\ConfigMapResources.xaml" />
     <None Remove="Views\Resources\EventResources.xaml" />
+    <None Remove="Views\Resources\HelmReleaseResources.xaml" />
     <None Remove="Views\Resources\NamespaceResources.xaml" />
     <None Remove="Views\Resources\SecretResources.xaml" />
     <None Remove="Views\Resources\ServiceResources.xaml" />
@@ -166,6 +167,11 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Resources\HelmReleaseResources.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Resources\NamespaceResources.xaml">

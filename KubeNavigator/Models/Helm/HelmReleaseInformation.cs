@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace KubeNavigator.Models.Helm;
 
@@ -8,7 +9,7 @@ public class HelmReleaseInformation
     public string? FirstDeployed { get; set; }
 
     [JsonPropertyName("last_deployed")]
-    public string? LastDeployed { get; set; }
+    public DateTime? LastDeployed { get; set; }
 
     public string? Deleted { get; set; }
 

@@ -17,6 +17,7 @@
         <resources:SecretResources />
         <resources:EventResources />
         <resources:NamespaceResources />
+        <resources:HelmReleaseResources />
         <!--  Other merged dictionaries here  -->
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>

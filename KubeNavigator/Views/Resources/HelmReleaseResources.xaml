@@ -1,88 +1,79 @@
 ﻿<ResourceDictionary
-  x:Class="KubeNavigator.Views.Resources.ServiceResources"
+  x:Class="KubeNavigator.Views.Resources.HelmReleaseResources"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:controls="using:CommunityToolkit.WinUI.Controls"
   xmlns:customcontrols="using:KubeNavigator.Views.Controls"
-  xmlns:kubernetes="using:k8s.Models"
   xmlns:local="using:KubeNavigator.Views.Resources"
-  xmlns:resources="using:KubeNavigator.ViewModels.Resources"
+  xmlns:resources="using:KubeNavigator.ViewModels.Helm"
   xmlns:viewmodels="using:KubeNavigator.ViewModels"
-  xmlns:views="using:KubeNavigator.Views"
 >
-  <DataTemplate
-    x:Key="ServiceTableHeader"
-    x:DataType="viewmodels:KubernetesResourceTypeListViewModel"
-  >
+  <DataTemplate x:Key="HelmReleaseTableHeader" x:DataType="resources:HelmReleasesViewModel">
     <controls:DataTable ColumnSpacing="16">
       <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
         <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
       </controls:DataColumn>
       <controls:DataColumn
         CanResize="True"
-        FontWeight="SemiBold"
         Content="Name"
         DesiredWidth="Auto"
+        FontWeight="SemiBold"
       />
       <controls:DataColumn
         CanResize="True"
-        FontWeight="SemiBold"
         Content="Namespace"
         DesiredWidth="Auto"
+        FontWeight="SemiBold"
       />
       <controls:DataColumn
         CanResize="True"
-        FontWeight="SemiBold"
-        Content="Type"
+        Content="Chart"
         DesiredWidth="Auto"
+        FontWeight="SemiBold"
       />
       <controls:DataColumn
         CanResize="True"
-        FontWeight="SemiBold"
-        Content="Cluster IP"
+        Content="Revision"
         DesiredWidth="Auto"
+        FontWeight="SemiBold"
       />
       <controls:DataColumn
         CanResize="True"
-        FontWeight="SemiBold"
-        Content="External IP"
+        Content="Version"
         DesiredWidth="Auto"
+        FontWeight="SemiBold"
       />
       <controls:DataColumn
         CanResize="True"
-        FontWeight="SemiBold"
-        Content="Ports"
+        Content="App Version"
         DesiredWidth="Auto"
+        FontWeight="SemiBold"
       />
       <controls:DataColumn
         CanResize="True"
-        FontWeight="SemiBold"
-        Content="Age"
-        DesiredWidth="Auto"
-      />
-      <controls:DataColumn
-        CanResize="True"
-        FontWeight="SemiBold"
         Content="Status"
         DesiredWidth="Auto"
+        FontWeight="SemiBold"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        Content="Updated"
+        DesiredWidth="Auto"
+        FontWeight="SemiBold"
       />
     </controls:DataTable>
   </DataTemplate>
-  <DataTemplate x:Key="ServiceTableRow" x:DataType="resources:ServiceViewModel">
-    <controls:DataRow
-      HorizontalAlignment="Left"
-      Background="Transparent"
-      ContextFlyout="{x:Bind Converter={StaticResource ListItemToMenuConverter}}"
-    >
+  <DataTemplate x:Key="HelmReleaseTableRow" x:DataType="resources:HelmReleaseViewModel">
+    <controls:DataRow HorizontalAlignment="Left" Background="Transparent">
       <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
       <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
       <TextBlock VerticalAlignment="Center" Text="{x:Bind Namespace}" />
-      <TextBlock VerticalAlignment="Center" Text="{x:Bind Type, Mode=OneWay}" />
-      <TextBlock VerticalAlignment="Center" Text="{x:Bind ClusterIP, Mode=OneWay}" />
-      <TextBlock VerticalAlignment="Center" Text="{x:Bind ExternalIP, Mode=OneWay}" />
-      <TextBlock VerticalAlignment="Center" Text="{x:Bind Ports, Mode=OneWay}" />
-      <customcontrols:AgeTextBlock VerticalAlignment="Center" Timestamp="{x:Bind Age}" />
-      <customcontrols:StatusTextBlock VerticalAlignment="Center" Status="{x:Bind Status, Mode=OneWay}" />
+      <TextBlock VerticalAlignment="Center" Text="{x:Bind Chart}" />
+      <TextBlock VerticalAlignment="Center" Text="{x:Bind Revision}" />
+      <TextBlock VerticalAlignment="Center" Text="{x:Bind Version}" />
+      <TextBlock VerticalAlignment="Center" Text="{x:Bind AppVersion}" />
+      <customcontrols:StatusTextBlock VerticalAlignment="Center" Status="{x:Bind Status}" />
+      <customcontrols:AgeTextBlock VerticalAlignment="Center" Timestamp="{x:Bind Updated}" />
     </controls:DataRow>
   </DataTemplate>
 </ResourceDictionary>

@@ -33,7 +33,7 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
 
     public string Status => HelmRelease.Info.Status;
 
-    public string Updated => HelmRelease.Info.LastDeployed.ToString();
+    public DateTime? Updated => HelmRelease.Info.LastDeployed;
 
     public ObservableCollection<HelmRelease> Revisions { get; } = [];
 
@@ -76,7 +76,7 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
                 Items =
                 [
                     new DetailsTextItem { Title = "Chart", Value = Chart },
-                    new DetailsTextItem { Title = "Updated", Value = Updated },
+                    new DetailsTextItem { Title = "Updated", Value = Updated?.ToString() },
                     new DetailsTextItem { Title = "Namespace", Value = Namespace },
                     new DetailsTextItem { Title = "Version", Value = Version },
                     new DetailsTextItem { Title = "Status", Value = Status },

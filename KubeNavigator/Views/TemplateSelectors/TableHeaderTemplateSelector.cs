@@ -10,8 +10,6 @@ public partial class TableHeaderTemplateSelector : DataTemplateSelector
 {
     public DataTemplate? KubernetesResourceTemplate { get; set; }
 
-    public DataTemplate? HelmReleaseTemplate { get; set; }
-
     public DataTemplate? ForwardedPortTemplate { get; set; }
 
     protected override DataTemplate SelectTemplateCore(object item)
@@ -53,9 +51,10 @@ public partial class TableHeaderTemplateSelector : DataTemplateSelector
             }
             return KubernetesResourceTemplate;
         }
-        else if (item is HelmReleasesViewModel && HelmReleaseTemplate != null)
+        else if (item is HelmReleasesViewModel)
         {
-            return HelmReleaseTemplate;
+            var helmReleaseTableHeader = Application.Current.Resources["HelmReleaseTableHeader"];
+            return (DataTemplate)helmReleaseTableHeader;
         }
         else if (item is PortForwardsViewModel && ForwardedPortTemplate != null)
         {

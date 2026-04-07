@@ -10,8 +10,6 @@ public partial class TableTemplateSelector : DataTemplateSelector
 {
     public DataTemplate? KubernetesResourceTemplate { get; set; }
 
-    public DataTemplate? HelmReleaseTemplate { get; set; }
-
     public DataTemplate? ForwardedPortTemplate { get; set; }
 
     protected override DataTemplate SelectTemplateCore(object item)
@@ -50,9 +48,10 @@ public partial class TableTemplateSelector : DataTemplateSelector
             }
             return KubernetesResourceTemplate;
         }
-        else if (item is HelmReleaseViewModel && HelmReleaseTemplate != null)
+        else if (item is HelmReleaseViewModel)
         {
-            return HelmReleaseTemplate;
+            var helmReleaseTableRow = Application.Current.Resources["HelmReleaseTableRow"];
+            return (DataTemplate)helmReleaseTableRow;
         }
         else if (item is ForwardedPortViewModel && ForwardedPortTemplate != null)
         {

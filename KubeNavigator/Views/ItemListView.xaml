@@ -58,21 +58,6 @@
           </controls:DataRow>
         </DataTemplate>
       </templateselectors:TableTemplateSelector.ForwardedPortTemplate>
-      <templateselectors:TableTemplateSelector.HelmReleaseTemplate>
-        <DataTemplate x:DataType="helm:HelmReleaseViewModel">
-          <controls:DataRow HorizontalAlignment="Left" Background="Transparent">
-            <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Namespace}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Chart}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Revision}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Version}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind AppVersion}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Status}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Updated}" />
-          </controls:DataRow>
-        </DataTemplate>
-      </templateselectors:TableTemplateSelector.HelmReleaseTemplate>
     </templateselectors:TableTemplateSelector>
     <templateselectors:TableHeaderTemplateSelector x:Key="TableHeaderTemplateSelector">
       <templateselectors:TableHeaderTemplateSelector.KubernetesResourceTemplate>
@@ -83,21 +68,21 @@
             </controls:DataColumn>
             <controls:DataColumn
               CanResize="True"
-              FontWeight="SemiBold"
               Content="Name"
               DesiredWidth="Auto"
+              FontWeight="SemiBold"
             />
             <controls:DataColumn
               CanResize="True"
-              FontWeight="SemiBold"
               Content="Namespace"
               DesiredWidth="Auto"
+              FontWeight="SemiBold"
             />
             <controls:DataColumn
               CanResize="True"
-              FontWeight="SemiBold"
               Content="Age"
               DesiredWidth="Auto"
+              FontWeight="SemiBold"
             />
           </controls:DataTable>
         </DataTemplate>
@@ -110,70 +95,13 @@
             </controls:DataColumn>
             <controls:DataColumn
               CanResize="True"
-              FontWeight="SemiBold"
               Content="Pod Name"
               DesiredWidth="Auto"
+              FontWeight="SemiBold"
             />
           </controls:DataTable>
         </DataTemplate>
       </templateselectors:TableHeaderTemplateSelector.ForwardedPortTemplate>
-      <templateselectors:TableHeaderTemplateSelector.HelmReleaseTemplate>
-        <DataTemplate x:DataType="helm:HelmReleasesViewModel">
-          <controls:DataTable ColumnSpacing="16">
-            <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
-              <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
-            </controls:DataColumn>
-            <controls:DataColumn
-              CanResize="True"
-              FontWeight="SemiBold"
-              Content="Name"
-              DesiredWidth="Auto"
-            />
-            <controls:DataColumn
-              CanResize="True"
-              FontWeight="SemiBold"
-              Content="Namespace"
-              DesiredWidth="Auto"
-            />
-            <controls:DataColumn
-              CanResize="True"
-              FontWeight="SemiBold"
-              Content="Chart"
-              DesiredWidth="Auto"
-            />
-            <controls:DataColumn
-              CanResize="True"
-              FontWeight="SemiBold"
-              Content="Revision"
-              DesiredWidth="Auto"
-            />
-            <controls:DataColumn
-              CanResize="True"
-              FontWeight="SemiBold"
-              Content="Version"
-              DesiredWidth="Auto"
-            />
-            <controls:DataColumn
-              CanResize="True"
-              FontWeight="SemiBold"
-              Content="App Version"
-              DesiredWidth="Auto"
-            />
-            <controls:DataColumn
-              CanResize="True"
-              FontWeight="SemiBold"
-              Content="Status"
-              DesiredWidth="Auto"
-            />
-            <controls:DataColumn
-              CanResize="True"
-              FontWeight="SemiBold"
-              Content="Updated"
-              DesiredWidth="Auto"
-            />
-          </controls:DataTable>
-        </DataTemplate>
-      </templateselectors:TableHeaderTemplateSelector.HelmReleaseTemplate>
     </templateselectors:TableHeaderTemplateSelector>
   </UserControl.Resources>
   <Grid>

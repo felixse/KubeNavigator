@@ -52,17 +52,7 @@
       <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
       <TextBlock VerticalAlignment="Center" Text="{x:Bind Labels}" />
       <customcontrols:AgeTextBlock VerticalAlignment="Center" Timestamp="{x:Bind Age}" />
-      <controls:SwitchPresenter VerticalAlignment="Center" Value="{x:Bind Status, Mode=OneWay}">
-        <controls:Case Value="Active">
-          <TextBlock
-            Foreground="{ThemeResource SystemFillColorSuccessBrush}"
-            Text="{x:Bind Status, Mode=OneWay}"
-          />
-        </controls:Case>
-        <controls:Case IsDefault="True">
-          <TextBlock Text="{x:Bind Status, Mode=OneWay}" />
-        </controls:Case>
-      </controls:SwitchPresenter>
+      <customcontrols:StatusTextBlock VerticalAlignment="Center" Status="{x:Bind Status, Mode=OneWay}" />
     </controls:DataRow>
   </DataTemplate>
 </ResourceDictionary>

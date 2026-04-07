@@ -11,8 +11,7 @@ namespace KubeNavigator.ViewModels.Helm;
 public partial class HelmReleasesViewModel : ListViewModel
 {
     public HelmReleasesViewModel(WorkspaceViewModel workspace, ClusterViewModel cluster)
-        : base(workspace, title: "Helm Releases", isNamespaceScoped: true, cluster.NamespaceFilters)
-    { }
+        : base(workspace, title: "Releases", isNamespaceScoped: true, cluster.NamespaceFilters) { }
 
     public async Task ActivateAsync()
     {

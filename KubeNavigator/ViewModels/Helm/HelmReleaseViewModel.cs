@@ -29,7 +29,7 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
 
     public string Version => HelmRelease.Chart.Metadata.Version;
 
-    public string AppVersion => ""; // todo
+    public string AppVersion => HelmRelease.Chart.Metadata.AppVersion;
 
     public string Status => HelmRelease.Info.Status;
 

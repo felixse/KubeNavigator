@@ -1,0 +1,42 @@
+<UserControl
+  x:Class="KubeNavigator.Views.Controls.StatusTextBlock"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+>
+  <controls:SwitchPresenter Value="{x:Bind Status, Mode=OneWay}">
+    <controls:Case Value="Running">
+      <TextBlock
+        Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+        Text="{x:Bind Status, Mode=OneWay}"
+      />
+    </controls:Case>
+    <controls:Case Value="Active">
+      <TextBlock
+        Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+        Text="{x:Bind Status, Mode=OneWay}"
+      />
+    </controls:Case>
+    <controls:Case Value="Deployed">
+      <TextBlock
+        Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+        Text="{x:Bind Status, Mode=OneWay}"
+      />
+    </controls:Case>
+    <controls:Case Value="Pending">
+      <TextBlock
+        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+        Text="{x:Bind Status, Mode=OneWay}"
+      />
+    </controls:Case>
+    <controls:Case Value="Terminating">
+      <TextBlock
+        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+        Text="{x:Bind Status, Mode=OneWay}"
+      />
+    </controls:Case>
+    <controls:Case IsDefault="True">
+      <TextBlock Text="{x:Bind Status, Mode=OneWay}" />
+    </controls:Case>
+  </controls:SwitchPresenter>
+</UserControl>

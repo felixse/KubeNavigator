@@ -1,4 +1,6 @@
-﻿using KubeNavigator.Models;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Shelf;
 
 namespace KubeNavigator.ViewModels;
@@ -14,4 +16,6 @@ public interface IWindow
     void ShowMessage(string title, string message, NotificationSeverity severity);
 
     void DismissNotification(NotificationViewModel notification);
+
+    Task<string?> PickFileAsync(IReadOnlyList<string> fileTypes);
 }

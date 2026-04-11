@@ -17,6 +17,7 @@ namespace KubeNavigator.ViewModels;
 public partial class AppViewModel : ObservableObject
 {
     private readonly Func<IUserConfirmationService> _userConfirmationServiceFactory;
+    private readonly ISettingsService _settingsService;
 
     public ObservableCollection<DetailWindowViewModel> DetailWindowViewModels { get; } = [];
 
@@ -44,7 +45,8 @@ public partial class AppViewModel : ObservableObject
         SettingsViewModel settings,
         DispatcherQueue dispatcherQueue,
         ThemeManager themeManager,
-        LoggingService loggingService
+        LoggingService loggingService,
+        ISettingsService settingsService
     )
     {
         _userConfirmationServiceFactory = userConfirmationServiceFactory;
@@ -53,8 +55,10 @@ public partial class AppViewModel : ObservableObject
         DispatcherQueue = dispatcherQueue;
         ThemeManager = themeManager;
         LoggingService = loggingService;
+        _settingsService = settingsService;
         HelmService = new HelmService(
-            LoggerFactoryExtensions.CreateLogger<HelmService>(loggingService.LoggerFactory)
+            LoggerFactoryExtensions.CreateLogger<HelmService>(loggingService.LoggerFactory),
+            settingsService
         );
 
         var configContent = System.IO.File.ReadAllText(
@@ -67,7 +71,7 @@ public partial class AppViewModel : ObservableObject
             .. config.Contexts.Select(c => new ClusterViewModel(
                 c.Name,
                 this,
-                new KubernetesContext(c.Name, loggingService.LoggerFactory)
+                new KubernetesContext(c.Name, loggingService.LoggerFactory, settingsService)
             )),
         ];
 

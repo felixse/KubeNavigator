@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +20,8 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
     public IUserConfirmationService UserConfirmationService { get; }
 
     public IShelfHost ShelfHost => this;
+
+    public Func<IReadOnlyList<string>, Task<string?>>? FilePickerHandler { get; set; }
 
     [ObservableProperty]
     public partial string Title { get; set; }
@@ -94,5 +97,16 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
     public void DismissNotification(NotificationViewModel notification)
     {
         Notifications.Remove(notification);
+    }
+
+    public Task<string?> PickFileAsync(IReadOnlyList<string> fileTypes)
+    {
+        if (FilePickerHandler is null)
+        {
+            Serilog.Log.Error("FilePickerHandler is not set on {ViewModelType}", nameof(DetailWindowViewModel));
+            return Task.FromResult<string?>(null);
+        }
+
+        return FilePickerHandler(fileTypes);
     }
 }

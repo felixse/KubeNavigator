@@ -16,10 +16,12 @@ namespace KubeNavigator.Services;
 public partial class HelmService
 {
     private readonly ILogger<HelmService> _logger;
+    private readonly ISettingsService _settingsService;
 
-    public HelmService(ILogger<HelmService> logger)
+    public HelmService(ILogger<HelmService> logger, ISettingsService settingsService)
     {
         _logger = logger;
+        _settingsService = settingsService;
     }
 
     public HelmRelease? ParseReleaseFromSecret(V1Secret secret)
@@ -86,7 +88,11 @@ public partial class HelmService
         {
             Log.GettingHelmValues(_logger, release.Name, release.Namespace, release.Version);
 
-            var result = await Cli.Wrap("helm")
+            var helmPath = string.IsNullOrWhiteSpace(_settingsService.Settings.HelmPath)
+                ? "helm"
+                : _settingsService.Settings.HelmPath;
+
+            var result = await Cli.Wrap(helmPath)
                 .WithArguments(args =>
                 {
                     args.Add("get");

@@ -53,11 +53,11 @@ public class KubernetesContext
         }
     }
 
-    public KubernetesContext(string name, ILoggerFactory loggerFactory)
+    public KubernetesContext(string name, ILoggerFactory loggerFactory, ISettingsService settingsService)
     {
         Name = name;
         var logger = loggerFactory.CreateLogger<KubernetesService>();
-        _kubernetesService = new KubernetesService(name, logger);
+        _kubernetesService = new KubernetesService(name, logger, settingsService);
     }
 
     public async Task ConnectAsync()

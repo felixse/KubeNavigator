@@ -19,11 +19,13 @@ public partial class KubernetesService
     private readonly ILogger<KubernetesService> _logger;
     private IKubernetes? _kubernetes;
     private readonly string _contextName;
+    private readonly ISettingsService _settingsService;
 
-    public KubernetesService(string contextName, ILogger<KubernetesService> logger)
+    public KubernetesService(string contextName, ILogger<KubernetesService> logger, ISettingsService settingsService)
     {
         _contextName = contextName;
         _logger = logger;
+        _settingsService = settingsService;
     }
 
     public async Task InitializeAsync()
@@ -299,7 +301,11 @@ public partial class KubernetesService
                 _contextName
             );
 
-            var result = await Cli.Wrap("kubectl")
+            var kubectlPath = string.IsNullOrWhiteSpace(_settingsService.Settings.KubectlPath)
+                ? "kubectl"
+                : _settingsService.Settings.KubectlPath;
+
+            var result = await Cli.Wrap(kubectlPath)
                 .WithArguments(args =>
                 {
                     args.Add("get");
@@ -356,7 +362,11 @@ public partial class KubernetesService
 
             try
             {
-                var result = await Cli.Wrap("kubectl")
+                var kubectlPath = string.IsNullOrWhiteSpace(_settingsService.Settings.KubectlPath)
+                    ? "kubectl"
+                    : _settingsService.Settings.KubectlPath;
+
+                var result = await Cli.Wrap(kubectlPath)
                     .WithArguments(args =>
                     {
                         args.Add("apply");

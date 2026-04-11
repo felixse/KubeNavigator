@@ -91,6 +91,11 @@ public partial class WindowViewModel : ObservableObject, IWindow
         }
     }
 
+    public void NavigateToSettings()
+    {
+        SelectedWorkspace.SelectedItem = App.Settings;
+    }
+
     public void ShowMessage(string title, string message, NotificationSeverity severity)
     {
         App.DispatcherQueue.TryEnqueue(() =>

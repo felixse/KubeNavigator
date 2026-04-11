@@ -8,11 +8,14 @@ using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
+using Microsoft.Extensions.Logging;
 
 namespace KubeNavigator.ViewModels;
 
 public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWindow
 {
+    private readonly ILogger<DetailWindowViewModel> _logger;
+
     public AppViewModel App { get; }
 
     public DetailsViewModel Details { get; }
@@ -39,6 +42,7 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
     )
     {
         App = detailsSource.Cluster.App;
+        _logger = App.LoggingService.LoggerFactory.CreateLogger<DetailWindowViewModel>();
         Details = new DetailsViewModel(detailsSource, this);
 
         Details.PropertyChanged += (s, e) =>
@@ -103,10 +107,20 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
     {
         if (FilePickerHandler is null)
         {
-            Serilog.Log.Error("FilePickerHandler is not set on {ViewModelType}", nameof(DetailWindowViewModel));
+            Log.FilePickerHandlerNotSet(_logger, nameof(DetailWindowViewModel));
             return Task.FromResult<string?>(null);
         }
 
         return FilePickerHandler(fileTypes);
+    }
+
+    private static partial class Log
+    {
+        [LoggerMessage(
+            EventId = 4101,
+            Level = LogLevel.Error,
+            Message = "FilePickerHandler is not set on {ViewModelType}"
+        )]
+        public static partial void FilePickerHandlerNotSet(ILogger logger, string viewModelType);
     }
 }

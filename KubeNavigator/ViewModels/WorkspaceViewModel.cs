@@ -15,6 +15,7 @@ using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
+using Microsoft.Extensions.Logging;
 using Windows.UI.WebUI;
 
 namespace KubeNavigator.ViewModels;
@@ -22,6 +23,7 @@ namespace KubeNavigator.ViewModels;
 public partial class WorkspaceViewModel : ObservableObject, IShelfHost
 {
     private ObservableCollection<KubernetesResourceViewModel>? _customResourceDefinitions;
+    private readonly ILogger<WorkspaceViewModel> _logger;
 
     public event EventHandler? Closed;
 
@@ -76,6 +78,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     public WorkspaceViewModel(WindowViewModel window)
     {
         Window = window;
+        _logger = window.App.LoggingService.LoggerFactory.CreateLogger<WorkspaceViewModel>();
 
         Pinned = new NavigationGroupViewModel("Pinned", new SymbolNavigationGroupIcon("\uE840"), []);
         // todo load pinned from settings
@@ -326,7 +329,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     {
         if (CustomResourcesNavigationGroup == null)
         {
-            // todo log error
+            Log.CustomResourcesNavigationGroupNull(_logger);
             return;
         }
 
@@ -426,13 +429,13 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     {
         if (Cluster == null)
         {
-            // todo log error
+            Log.ClusterNullInAddCrd(_logger);
             return;
         }
 
         if (CustomResourcesNavigationGroup == null)
         {
-            // todo log error
+            Log.CustomResourcesNavigationGroupNull(_logger);
             return;
         }
 
@@ -601,5 +604,14 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     )
     {
         HelmReleasesViews?.RefreshFilter(); // todo this should be done in the viewmodel
+    }
+
+    private static partial class Log
+    {
+        [LoggerMessage(EventId = 11001, Level = LogLevel.Error, Message = "CustomResourcesNavigationGroup is null, cannot process CRD changes")]
+        public static partial void CustomResourcesNavigationGroupNull(ILogger logger);
+
+        [LoggerMessage(EventId = 11002, Level = LogLevel.Error, Message = "Cluster is null in AddCustomResourceDefinitionToNavigation")]
+        public static partial void ClusterNullInAddCrd(ILogger logger);
     }
 }

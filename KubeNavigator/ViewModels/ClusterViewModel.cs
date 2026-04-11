@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +10,7 @@ using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Resources;
+using Microsoft.Extensions.Logging;
 
 namespace KubeNavigator.ViewModels;
 
@@ -20,6 +20,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         ResourceType,
         ObservableCollection<KubernetesResourceViewModel>
     > _resources = [];
+
+    private readonly ILogger<ClusterViewModel> _logger;
 
     [ObservableProperty]
     public partial ClusterStatus Status { get; private set; } =
@@ -39,6 +41,7 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         Name = name;
         App = app;
         Context = context;
+        _logger = app.LoggingService.LoggerFactory.CreateLogger<ClusterViewModel>();
         NamespaceFilters.Add(new AllNamespacesFilter());
 
         context.StatusChanged += Context_StatusChanged;
@@ -295,7 +298,7 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 }
                 else
                 {
-                    Debug.WriteLine($"Unhandled namespace event: {resourceEvent}");
+                    Log.UnhandledNamespaceEvent(_logger, Name, resourceEvent.ToString());
                 }
             }
             else if (
@@ -354,9 +357,18 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 }
                 else
                 {
-                    Debug.WriteLine($"Unhandled secret event: {resourceEvent}");
+                    Log.UnhandledSecretEvent(_logger, Name, resourceEvent.ToString());
                 }
             }
         });
+    }
+
+    private static partial class Log
+    {
+        [LoggerMessage(EventId = 10001, Level = LogLevel.Warning, Message = "Unhandled namespace event {EventType} for cluster {ClusterName}")]
+        public static partial void UnhandledNamespaceEvent(ILogger logger, string clusterName, string eventType);
+
+        [LoggerMessage(EventId = 10002, Level = LogLevel.Warning, Message = "Unhandled secret event {EventType} for cluster {ClusterName}")]
+        public static partial void UnhandledSecretEvent(ILogger logger, string clusterName, string eventType);
     }
 }

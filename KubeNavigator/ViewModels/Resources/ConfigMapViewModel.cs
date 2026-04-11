@@ -6,13 +6,19 @@ using k8s;
 using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
+using Microsoft.Extensions.Logging;
 
 namespace KubeNavigator.ViewModels.Resources;
 
 internal partial class ConfigMapViewModel : KubernetesResourceViewModel
 {
+    private readonly ILogger<ConfigMapViewModel> _logger;
+
     public ConfigMapViewModel(IKubernetesObject<V1ObjectMeta> resource, ClusterViewModel cluster)
-        : base(resource, ResourceType.ConfigMap, cluster) { }
+        : base(resource, ResourceType.ConfigMap, cluster)
+    {
+        _logger = cluster.App.LoggingService.LoggerFactory.CreateLogger<ConfigMapViewModel>();
+    }
 
     public V1ConfigMap ConfigMap => (V1ConfigMap)Resource;
 
@@ -23,7 +29,7 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
     {
         if (dataSection == null)
         {
-            // todo log error
+            Log.DataSectionNullOnSave(_logger, Name);
             return;
         }
 
@@ -83,5 +89,11 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
                 yield return new DetailsEditorItem(key, value);
             }
         }
+    }
+
+    private static partial class Log
+    {
+        [LoggerMessage(EventId = 12001, Level = LogLevel.Error, Message = "Data section is null when saving ConfigMap {ResourceName}")]
+        public static partial void DataSectionNullOnSave(ILogger logger, string resourceName);
     }
 }

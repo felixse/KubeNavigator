@@ -9,6 +9,7 @@ using KubeNavigator.Services;
 using KubeNavigator.ViewModels;
 using KubeNavigator.Views;
 using KubeNavigator.Windows;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -22,6 +23,7 @@ public partial class App : Application, IWindowManager
     private readonly ISettingsService _settingsService;
     private ThemeManager? _themeManager;
     private LoggingService? _loggingService;
+    private ILogger<App>? _logger;
 
     public IWindow ActiveWindow =>
         _activeWindow switch
@@ -36,8 +38,8 @@ public partial class App : Application, IWindowManager
         this.InitializeComponent();
         UnhandledException += App_UnhandledException;
 
-        _settingsService = new SettingsService();
         _loggingService = new LoggingService();
+        _settingsService = new SettingsService(_loggingService.LoggerFactory.CreateLogger<SettingsService>());
     }
 
     private void App_UnhandledException(
@@ -45,7 +47,10 @@ public partial class App : Application, IWindowManager
         Microsoft.UI.Xaml.UnhandledExceptionEventArgs e
     )
     {
-        Serilog.Log.Fatal(e.Exception, "Unhandled exception occurred");
+        if (_logger != null)
+        {
+            Log.UnhandledExceptionOccurred(_logger, e.Exception);
+        }
     }
 
     protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
@@ -54,8 +59,9 @@ public partial class App : Application, IWindowManager
 
         var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         _themeManager = new ThemeManager(_settingsService, dispatcherQueue);
+        _logger = _loggingService!.LoggerFactory.CreateLogger<App>();
 
-        Serilog.Log.Information("KubeNavigator starting");
+        Log.ApplicationStarting(_logger);
 
         var settings = new SettingsViewModel(_settingsService, this);
         var app = new AppViewModel(
@@ -79,7 +85,7 @@ public partial class App : Application, IWindowManager
 
         await CheckCliToolsAsync(mainWindow, app.MainWindow);
 
-        Serilog.Log.Information("KubeNavigator started successfully");
+        Log.ApplicationStartedSuccessfully(_logger);
     }
 
     private async Task CheckCliToolsAsync(MainWindow mainWindow, WindowViewModel viewModel)
@@ -198,5 +204,29 @@ public partial class App : Application, IWindowManager
                 _themeManager?.UnregisterThemeTarget(content);
             }
         }
+    }
+
+    private static partial class Log
+    {
+        [LoggerMessage(
+            EventId = 1001,
+            Level = LogLevel.Critical,
+            Message = "Unhandled exception occurred"
+        )]
+        public static partial void UnhandledExceptionOccurred(ILogger logger, Exception exception);
+
+        [LoggerMessage(
+            EventId = 1002,
+            Level = LogLevel.Information,
+            Message = "KubeNavigator starting"
+        )]
+        public static partial void ApplicationStarting(ILogger logger);
+
+        [LoggerMessage(
+            EventId = 1003,
+            Level = LogLevel.Information,
+            Message = "KubeNavigator started successfully"
+        )]
+        public static partial void ApplicationStartedSuccessfully(ILogger logger);
     }
 }

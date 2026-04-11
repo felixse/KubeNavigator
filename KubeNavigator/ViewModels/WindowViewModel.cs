@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Shelf;
+using Microsoft.Extensions.Logging;
 
 namespace KubeNavigator.ViewModels;
 
@@ -21,6 +22,8 @@ public enum NotificationSeverity
 
 public partial class WindowViewModel : ObservableObject, IWindow
 {
+    private readonly ILogger<WindowViewModel> _logger;
+
     public IUserConfirmationService UserConfirmationService { get; }
 
     public IShelfHost ShelfHost => SelectedWorkspace;
@@ -44,6 +47,7 @@ public partial class WindowViewModel : ObservableObject, IWindow
     public WindowViewModel(AppViewModel app, IUserConfirmationService userConfirmationService)
     {
         App = app;
+        _logger = app.LoggingService.LoggerFactory.CreateLogger<WindowViewModel>();
         UserConfirmationService = userConfirmationService;
 
         Notifications = [];
@@ -120,10 +124,20 @@ public partial class WindowViewModel : ObservableObject, IWindow
     {
         if (FilePickerHandler is null)
         {
-            Serilog.Log.Error("FilePickerHandler is not set on {ViewModelType}", nameof(WindowViewModel));
+            Log.FilePickerHandlerNotSet(_logger, nameof(WindowViewModel));
             return Task.FromResult<string?>(null);
         }
 
         return FilePickerHandler(fileTypes);
+    }
+
+    private static partial class Log
+    {
+        [LoggerMessage(
+            EventId = 4001,
+            Level = LogLevel.Error,
+            Message = "FilePickerHandler is not set on {ViewModelType}"
+        )]
+        public static partial void FilePickerHandlerNotSet(ILogger logger, string viewModelType);
     }
 }

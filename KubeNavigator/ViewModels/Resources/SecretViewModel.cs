@@ -7,13 +7,19 @@ using k8s;
 using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
+using Microsoft.Extensions.Logging;
 
 namespace KubeNavigator.ViewModels.Resources;
 
 internal partial class SecretViewModel : KubernetesResourceViewModel
 {
+    private readonly ILogger<SecretViewModel> _logger;
+
     public SecretViewModel(IKubernetesObject<V1ObjectMeta> resource, ClusterViewModel cluster)
-        : base(resource, ResourceType.Secret, cluster) { }
+        : base(resource, ResourceType.Secret, cluster)
+    {
+        _logger = cluster.App.LoggingService.LoggerFactory.CreateLogger<SecretViewModel>();
+    }
 
     public V1Secret Secret => (V1Secret)Resource;
 
@@ -26,7 +32,7 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
     {
         if (dataSection == null)
         {
-            // todo log error
+            Log.DataSectionNullOnSave(_logger, Name);
             return;
         }
 
@@ -118,5 +124,11 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
                 yield return new DetailsEditorItem(key, Encoding.UTF8.GetString(value));
             }
         }
+    }
+
+    private static partial class Log
+    {
+        [LoggerMessage(EventId = 12101, Level = LogLevel.Error, Message = "Data section is null when saving Secret {ResourceName}")]
+        public static partial void DataSectionNullOnSave(ILogger logger, string resourceName);
     }
 }

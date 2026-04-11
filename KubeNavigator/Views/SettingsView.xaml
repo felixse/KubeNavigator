@@ -22,11 +22,18 @@
         Text="Settings"
       />
     </Border>
-    <SelectorBar Grid.Row="1" Margin="0,0,0,16">
-      <SelectorBarItem IsSelected="True" Text="General" />
-      <SelectorBarItem Text="About" />
+    <SelectorBar
+      x:Name="SettingsTabs"
+      Grid.Row="1"
+      Margin="0,0,0,16"
+      SelectionChanged="SettingsTabs_SelectionChanged"
+    >
+      <SelectorBarItem x:Name="GeneralTab" IsSelected="True" Text="General" />
+      <SelectorBarItem x:Name="AboutTab" Text="About" />
     </SelectorBar>
-    <StackPanel Grid.Row="2" Spacing="4">
+
+    <!--  General tab content  -->
+    <StackPanel x:Name="GeneralPanel" Grid.Row="2" Spacing="4">
       <controls:SettingsCard Header="Application Theme">
         <ComboBox
           x:Name="ThemeComboBox"
@@ -61,5 +68,76 @@
         </StackPanel>
       </controls:SettingsCard>
     </StackPanel>
+
+    <!--  About tab content  -->
+    <ScrollViewer x:Name="AboutPanel" Grid.Row="2" VerticalAlignment="Top" Visibility="Collapsed">
+      <ScrollViewer.Resources>
+        <Style BasedOn="{StaticResource DefaultHyperlinkButtonStyle}" TargetType="HyperlinkButton">
+          <Setter Property="Margin" Value="-12,0,0,0" />
+        </Style>
+      </ScrollViewer.Resources>
+      <controls:SettingsExpander Description="© 2026. All rights reserved." Header="KubeNavigator">
+        <controls:SettingsExpander.HeaderIcon>
+          <BitmapIcon
+            ShowAsMonochrome="False"
+            UriSource="ms-appx:///Assets/Square44x44Logo.altform-unplated_targetsize-32.png"
+          />
+        </controls:SettingsExpander.HeaderIcon>
+        <TextBlock
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+          Text="{x:Bind ViewModel.AppVersion}"
+        />
+        <controls:SettingsExpander.Items>
+          <controls:SettingsCard
+            HorizontalContentAlignment="Left"
+            ContentAlignment="Vertical"
+            Header="License"
+          >
+            <HyperlinkButton
+              Content="MIT License"
+              NavigateUri="https://github.com/felixse/KubeNavigator/blob/main/LICENSE"
+            />
+          </controls:SettingsCard>
+          <controls:SettingsCard
+            HorizontalContentAlignment="Left"
+            ContentAlignment="Vertical"
+            Header="Dependencies"
+          >
+            <StackPanel>
+              <HyperlinkButton
+                Content="KubernetesClient"
+                NavigateUri="https://github.com/kubernetes-client/csharp"
+              />
+              <HyperlinkButton
+                Content="Windows App SDK"
+                NavigateUri="https://github.com/microsoft/WindowsAppSDK"
+              />
+              <HyperlinkButton
+                Content="Windows Community Toolkit"
+                NavigateUri="https://github.com/CommunityToolkit/Windows"
+              />
+              <HyperlinkButton Content="CliWrap" NavigateUri="https://github.com/Tyrrrz/CliWrap" />
+              <HyperlinkButton Content="Serilog" NavigateUri="https://github.com/serilog/serilog" />
+            </StackPanel>
+          </controls:SettingsCard>
+          <controls:SettingsCard
+            HorizontalContentAlignment="Left"
+            ContentAlignment="Vertical"
+            Header="Links"
+          >
+            <StackPanel>
+              <HyperlinkButton
+                Content="GitHub repository"
+                NavigateUri="https://github.com/felixse/KubeNavigator"
+              />
+              <HyperlinkButton
+                Content="Report an issue"
+                NavigateUri="https://github.com/felixse/KubeNavigator/issues"
+              />
+            </StackPanel>
+          </controls:SettingsCard>
+        </controls:SettingsExpander.Items>
+      </controls:SettingsExpander>
+    </ScrollViewer>
   </Grid>
 </UserControl>

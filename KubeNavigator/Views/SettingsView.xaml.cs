@@ -1,4 +1,6 @@
+using System;
 using KubeNavigator.ViewModels;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -13,5 +15,15 @@ public sealed partial class SettingsView : UserControl
     public SettingsView()
     {
         this.InitializeComponent();
+    }
+
+    private void SettingsTabs_SelectionChanged(
+        SelectorBar sender,
+        SelectorBarSelectionChangedEventArgs args
+    )
+    {
+        var isGeneral = sender.SelectedItem == GeneralTab;
+        GeneralPanel.Visibility = isGeneral ? Visibility.Visible : Visibility.Collapsed;
+        AboutPanel.Visibility = isGeneral ? Visibility.Collapsed : Visibility.Visible;
     }
 }

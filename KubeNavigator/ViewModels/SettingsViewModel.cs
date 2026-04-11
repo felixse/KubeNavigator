@@ -16,6 +16,15 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
 
     public string Title => "Settings";
 
+    public string AppVersion
+    {
+        get
+        {
+            var version = global::Windows.ApplicationModel.Package.Current.Id.Version;
+            return $"Version {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+        }
+    }
+
     public AppTheme Theme
     {
         get => _settingsService.Settings.Theme;

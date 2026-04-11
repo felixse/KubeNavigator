@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading.Tasks;
+using CliWrap;
 using KubeNavigator.Models;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels;
@@ -9,6 +11,7 @@ using KubeNavigator.Views;
 using KubeNavigator.Windows;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace KubeNavigator;
 
@@ -74,7 +77,67 @@ public partial class App : Application, IWindowManager
         RegisterWindowForTheming(mainWindow);
         mainWindow.Activate();
 
+        await CheckCliToolsAsync(mainWindow, app.MainWindow);
+
         Serilog.Log.Information("KubeNavigator started successfully");
+    }
+
+    private async Task CheckCliToolsAsync(MainWindow mainWindow, WindowViewModel viewModel)
+    {
+        var settings = viewModel.App.Settings;
+        var kubectlAvailable = await IsToolAvailableAsync(settings.KubectlPath, "kubectl");
+        var helmAvailable = await IsToolAvailableAsync(settings.HelmPath, "helm");
+
+        if (kubectlAvailable && helmAvailable)
+        {
+            return;
+        }
+
+        var missing = (kubectlAvailable, helmAvailable) switch
+        {
+            (false, false) => "kubectl and helm",
+            (false, true) => "kubectl",
+            _ => "helm",
+        };
+
+        var dialog = new ContentDialog
+        {
+            Title = "CLI tools not found",
+            Content =
+                $"Could not find {missing} on this system. Some functionality may not work correctly.\n\nYou can configure custom paths in Settings.",
+            PrimaryButtonText = "Go to Settings",
+            CloseButtonText = "Close",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = mainWindow.Content.XamlRoot,
+            RequestedTheme =
+                _themeManager!.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark
+                    ? ElementTheme.Dark
+                    : ElementTheme.Light,
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            viewModel.NavigateToSettings();
+        }
+    }
+
+    private static async Task<bool> IsToolAvailableAsync(string customPath, string defaultName)
+    {
+        var tool = string.IsNullOrWhiteSpace(customPath) ? defaultName : customPath;
+
+        try
+        {
+            await Cli.Wrap(tool)
+                .WithArguments("version")
+                .WithValidation(CommandResultValidation.None)
+                .ExecuteAsync();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private void RegisterWindowForTheming(Window window)

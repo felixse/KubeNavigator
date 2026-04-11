@@ -23,6 +23,7 @@ public sealed partial class DetailWindow : Window
         this.InitializeComponent();
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
+        AppWindow.SetIcon("Assets/Square44x44Logo.targetsize-24.png");
         AppTitleBar.Loaded += AppTitleBar_Loaded;
         AppTitleBar.ActualThemeChanged += AppTitleBar_ActualThemeChanged;
 

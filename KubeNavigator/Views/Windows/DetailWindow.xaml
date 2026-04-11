@@ -25,7 +25,14 @@
       BackRequested="AppTitleBar_BackRequested"
       IsBackButtonVisible="{x:Bind ViewModel.Details.CanGoBack, Mode=OneWay}"
       Subtitle="{x:Bind ViewModel.Details.Cluster.Name, Mode=OneWay}"
-    />
+    >
+      <TitleBar.IconSource>
+        <BitmapIconSource
+          ShowAsMonochrome="False"
+          UriSource="ms-appx:///Assets/Square44x44Logo.altform-unplated_targetsize-32.png"
+        />
+      </TitleBar.IconSource>
+    </TitleBar>
     <Frame x:Name="RootFrame" Grid.Row="1" />
   </Grid>
 </Window>

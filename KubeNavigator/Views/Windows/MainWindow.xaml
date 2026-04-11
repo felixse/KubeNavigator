@@ -21,6 +21,12 @@
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
     <TitleBar x:Name="AppTitleBar" Title="KubeNavigator" IsBackButtonVisible="False">
+      <TitleBar.IconSource>
+        <BitmapIconSource
+          ShowAsMonochrome="False"
+          UriSource="ms-appx:///Assets/Square44x44Logo.altform-unplated_targetsize-32.png"
+        />
+      </TitleBar.IconSource>
       <TitleBar.Content>
         <controls:CommandSelector ViewModel="{x:Bind ViewModel}" />
       </TitleBar.Content>

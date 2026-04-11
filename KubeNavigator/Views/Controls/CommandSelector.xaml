@@ -32,11 +32,15 @@
         x:Name="Selector"
         Width="600"
         HorizontalAlignment="Stretch"
-        Background="{ThemeResource AcrylicInAppFillColorBaseBrush}"
+        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
         BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
         BorderThickness="1"
         CornerRadius="4"
+        Translation="0,0,32"
       >
+        <StackPanel.Shadow>
+          <ThemeShadow />
+        </StackPanel.Shadow>
         <TextBox
           x:Name="Query"
           Background="Transparent"

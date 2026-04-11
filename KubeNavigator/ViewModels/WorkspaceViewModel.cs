@@ -77,7 +77,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     {
         Window = window;
 
-        Pinned = new NavigationGroupViewModel("Pinned", "\uE840", []);
+        Pinned = new NavigationGroupViewModel("Pinned", new SymbolNavigationGroupIcon("\uE840"), []);
         // todo load pinned from settings
 
         var portForwards = new PortForwardsViewModel(this, window.App.ForwardedPorts);
@@ -131,7 +131,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
 
         var clusterGroup = new NavigationGroupViewModel(
             "Cluster",
-            "\uE968",
+            new SymbolNavigationGroupIcon("\uE968"),
             [
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Node),
                 new KubernetesResourceTypeListViewModel(
@@ -150,7 +150,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         );
         var workloads = new NavigationGroupViewModel(
             "Workloads",
-            "\uEE40",
+            new SymbolNavigationGroupIcon("\uEE40"),
             [
                 new KubernetesResourceTypeListViewModel(
                     this,
@@ -173,7 +173,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         );
         var config = new NavigationGroupViewModel(
             "Config",
-            "\uF259",
+            new SymbolNavigationGroupIcon("\uF259"),
             [
                 new KubernetesResourceTypeListViewModel(
                     this,
@@ -216,7 +216,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         );
         var network = new NavigationGroupViewModel(
             "Network",
-            "\uED5D",
+            new SymbolNavigationGroupIcon("\uED5D"),
             [
                 new KubernetesResourceTypeListViewModel(
                     this,
@@ -232,7 +232,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         );
         var storage = new NavigationGroupViewModel(
             "Storage",
-            "\uEDA2",
+            new SymbolNavigationGroupIcon("\uEDA2"),
             [
                 new KubernetesResourceTypeListViewModel(
                     this,
@@ -249,12 +249,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         );
         var helm = new NavigationGroupViewModel(
             "Helm",
-            "\uEE94",
+            new PathNavigationGroupIcon("M1.5,8 A6.5,6.5,0,1,1,14.5,8 A6.5,6.5,0,1,1,1.5,8 Z M2.7,8 A5.3,5.3,0,1,0,13.3,8 A5.3,5.3,0,1,0,2.7,8 Z M6.2,8 A1.8,1.8,0,1,1,9.8,8 A1.8,1.8,0,1,1,6.2,8 Z M7.45,5.8 L8.55,5.8 L8.55,3.1 L7.45,3.1 Z M7.45,1.2 L8.55,1.2 L8.55,0.2 L7.45,0.2 Z M9.63,6.42 L10.18,7.38 L12.52,6.03 L11.97,5.07 Z M13.61,4.12 L14.16,5.08 L15.03,4.58 L14.48,3.62 Z M10.18,8.62 L9.63,9.58 L11.97,10.93 L12.52,9.97 Z M14.16,10.92 L13.61,11.88 L14.48,12.38 L15.03,11.42 Z M8.55,10.2 L7.45,10.2 L7.45,12.9 L8.55,12.9 Z M8.55,14.8 L7.45,14.8 L7.45,15.8 L8.55,15.8 Z M6.37,9.58 L5.82,8.62 L3.48,9.97 L4.03,10.93 Z M2.39,11.88 L1.84,10.92 L0.97,11.42 L1.52,12.38 Z M5.82,7.38 L6.37,6.42 L4.03,5.07 L3.48,6.03 Z M1.84,5.08 L2.39,4.12 L1.52,3.62 L0.97,4.58 Z"),
             [new HelmReleasesViewModel(this, cluster)]
         );
         var accessControl = new NavigationGroupViewModel(
             "Access Control",
-            "\uE72E",
+            new SymbolNavigationGroupIcon("\uE72E"),
             [
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ServiceAccount),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ClusterRole),
@@ -269,7 +269,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         );
         CustomResourcesNavigationGroup = new NavigationGroupViewModel(
             "Custom Resources",
-            "\uEA86",
+            new SymbolNavigationGroupIcon("\uEA86"),
             [
                 new KubernetesResourceTypeListViewModel(
                     this,

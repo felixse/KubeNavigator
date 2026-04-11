@@ -26,15 +26,12 @@
           <DataTemplate x:DataType="navigationViewModels:NavigationGroupViewModel">
             <NavigationViewItem
               Content="{x:Bind Name}"
+              Icon="{x:Bind converters1:NavigationIconHelper.CreateIcon(Icon)}"
               IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
               MenuItemsSource="{x:Bind Items, Mode=OneWay}"
               SelectsOnInvoked="False"
               Visibility="{x:Bind IsVisible, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"
-            >
-              <NavigationViewItem.Icon>
-                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="{x:Bind Icon}" />
-              </NavigationViewItem.Icon>
-            </NavigationViewItem>
+            />
           </DataTemplate>
         </templateselectors:NavigationViewMenuItemTemplateSelector.CategoryTemplate>
         <templateselectors:NavigationViewMenuItemTemplateSelector.ResourceTypeTemplate>

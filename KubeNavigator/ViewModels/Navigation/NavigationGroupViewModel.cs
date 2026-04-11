@@ -9,7 +9,7 @@ public partial class NavigationGroupViewModel : ObservableObject
 {
     public NavigationGroupViewModel(
         string name,
-        string icon,
+        INavigationGroupIcon icon,
         IEnumerable<INavigationTarget> resources
     )
     {
@@ -22,7 +22,7 @@ public partial class NavigationGroupViewModel : ObservableObject
 
     public string Name { get; }
 
-    public string Icon { get; }
+    public INavigationGroupIcon Icon { get; }
 
     public bool HideIfEmpty { get; }
 

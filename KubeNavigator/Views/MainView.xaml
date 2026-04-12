@@ -93,6 +93,7 @@
           <DataTemplate x:DataType="navigationViewModels:CustomResourceGroupViewModel">
             <NavigationViewItem
               Content="{x:Bind GroupName}"
+              IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}"
               MenuItemsSource="{x:Bind Resources, Mode=OneWay}"
               SelectsOnInvoked="False"
             />

@@ -13,6 +13,9 @@ public partial class CustomResourceGroupViewModel : ObservableObject, INavigatio
 
     public string GroupName { get; }
 
+    [ObservableProperty]
+    public partial bool IsExpanded { get; set; }
+
     public ObservableCollection<KubernetesResourceTypeListViewModel> Resources { get; } = [];
 
     string INavigationTarget.Title => GroupName;

@@ -595,6 +595,23 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             {
                 category.IsExpanded = true;
             }
+            else
+            {
+                // Custom resources are nested inside CustomResourceGroupViewModel,
+                // so search one level deeper and expand both the group and subgroup.
+                foreach (var group in NavigationGroups)
+                {
+                    var crGroup = group
+                        .Items.OfType<CustomResourceGroupViewModel>()
+                        .FirstOrDefault(cr => cr.Resources.Contains(resourceType));
+                    if (crGroup != null)
+                    {
+                        group.IsExpanded = true;
+                        crGroup.IsExpanded = true;
+                        break;
+                    }
+                }
+            }
         }
     }
 

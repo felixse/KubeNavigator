@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using KubeNavigator.Models;
+using KubeNavigator.ViewModels.Navigation;
 
 namespace KubeNavigator.ViewModels.AppCommands
 {
@@ -26,6 +27,9 @@ namespace KubeNavigator.ViewModels.AppCommands
         {
             var target = _workspace
                 .NavigationGroups.SelectMany(x => x.Items)
+                .SelectMany(item => item is CustomResourceGroupViewModel crg
+                    ? crg.Resources.Cast<INavigationTarget>()
+                    : [item])
                 .FirstOrDefault(x =>
                     x is KubernetesResourceTypeListViewModel resourceTypeList
                     && resourceTypeList.ResourceType == _resourceType

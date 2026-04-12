@@ -91,6 +91,9 @@ public partial class WindowViewModel : ObservableObject, IWindow
         {
             workspace.SelectedItem = workspace
                 .NavigationGroups.SelectMany(c => c.Items)
+                .SelectMany(item => item is CustomResourceGroupViewModel crg
+                    ? crg.Resources.Cast<INavigationTarget>()
+                    : [item])
                 .FirstOrDefault(r => r.Title == navigationTarget.Title);
         }
     }

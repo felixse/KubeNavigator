@@ -308,6 +308,10 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             ResourceType.CustomResourceDefinition
         );
 
+        // Start watching CRDs immediately so new definitions added to the
+        // cluster are picked up without the user navigating to the CRD list first.
+        await cluster.WatchResource(ResourceType.CustomResourceDefinition);
+
         foreach (var item in _customResourceDefinitions)
         {
             if (item.Resource is V1CustomResourceDefinition crd)

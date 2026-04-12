@@ -24,6 +24,7 @@
         Grid.Column="2"
         MinWidth="200"
         Margin="4"
+        KeyDown="OnSearchKeyDown"
         PlaceholderText="Search"
         Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
       />

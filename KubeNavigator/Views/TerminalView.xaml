@@ -10,6 +10,6 @@
   mc:Ignorable="d"
 >
   <Grid Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
-    <WebView2 x:Name="WebView" Margin="8" />
+    <WebView2 x:Name="WebView" Margin="4" />
   </Grid>
 </UserControl>

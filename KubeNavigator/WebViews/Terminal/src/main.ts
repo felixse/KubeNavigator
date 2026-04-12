@@ -1,5 +1,6 @@
 import { ITheme, Terminal } from "@xterm/xterm";
 import { FitAddon } from '@xterm/addon-fit';
+import { SearchAddon } from '@xterm/addon-search';
 import { WebglAddon } from "@xterm/addon-webgl";
 import { match } from "ts-pattern";
 
@@ -25,6 +26,8 @@ interface OutputReceived {
 interface SearchTextChanged {
   type: 'SearchTextChanged';
   text: string;
+  findPrevious: boolean;
+  incremental: boolean;
 }
 
 interface ClearRequested {
@@ -80,6 +83,7 @@ let darkTheme: ITheme = {
   background: '#202020',
   selectionBackground: '#264f78',
   cursor: '#ffffff',
+  overviewRulerBorder: '#202020',
 };
 
 let lightTheme: ITheme = {
@@ -103,12 +107,24 @@ let lightTheme: ITheme = {
   background: '#f3f3f3',
   selectionBackground: '#add6ff',
   cursor: '#000000',
+  overviewRulerBorder: '#f3f3f3',
 };
 
-let term = new Terminal();
+let term = new Terminal({
+  allowProposedApi: true,
+  scrollbar: {
+    width: 14,
+    overviewRuler: {},
+  },
+  fontFamily: 'Cascadia Code',
+  cursorBlink: true,
+  cursorStyle: 'bar',
+});
 const fitAddon = new FitAddon();
+const searchAddon = new SearchAddon();
 const webGlAddon = new WebglAddon();
 term.loadAddon(fitAddon);
+term.loadAddon(searchAddon);
 term.loadAddon(webGlAddon);
 term.onData((data) => {
   let message: InputReceived = { type: 'InputReceived', data: data };
@@ -119,14 +135,12 @@ term.onResize((size) => {
   window.chrome.webview.postMessage(message);
 });
 
-
-term.options.fontFamily = 'Cascadia Code';
-term.options.cursorBlink = true;
-term.options.cursorStyle = 'bar';
+let currentTheme: 'dark' | 'light' = 'dark';
 
 window.chrome.webview.addEventListener('message', (message: { data: IncomingMessage }) => {
   match(message.data)
     .with({ type: 'InitializeTerminal' }, ({ theme, readOnly }) => {
+      currentTheme = theme;
       if (theme === 'dark') {
         term.options.theme = darkTheme;
       } else {
@@ -148,11 +162,27 @@ window.chrome.webview.addEventListener('message', (message: { data: IncomingMess
     .with({ type: 'ClearRequested' }, () => {
       term.clear();
     })
-    .with({ type: 'SearchTextChanged' }, ({ text }) => {
-      console.log('search text changed: ' + text);
-      //term.findNext(text);
+    .with({ type: 'SearchTextChanged' }, ({ text, findPrevious, incremental }) => {
+      const activeColor = currentTheme === 'dark' ? '#D98B21' : '#B16519';
+      const matchColor = currentTheme === 'dark' ? '#7C5520' : '#D2AC86';
+      const decorations = {
+        matchBackground: matchColor,
+        matchOverviewRuler: matchColor,
+        activeMatchBackground: activeColor,
+        activeMatchColorOverviewRuler: activeColor,
+      };
+      if (text) {
+        if (findPrevious) {
+          searchAddon.findPrevious(text, { decorations });
+        } else {
+          searchAddon.findNext(text, { incremental, decorations });
+        }
+      } else {
+        searchAddon.clearDecorations();
+      }
     })
     .with({ type: 'ThemeChanged' }, ({ theme }) => {
+      currentTheme = theme;
       term.options.theme = theme === 'dark' ? darkTheme : lightTheme;
     });
 });

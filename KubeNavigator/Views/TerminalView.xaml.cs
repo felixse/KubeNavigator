@@ -59,6 +59,37 @@ public sealed partial class TerminalView : UserControl
         });
     }
 
+    public void Search(string? text)
+    {
+        DispatcherQueue.EnqueueAsync(() =>
+        {
+            var message = new SearchTextChanged { Text = text ?? string.Empty, Incremental = true };
+            SendMessage(message);
+        });
+    }
+
+    public void SearchNext(string? text)
+    {
+        DispatcherQueue.EnqueueAsync(() =>
+        {
+            var message = new SearchTextChanged { Text = text ?? string.Empty };
+            SendMessage(message);
+        });
+    }
+
+    public void SearchPrevious(string? text)
+    {
+        DispatcherQueue.EnqueueAsync(() =>
+        {
+            var message = new SearchTextChanged
+            {
+                Text = text ?? string.Empty,
+                FindPrevious = true,
+            };
+            SendMessage(message);
+        });
+    }
+
     public void SendMessage(OutgoingMessage message)
     {
         if (WebView?.CoreWebView2 != null)
@@ -124,7 +155,7 @@ public sealed partial class TerminalView : UserControl
         {
             OnInitialized?.Invoke(this, EventArgs.Empty);
         };
-        //WebView.CoreWebView2.OpenDevToolsWindow();
+        WebView.CoreWebView2.OpenDevToolsWindow();
         WebView.CoreWebView2.Navigate("https://webviews.kubenavigator/Terminal/dist/index.html");
     }
 

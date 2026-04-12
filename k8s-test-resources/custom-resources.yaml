@@ -1,0 +1,167 @@
+---
+# Widgets in default namespace
+apiVersion: samples.kubenavigator.dev/v1
+kind: Widget
+metadata:
+  name: primary-widget
+  namespace: default
+spec:
+  color: blue
+  size: large
+  replicas: 3
+---
+apiVersion: samples.kubenavigator.dev/v1
+kind: Widget
+metadata:
+  name: secondary-widget
+  namespace: default
+spec:
+  color: red
+  size: medium
+  replicas: 2
+---
+apiVersion: samples.kubenavigator.dev/v1
+kind: Widget
+metadata:
+  name: mini-widget
+  namespace: default
+spec:
+  color: green
+  size: small
+  replicas: 1
+---
+# Widgets in kube-system namespace
+apiVersion: samples.kubenavigator.dev/v1
+kind: Widget
+metadata:
+  name: system-widget
+  namespace: kube-system
+spec:
+  color: yellow
+  size: large
+  replicas: 5
+---
+# Pipelines in default namespace
+apiVersion: ci.kubenavigator.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: frontend-build
+  namespace: default
+spec:
+  repository: https://github.com/example/frontend
+  branch: main
+  steps:
+    - name: install
+      image: node:20
+      command: ["npm", "ci"]
+    - name: test
+      image: node:20
+      command: ["npm", "test"]
+    - name: build
+      image: node:20
+      command: ["npm", "run", "build"]
+---
+apiVersion: ci.kubenavigator.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: backend-build
+  namespace: default
+spec:
+  repository: https://github.com/example/backend
+  branch: main
+  steps:
+    - name: restore
+      image: mcr.microsoft.com/dotnet/sdk:10.0
+      command: ["dotnet", "restore"]
+    - name: build
+      image: mcr.microsoft.com/dotnet/sdk:10.0
+      command: ["dotnet", "build"]
+    - name: test
+      image: mcr.microsoft.com/dotnet/sdk:10.0
+      command: ["dotnet", "test"]
+---
+apiVersion: ci.kubenavigator.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: nightly-integration
+  namespace: default
+spec:
+  repository: https://github.com/example/integration-tests
+  branch: develop
+  steps:
+    - name: run-tests
+      image: mcr.microsoft.com/dotnet/sdk:10.0
+      command: ["dotnet", "test", "--filter", "Category=Integration"]
+---
+# DatabaseClusters in default namespace
+apiVersion: data.kubenavigator.dev/v1
+kind: DatabaseCluster
+metadata:
+  name: orders-db
+  namespace: default
+spec:
+  engine: postgres
+  version: "16.2"
+  replicas: 3
+  storageSize: 50Gi
+---
+apiVersion: data.kubenavigator.dev/v1
+kind: DatabaseCluster
+metadata:
+  name: users-db
+  namespace: default
+spec:
+  engine: postgres
+  version: "16.2"
+  replicas: 2
+  storageSize: 20Gi
+---
+apiVersion: data.kubenavigator.dev/v1
+kind: DatabaseCluster
+metadata:
+  name: analytics-db
+  namespace: default
+spec:
+  engine: mongodb
+  version: "7.0"
+  replicas: 3
+  storageSize: 100Gi
+---
+apiVersion: data.kubenavigator.dev/v1
+kind: DatabaseCluster
+metadata:
+  name: cache-db
+  namespace: kube-system
+spec:
+  engine: mysql
+  version: "8.3"
+  replicas: 1
+  storageSize: 10Gi
+---
+# ClusterBackupPolicies (cluster-scoped)
+apiVersion: data.kubenavigator.dev/v1
+kind: ClusterBackupPolicy
+metadata:
+  name: daily-backup
+spec:
+  schedule: "0 2 * * *"
+  retentionDays: 30
+  destination: s3://backups/daily
+---
+apiVersion: data.kubenavigator.dev/v1
+kind: ClusterBackupPolicy
+metadata:
+  name: weekly-backup
+spec:
+  schedule: "0 3 * * 0"
+  retentionDays: 90
+  destination: s3://backups/weekly
+---
+apiVersion: data.kubenavigator.dev/v1
+kind: ClusterBackupPolicy
+metadata:
+  name: monthly-archive
+spec:
+  schedule: "0 4 1 * *"
+  retentionDays: 365
+  destination: s3://backups/monthly

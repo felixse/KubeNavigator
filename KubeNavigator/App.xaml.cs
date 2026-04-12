@@ -63,7 +63,7 @@ public partial class App : Application, IWindowManager
 
         Log.ApplicationStarting(_logger);
 
-        var settings = new SettingsViewModel(_settingsService, this);
+        var settings = new SettingsViewModel(_settingsService, this, _loggingService!);
         var app = new AppViewModel(
             () => new ConfirmationDialogService(_themeManager),
             this,

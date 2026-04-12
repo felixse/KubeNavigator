@@ -76,68 +76,76 @@
           <Setter Property="Margin" Value="-12,0,0,0" />
         </Style>
       </ScrollViewer.Resources>
-      <controls:SettingsExpander Description="© 2026. All rights reserved." Header="KubeNavigator">
-        <controls:SettingsExpander.HeaderIcon>
-          <BitmapIcon
-            ShowAsMonochrome="False"
-            UriSource="ms-appx:///Assets/Square44x44Logo.altform-unplated_targetsize-32.png"
-          />
-        </controls:SettingsExpander.HeaderIcon>
-        <TextBlock
-          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-          Text="{x:Bind ViewModel.AppVersion}"
-        />
-        <controls:SettingsExpander.Items>
-          <controls:SettingsCard
-            HorizontalContentAlignment="Left"
-            ContentAlignment="Vertical"
-            Header="License"
-          >
-            <HyperlinkButton
-              Content="MIT License"
-              NavigateUri="https://github.com/felixse/KubeNavigator/blob/main/LICENSE"
+      <StackPanel Spacing="4">
+        <controls:SettingsExpander Description="© 2026. All rights reserved." Header="KubeNavigator">
+          <controls:SettingsExpander.HeaderIcon>
+            <BitmapIcon
+              ShowAsMonochrome="False"
+              UriSource="ms-appx:///Assets/Square44x44Logo.altform-unplated_targetsize-32.png"
             />
-          </controls:SettingsCard>
-          <controls:SettingsCard
-            HorizontalContentAlignment="Left"
-            ContentAlignment="Vertical"
-            Header="Dependencies"
-          >
-            <StackPanel>
+          </controls:SettingsExpander.HeaderIcon>
+          <TextBlock
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Text="{x:Bind ViewModel.AppVersion}"
+          />
+          <controls:SettingsExpander.Items>
+            <controls:SettingsCard
+              HorizontalContentAlignment="Left"
+              ContentAlignment="Vertical"
+              Header="License"
+            >
               <HyperlinkButton
-                Content="KubernetesClient"
-                NavigateUri="https://github.com/kubernetes-client/csharp"
+                Content="MIT License"
+                NavigateUri="https://github.com/felixse/KubeNavigator/blob/main/LICENSE"
               />
-              <HyperlinkButton
-                Content="Windows App SDK"
-                NavigateUri="https://github.com/microsoft/WindowsAppSDK"
-              />
-              <HyperlinkButton
-                Content="Windows Community Toolkit"
-                NavigateUri="https://github.com/CommunityToolkit/Windows"
-              />
-              <HyperlinkButton Content="CliWrap" NavigateUri="https://github.com/Tyrrrz/CliWrap" />
-              <HyperlinkButton Content="Serilog" NavigateUri="https://github.com/serilog/serilog" />
-            </StackPanel>
-          </controls:SettingsCard>
-          <controls:SettingsCard
-            HorizontalContentAlignment="Left"
-            ContentAlignment="Vertical"
-            Header="Links"
-          >
-            <StackPanel>
-              <HyperlinkButton
-                Content="GitHub repository"
-                NavigateUri="https://github.com/felixse/KubeNavigator"
-              />
-              <HyperlinkButton
-                Content="Report an issue"
-                NavigateUri="https://github.com/felixse/KubeNavigator/issues"
-              />
-            </StackPanel>
-          </controls:SettingsCard>
-        </controls:SettingsExpander.Items>
-      </controls:SettingsExpander>
+            </controls:SettingsCard>
+            <controls:SettingsCard
+              HorizontalContentAlignment="Left"
+              ContentAlignment="Vertical"
+              Header="Dependencies"
+            >
+              <StackPanel>
+                <HyperlinkButton
+                  Content="KubernetesClient"
+                  NavigateUri="https://github.com/kubernetes-client/csharp"
+                />
+                <HyperlinkButton
+                  Content="Windows App SDK"
+                  NavigateUri="https://github.com/microsoft/WindowsAppSDK"
+                />
+                <HyperlinkButton
+                  Content="Windows Community Toolkit"
+                  NavigateUri="https://github.com/CommunityToolkit/Windows"
+                />
+                <HyperlinkButton Content="CliWrap" NavigateUri="https://github.com/Tyrrrz/CliWrap" />
+                <HyperlinkButton Content="Serilog" NavigateUri="https://github.com/serilog/serilog" />
+              </StackPanel>
+            </controls:SettingsCard>
+            <controls:SettingsCard
+              HorizontalContentAlignment="Left"
+              ContentAlignment="Vertical"
+              Header="Links"
+            >
+              <StackPanel>
+                <HyperlinkButton
+                  Content="GitHub repository"
+                  NavigateUri="https://github.com/felixse/KubeNavigator"
+                />
+                <HyperlinkButton
+                  Content="Report an issue"
+                  NavigateUri="https://github.com/felixse/KubeNavigator/issues"
+                />
+              </StackPanel>
+            </controls:SettingsCard>
+          </controls:SettingsExpander.Items>
+        </controls:SettingsExpander>
+        <controls:SettingsCard
+          Description="{x:Bind ViewModel.LogDirectory}"
+          Header="Log Files"
+        >
+          <HyperlinkButton Command="{x:Bind ViewModel.OpenLogDirectoryCommand}" Content="Open log directory" />
+        </controls:SettingsCard>
+      </StackPanel>
     </ScrollViewer>
   </Grid>
 </UserControl>

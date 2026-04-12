@@ -13,8 +13,11 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
 {
     private readonly ISettingsService _settingsService;
     private readonly IWindowManager _windowManager;
+    private readonly LoggingService _loggingService;
 
     public string Title => "Settings";
+
+    public string LogDirectory => _loggingService.LogDirectory;
 
     public string AppVersion
     {
@@ -59,10 +62,17 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
 
     public IReadOnlyList<AppTheme> AvailableThemes { get; } = Enum.GetValues<AppTheme>();
 
-    public SettingsViewModel(ISettingsService settingsService, IWindowManager windowManager)
+    public SettingsViewModel(ISettingsService settingsService, IWindowManager windowManager, LoggingService loggingService)
     {
         _settingsService = settingsService;
         _windowManager = windowManager;
+        _loggingService = loggingService;
+    }
+
+    [RelayCommand]
+    private async Task OpenLogDirectoryAsync()
+    {
+        await global::Windows.System.Launcher.LaunchFolderPathAsync(LogDirectory);
     }
 
     [RelayCommand]

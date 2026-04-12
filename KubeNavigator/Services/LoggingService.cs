@@ -17,23 +17,21 @@ public class LoggingService : IDisposable
 
     public event EventHandler<LogEvent>? LogReceived;
 
+    public string LogDirectory { get; }
+
     public LoggingService()
     {
         _inMemorySink = new InMemoryLogSink(maxLogCount: 1000);
         _inMemorySink.LogReceived += OnLogReceived;
 
-        var logDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "KubeNavigator",
-            "Logs"
-        );
+        LogDirectory = Path.Combine(GetLocalAppDataPath(), "KubeNavigator", "Logs");
 
-        Directory.CreateDirectory(logDirectory);
+        Directory.CreateDirectory(LogDirectory);
 
         _logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.File(
-                path: Path.Combine(logDirectory, "log-.txt"),
+                path: Path.Combine(LogDirectory, "log-.txt"),
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: 7,
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
@@ -64,5 +62,17 @@ public class LoggingService : IDisposable
         _inMemorySink.LogReceived -= OnLogReceived;
         _loggerFactory.Dispose();
         Log.CloseAndFlush();
+    }
+
+    private static string GetLocalAppDataPath()
+    {
+        try
+        {
+            return global::Windows.Storage.ApplicationData.Current.LocalFolder.Path;
+        }
+        catch
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        }
     }
 }

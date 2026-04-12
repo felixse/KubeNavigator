@@ -95,11 +95,14 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         ShelfItems.CollectionChanged += OnShelfItemsCollectionChanged;
 
         SelectedItem = FooterItems.First(f => f is ClusterListViewModel);
+#if DEBUG
         ShelfItems.Add(new ApplicationLogViewModel(App.LoggingService, App.ThemeManager));
         SelectedShelfItem = ShelfItems.First();
+#endif
         AppCommands = new ObservableCollection<IAppCommand>(
             FooterItems.Select(x => new NavigateToViewAppCommand(x, this))
         );
+        AppCommands.Add(new OpenApplicationLogCommand(this));
         FilteredAppCommands = new AdvancedCollectionView(AppCommands);
         FilteredAppCommands.Filter = (obj) =>
         {

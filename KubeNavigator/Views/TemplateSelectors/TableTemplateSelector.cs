@@ -36,6 +36,11 @@ public partial class TableTemplateSelector : DataTemplateSelector
                 var secretTableRow = Application.Current.Resources["SecretTableRow"];
                 return (DataTemplate)secretTableRow;
             }
+            else if (item is DeploymentViewModel)
+            {
+                var deploymentTableRow = Application.Current.Resources["DeploymentTableRow"];
+                return (DataTemplate)deploymentTableRow;
+            }
             else if (item is EventViewModel)
             {
                 var eventTableRow = Application.Current.Resources["EventTableRow"];

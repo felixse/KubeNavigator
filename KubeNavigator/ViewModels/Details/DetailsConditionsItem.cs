@@ -7,6 +7,7 @@ public enum ConditionKind
 {
     Positive,
     Negative,
+    Neutral,
 }
 
 internal class DetailsConditionsElement
@@ -29,7 +30,9 @@ internal class DetailsConditionsElement
             "MemoryPressure" => ConditionKind.Negative,
             "DiskPressure" => ConditionKind.Negative,
             "PIDPressure" => ConditionKind.Negative,
-            _ => ConditionKind.Negative,
+            "Available" => ConditionKind.Positive,
+            "Progressing" => ConditionKind.Neutral,
+            _ => ConditionKind.Neutral,
         };
 
     public string KindString => Kind.ToString();

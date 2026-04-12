@@ -18,6 +18,8 @@ public partial class DetailsContentTemplateSelector : DataTemplateSelector
 
     public DataTemplate? TableTemplate { get; set; }
 
+    public DataTemplate? TableInlineTemplate { get; set; }
+
     public DataTemplate? DictionaryTemplate { get; set; }
 
     public DataTemplate? MarkdownTemplate { get; set; }
@@ -25,6 +27,8 @@ public partial class DetailsContentTemplateSelector : DataTemplateSelector
     public DataTemplate? ConditionsTemplate { get; set; }
 
     public DataTemplate? EditorTemplate { get; set; }
+
+    public DataTemplate? EditorColumnTemplate { get; set; }
 
     protected override DataTemplate SelectTemplateCore(object item)
     {
@@ -34,10 +38,12 @@ public partial class DetailsContentTemplateSelector : DataTemplateSelector
             DetailsCollectionItem { IsWrapLayout: true } => CollectionTemplate,
             DetailsCollectionItem => CollectionStackTemplate,
             DetailsPortsItem => PortsTemplate,
+            DetailsTableItem { IsExpandable: false } => TableInlineTemplate,
             DetailsTableItem => TableTemplate,
             DetailsDictionaryItem => DictionaryTemplate,
             DetailsMarkdownItem => MarkdownTemplate,
             DetailsConditionsItem => ConditionsTemplate,
+            DetailsEditorItem { ShowTitleInColumn: true } => EditorColumnTemplate,
             DetailsEditorItem => EditorTemplate,
             _ => TextTemplate,
         };

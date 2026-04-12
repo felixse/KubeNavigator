@@ -8,6 +8,7 @@ internal class DetailsEditorItem : IDetailsItem
 {
     public string Title { get; set; }
     public string Value { get; set; }
+    public bool ShowTitleInColumn { get; set; }
 
     public Func<string>? TextRetriever { get; set; }
 

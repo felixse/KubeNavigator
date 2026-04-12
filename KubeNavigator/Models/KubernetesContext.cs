@@ -124,6 +124,10 @@ public partial class KubernetesContext
                     new KubernetesResourceRepository<V1Secret>(resourceType, _kubernetesService, _loggerFactory),
                 (V1Namespace.KubeGroup, V1Namespace.KubeApiVersion, V1Namespace.KubePluralName) =>
                     new KubernetesResourceRepository<V1Namespace>(resourceType, _kubernetesService, _loggerFactory),
+                (V1Deployment.KubeGroup, V1Deployment.KubeApiVersion, V1Deployment.KubePluralName) =>
+                    new KubernetesResourceRepository<V1Deployment>(resourceType, _kubernetesService, _loggerFactory),
+                (V1ReplicaSet.KubeGroup, V1ReplicaSet.KubeApiVersion, V1ReplicaSet.KubePluralName) =>
+                    new KubernetesResourceRepository<V1ReplicaSet>(resourceType, _kubernetesService, _loggerFactory),
                 (V1ConfigMap.KubeGroup, V1ConfigMap.KubeApiVersion, V1ConfigMap.KubePluralName) =>
                     new KubernetesResourceRepository<V1ConfigMap>(resourceType, _kubernetesService, _loggerFactory),
                 (

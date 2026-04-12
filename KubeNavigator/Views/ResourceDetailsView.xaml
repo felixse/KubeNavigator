@@ -5,6 +5,7 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:controls="using:CommunityToolkit.WinUI.Controls"
   xmlns:converters="using:KubeNavigator.Converters"
+  xmlns:customcontrols="using:KubeNavigator.Views.Controls"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:details="using:KubeNavigator.ViewModels.Details"
   xmlns:editor="using:WinUIEditor"
@@ -48,6 +49,22 @@
               <Border
                 Padding="8,4,8,4"
                 Background="{ThemeResource SystemFillColorCriticalBrush}"
+                BorderThickness="1"
+                CornerRadius="4"
+              >
+                <TextBlock
+                  Foreground="{ThemeResource TextFillColorInverseBrush}"
+                  IsTextSelectionEnabled="True"
+                  Text="{x:Bind Type}"
+                  TextTrimming="CharacterEllipsis"
+                  ToolTipService.ToolTip="{x:Bind DetailsText}"
+                />
+              </Border>
+            </controls:Case>
+            <controls:Case Value="Neutral">
+              <Border
+                Padding="8,4,8,4"
+                Background="{ThemeResource SystemFillColorAttentionBrush}"
                 BorderThickness="1"
                 CornerRadius="4"
               >
@@ -332,23 +349,36 @@
         <DataTemplate x:DataType="details:DetailsTableItem">
           <controls:DataRow Margin="0,4,0,4">
             <TextBlock Style="{StaticResource DetailsRowHeaderStyle}" Text="{x:Bind Title}" />
-            <StackPanel Spacing="8">
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock VerticalAlignment="Center" Text="{x:Bind Count, Mode=OneWay}" />
-                <HyperlinkButton
-                  Command="{x:Bind ToggleIsExpandedCommand}"
-                  Content="{x:Bind ExpandButtonText, Mode=OneWay}"
-                />
-              </StackPanel>
-              <controls:MarkdownTextBlock
-                Config="{x:Bind local:ResourceDetailsView.GetMarkdownConfig()}"
-                Text="{x:Bind Markdown, Mode=OneWay}"
-                Visibility="{x:Bind IsExpanded, Mode=OneWay}"
-              />
-            </StackPanel>
+            <Expander
+              MinHeight="24"
+              HorizontalAlignment="Stretch"
+              Header="{x:Bind Count, Mode=OneWay}"
+            >
+              <customcontrols:SimpleTable Columns="{x:Bind Columns}" Rows="{x:Bind Rows}" />
+            </Expander>
           </controls:DataRow>
         </DataTemplate>
       </templateselectors:DetailsContentTemplateSelector.TableTemplate>
+      <templateselectors:DetailsContentTemplateSelector.TableInlineTemplate>
+        <DataTemplate x:DataType="details:DetailsTableItem">
+          <controls:DataRow Margin="0,4,0,4">
+            <TextBlock Style="{StaticResource DetailsRowHeaderStyle}" Text="{x:Bind Title}" />
+            <Border
+              Margin="4"
+              Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+              BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+              BorderThickness="1"
+              CornerRadius="4"
+            >
+              <customcontrols:SimpleTable
+                Margin="8"
+                Columns="{x:Bind Columns}"
+                Rows="{x:Bind Rows}"
+              />
+            </Border>
+          </controls:DataRow>
+        </DataTemplate>
+      </templateselectors:DetailsContentTemplateSelector.TableInlineTemplate>
       <templateselectors:DetailsContentTemplateSelector.DictionaryTemplate>
         <DataTemplate x:DataType="details:DetailsDictionaryItem">
           <controls:DataRow Margin="0,4,0,4">
@@ -447,6 +477,22 @@
           </controls:DataRow>
         </DataTemplate>
       </templateselectors:DetailsContentTemplateSelector.EditorTemplate>
+      <templateselectors:DetailsContentTemplateSelector.EditorColumnTemplate>
+        <DataTemplate x:DataType="details:DetailsEditorItem">
+          <controls:DataRow Margin="0,4,0,4">
+            <TextBlock Style="{StaticResource DetailsRowHeaderStyle}" Text="{x:Bind Title}" />
+            <editor:CodeEditorControl
+              Height="200"
+              BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+              BorderThickness="1"
+              CornerRadius="4"
+              DataContext="{x:Bind}"
+              HighlightingLanguage="yaml"
+              Loaded="CodeEditorControl_Loaded"
+            />
+          </controls:DataRow>
+        </DataTemplate>
+      </templateselectors:DetailsContentTemplateSelector.EditorColumnTemplate>
     </templateselectors:DetailsContentTemplateSelector>
     <templateselectors:DetailsSectionTemplateSelector x:Key="DetailsSectionTemplateSelector">
       <templateselectors:DetailsSectionTemplateSelector.SectionTemplate>

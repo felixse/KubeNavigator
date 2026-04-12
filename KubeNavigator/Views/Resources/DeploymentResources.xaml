@@ -1,0 +1,100 @@
+<ResourceDictionary
+  x:Class="KubeNavigator.Views.Resources.DeploymentResources"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+  xmlns:customcontrols="using:KubeNavigator.Views.Controls"
+  xmlns:local="using:KubeNavigator.Views.Resources"
+  xmlns:resources="using:KubeNavigator.ViewModels.Resources"
+  xmlns:viewmodels="using:KubeNavigator.ViewModels"
+  xmlns:views="using:KubeNavigator.Views"
+>
+  <DataTemplate
+    x:Key="DeploymentTableHeader"
+    x:DataType="viewmodels:KubernetesResourceTypeListViewModel"
+  >
+    <controls:DataTable ColumnSpacing="16">
+      <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
+        <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
+      </controls:DataColumn>
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Name"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Namespace"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Ready"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Desired"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Updated"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Available"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Age"
+        DesiredWidth="Auto"
+      />
+      <controls:DataColumn
+        CanResize="True"
+        FontWeight="SemiBold"
+        Content="Conditions"
+        DesiredWidth="Auto"
+      />
+    </controls:DataTable>
+  </DataTemplate>
+  <DataTemplate x:Key="DeploymentTableRow" x:DataType="resources:DeploymentViewModel">
+    <controls:DataRow
+      HorizontalAlignment="Left"
+      Background="Transparent"
+      ContextFlyout="{x:Bind Converter={StaticResource ListItemToMenuConverter}}"
+    >
+      <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
+      <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
+      <TextBlock VerticalAlignment="Center" Text="{x:Bind Namespace}" />
+      <TextBlock VerticalAlignment="Center" Text="{x:Bind Ready, Mode=OneWay}" />
+      <TextBlock VerticalAlignment="Center" Text="{x:Bind Desired, Mode=OneWay}" />
+      <TextBlock VerticalAlignment="Center" Text="{x:Bind Updated, Mode=OneWay}" />
+      <TextBlock VerticalAlignment="Center" Text="{x:Bind Available, Mode=OneWay}" />
+      <customcontrols:AgeTextBlock VerticalAlignment="Center" Timestamp="{x:Bind Age}" />
+      <ItemsRepeater
+        HorizontalAlignment="Left"
+        VerticalAlignment="Center"
+        ItemsSource="{x:Bind Conditions, Mode=OneWay}"
+      >
+        <ItemsRepeater.Layout>
+          <StackLayout Orientation="Horizontal" Spacing="4" />
+        </ItemsRepeater.Layout>
+        <ItemsRepeater.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+            <customcontrols:StatusTextBlock VerticalAlignment="Center" Status="{x:Bind}" />
+          </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+      </ItemsRepeater>
+    </controls:DataRow>
+  </DataTemplate>
+</ResourceDictionary>

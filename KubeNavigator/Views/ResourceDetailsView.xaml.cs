@@ -14,12 +14,12 @@ public sealed partial class ResourceDetailsView : UserControl
 {
     private static MarkdownConfig _markdownConfig = new MarkdownConfig
     {
-        Themes = new()
-        {
-            InlineCodePadding = new(4),
-            InlineCodeBorderBrush = new SolidColorBrush(Colors.Transparent),
-            InlineCodeBorderThickness = new(4),
-        },
+        //Themes = new()
+        //{
+        //    InlineCodePadding = new(4),
+        //    InlineCodeBorderBrush = new SolidColorBrush(Colors.Transparent),
+        //    InlineCodeBorderThickness = new(4),
+        //},
     };
 
     public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(

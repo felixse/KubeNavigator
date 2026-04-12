@@ -17,6 +17,18 @@
         Text="{x:Bind Status, Mode=OneWay}"
       />
     </controls:Case>
+    <controls:Case Value="Available">
+      <TextBlock
+        Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+        Text="{x:Bind Status, Mode=OneWay}"
+      />
+    </controls:Case>
+    <controls:Case Value="Progressing">
+      <TextBlock
+        Foreground="{ThemeResource SystemFillColorAttentionBrush}"
+        Text="{x:Bind Status, Mode=OneWay}"
+      />
+    </controls:Case>
     <controls:Case Value="Deployed">
       <TextBlock
         Foreground="{ThemeResource SystemFillColorSuccessBrush}"

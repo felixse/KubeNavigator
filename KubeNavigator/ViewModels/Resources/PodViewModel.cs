@@ -264,6 +264,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
 
         yield return new DetailsTableItem(
             "Tolerations",
+            isExpandable: true,
             ["Key", "Operator", "Value", "Effect", "Seconds"],
             Pod.Spec.Tolerations?.Select(t =>
                 new[]

@@ -99,7 +99,7 @@ public sealed partial class SimpleTable : UserControl
                     {
                         Text = cells[c],
                         IsTextSelectionEnabled = true,
-                        TextWrapping = TextWrapping.Wrap,
+                        TextWrapping = TextWrapping.NoWrap,
                     };
                     Grid.SetRow(cell, r + 1);
                     Grid.SetColumn(cell, c);

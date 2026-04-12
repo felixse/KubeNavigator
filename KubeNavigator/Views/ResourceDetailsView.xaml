@@ -374,10 +374,21 @@
             <Expander
               Grid.Column="1"
               MinHeight="24"
+              Padding="0"
               HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Stretch"
               Header="{x:Bind Count, Mode=OneWay}"
             >
-              <customcontrols:SimpleTable Columns="{x:Bind Columns}" Rows="{x:Bind Rows}" />
+              <ScrollViewer
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Disabled"
+              >
+                <customcontrols:SimpleTable
+                  Margin="16,0,16,16"
+                  Columns="{x:Bind Columns}"
+                  Rows="{x:Bind Rows}"
+                />
+              </ScrollViewer>
             </Expander>
           </Grid>
         </DataTemplate>
@@ -398,11 +409,16 @@
               BorderThickness="1"
               CornerRadius="4"
             >
-              <customcontrols:SimpleTable
-                Margin="8"
-                Columns="{x:Bind Columns}"
-                Rows="{x:Bind Rows}"
-              />
+              <ScrollViewer
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Disabled"
+              >
+                <customcontrols:SimpleTable
+                  Margin="8"
+                  Columns="{x:Bind Columns}"
+                  Rows="{x:Bind Rows}"
+                />
+              </ScrollViewer>
             </Border>
           </Grid>
         </DataTemplate>

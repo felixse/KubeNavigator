@@ -292,13 +292,17 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         NavigationGroups.Add(accessControl);
         NavigationGroups.Add(CustomResourcesNavigationGroup);
 
-        AppCommands = new ObservableCollection<IAppCommand>(
-            NavigationGroups
-                .SelectMany(x => x.Items)
-                .Where(x => x is KubernetesResourceTypeListViewModel)
-                .Cast<KubernetesResourceTypeListViewModel>()
-                .Select(x => new ViewResourceAppCommand(x.ResourceType, this))
-        );
+        AppCommands.Clear();
+        foreach (var command in NavigationGroups
+            .SelectMany(x => x.Items)
+            .SelectMany(item => item is CustomResourceGroupViewModel crg
+                ? crg.Resources.Cast<INavigationTarget>()
+                : [item])
+            .OfType<KubernetesResourceTypeListViewModel>()
+            .Select(x => new ViewResourceAppCommand(x.ResourceType, this)))
+        {
+            AppCommands.Add(command);
+        }
         foreach (var footerItem in FooterItems)
         {
             AppCommands.Add(new NavigateToViewAppCommand(footerItem, this));
@@ -356,11 +360,24 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                 if (group != null)
                 {
                     var viewModel = group.Resources.FirstOrDefault(r =>
-                        r.ResourceType.Version == crd.Spec.Versions.First().Name
+                        r.ResourceType.Kind == crd.Spec.Names.Kind
+                        && r.ResourceType.Version == crd.Spec.Versions.First().Name
                     );
                     if (viewModel != null)
                     {
                         group.Resources.Remove(viewModel);
+
+                        var command = AppCommands.OfType<ViewResourceAppCommand>()
+                            .FirstOrDefault(c => c.ResourceType == viewModel.ResourceType);
+                        if (command != null)
+                        {
+                            AppCommands.Remove(command);
+                        }
+                    }
+
+                    if (group.Resources.Count == 0)
+                    {
+                        CustomResourcesNavigationGroup.Items.Remove(group);
                     }
                 }
             }
@@ -462,21 +479,19 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         if (group != null)
         {
             // todo what if multiple versions?
-            group.Resources.Add(
-                new KubernetesResourceTypeListViewModel(
-                    this,
-                    Cluster,
-                    new ResourceType(
-                        crd.Spec.Names.Kind,
-                        crd.Spec.Group,
-                        crd.Spec.Versions.First().Name,
-                        crd.Spec.Names.Plural,
-                        crd.Spec.Scope == "Namespaced",
-                        crd.Spec.Names.Plural,
-                        crd.Spec.Names.Singular
-                    )
-                )
+            var resourceType = new ResourceType(
+                crd.Spec.Names.Kind,
+                crd.Spec.Group,
+                crd.Spec.Versions.First().Name,
+                crd.Spec.Names.Plural,
+                crd.Spec.Scope == "Namespaced",
+                crd.Spec.Names.Plural,
+                crd.Spec.Names.Singular
             );
+            group.Resources.Add(
+                new KubernetesResourceTypeListViewModel(this, Cluster, resourceType)
+            );
+            AppCommands.Add(new ViewResourceAppCommand(resourceType, this, crd.Spec.Group));
         }
     }
 

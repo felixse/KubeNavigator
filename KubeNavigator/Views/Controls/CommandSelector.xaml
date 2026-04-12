@@ -61,7 +61,6 @@
           Height="1"
           BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
           BorderThickness="1"
-          Visibility="{x:Bind ViewModel.SelectedWorkspace.FilteredAppCommands, Mode=OneWay, Converter={StaticResource EmptyToCollapsedConverter}}"
         />
         <ListView
           x:Name="Commands"
@@ -94,6 +93,12 @@
             </ItemsPanelTemplate>
           </ListView.ItemsPanel>
         </ListView>
+        <TextBlock
+          Margin="16,8,16,12"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+          Text="Nothing found"
+          Visibility="{x:Bind ViewModel.SelectedWorkspace.FilteredAppCommands.Count, Mode=OneWay, Converter={StaticResource ZeroCountToVisibleConverter}}"
+        />
       </StackPanel>
     </Popup>
   </Grid>

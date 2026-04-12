@@ -68,6 +68,20 @@
     NotEmptyValue="Collapsed"
   />
   <toolkitConverters:CollectionVisibilityConverter x:Key="EmptyToCollapsedConverter" />
+  <toolkitConverters:CollectionVisibilityConverter
+    x:Key="EmptyToVisibleConverter"
+    EmptyValue="Visible"
+    NotEmptyValue="Collapsed"
+  />
+  <converters:CountToVisibilityConverter
+    x:Key="CountToVisibleConverter"
+    MinimumCount="1"
+  />
+  <converters:CountToVisibilityConverter
+    x:Key="ZeroCountToVisibleConverter"
+    IsInverted="True"
+    MinimumCount="1"
+  />
   <converters:ToStringConverter x:Key="ToStringConverter" />
   <converters:ShelfItemToViewConverter x:Key="ShelfItemToViewConverter" />
   <converters:NotificationSeverityConverter x:Key="NotificationSeverityConverter" />

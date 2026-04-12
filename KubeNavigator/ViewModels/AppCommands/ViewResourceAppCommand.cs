@@ -7,19 +7,22 @@ namespace KubeNavigator.ViewModels.AppCommands
 {
     public class ViewResourceAppCommand : IAppCommand
     {
-        private readonly ResourceType _resourceType;
         private readonly WorkspaceViewModel _workspace;
+
+        public ResourceType ResourceType { get; }
 
         public string Name { get; }
 
         public string Context { get; }
 
-        public ViewResourceAppCommand(ResourceType resourceType, WorkspaceViewModel workspace)
+        public ViewResourceAppCommand(ResourceType resourceType, WorkspaceViewModel workspace, string? groupName = null)
         {
-            _resourceType = resourceType;
+            ResourceType = resourceType;
             _workspace = workspace;
 
-            Name = $"View {_resourceType.PluralDisplayName}";
+            Name = groupName != null
+                ? $"View {ResourceType.PluralDisplayName} [{groupName}]"
+                : $"View {ResourceType.PluralDisplayName}";
             Context = _workspace.Cluster.Name;
         }
 
@@ -32,7 +35,7 @@ namespace KubeNavigator.ViewModels.AppCommands
                     : [item])
                 .FirstOrDefault(x =>
                     x is KubernetesResourceTypeListViewModel resourceTypeList
-                    && resourceTypeList.ResourceType == _resourceType
+                    && resourceTypeList.ResourceType == ResourceType
                 );
             if (target != null)
             {

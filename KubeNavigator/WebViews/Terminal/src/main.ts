@@ -163,8 +163,8 @@ window.chrome.webview.addEventListener('message', (message: { data: IncomingMess
       term.clear();
     })
     .with({ type: 'SearchTextChanged' }, ({ text, findPrevious, incremental }) => {
-      const activeColor = currentTheme === 'dark' ? '#D98B21' : '#B16519';
-      const matchColor = currentTheme === 'dark' ? '#7C5520' : '#D2AC86';
+      const activeColor = '#D98B21';
+      const matchColor = currentTheme === 'dark' ? '#7C5520' : '#E6BF8A';
       const decorations = {
         matchBackground: matchColor,
         matchOverviewRuler: matchColor,

@@ -8,6 +8,8 @@ namespace KubeNavigator.ViewModels.Shelf;
 
 public partial class EditKubernetesResourceViewModel : ObservableObject, IShelfItem
 {
+    private string? _originalYaml;
+
     public EditKubernetesResourceViewModel(KubernetesResourceViewModel resource)
     {
         Resource = resource;
@@ -36,6 +38,7 @@ public partial class EditKubernetesResourceViewModel : ObservableObject, IShelfI
                 : null
         );
 
+        _originalYaml = yaml;
         ContentLoaded = true;
         return yaml;
     }
@@ -50,13 +53,25 @@ public partial class EditKubernetesResourceViewModel : ObservableObject, IShelfI
     public async Task SaveAsync()
     {
         var text = TextRetriever?.Invoke();
-        if (!string.IsNullOrWhiteSpace(text))
+        if (!string.IsNullOrWhiteSpace(text) && _originalYaml is not null)
         {
             try
             {
-                await Resource.Cluster.Context.ApplyResourceFromYamlAsync(
+                await Resource.Cluster.Context.PatchResourceFromYamlAsync(
+                    _originalYaml,
                     text,
                     Resource.ResourceType,
+                    Resource.ResourceType.IsNamespaceScoped
+                        ? Resource.Resource.Metadata.NamespaceProperty
+                        : null
+                );
+
+                // Re-fetch the resource from the server to capture any server-side
+                // mutations (e.g. updated resourceVersion, defaults, status) so the
+                // next save diffs against the actual server state.
+                _originalYaml = await Resource.Cluster.Context.GetResourceAsYamlAsync(
+                    Resource.ResourceType,
+                    Resource.Resource.Metadata.Name,
                     Resource.ResourceType.IsNamespaceScoped
                         ? Resource.Resource.Metadata.NamespaceProperty
                         : null

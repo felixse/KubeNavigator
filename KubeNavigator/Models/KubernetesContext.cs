@@ -215,15 +215,17 @@ public partial class KubernetesContext
         );
     }
 
-    public Task ApplyResourceFromYamlAsync(
-        string yaml,
+    public Task PatchResourceFromYamlAsync(
+        string originalYaml,
+        string modifiedYaml,
         ResourceType resourceType,
         string? resourceNamespace = null,
         CancellationToken cancellationToken = default
     )
     {
-        return _kubernetesService.ApplyResourceFromYamlAsync(
-            yaml,
+        return _kubernetesService.PatchResourceFromYamlAsync(
+            originalYaml,
+            modifiedYaml,
             resourceType,
             resourceNamespace,
             cancellationToken

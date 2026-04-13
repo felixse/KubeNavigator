@@ -2,15 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
-using CliWrap;
-using CliWrap.Buffered;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Model;
 using KubeNavigator.Models;
 using Microsoft.Extensions.Logging;
+using System.Text.Json.JsonDiffPatch;
+using System.Text.Json.JsonDiffPatch.Diffs.Formatters;
+using YamlDotNet.Serialization;
 
 namespace KubeNavigator.Services;
 
@@ -301,27 +305,29 @@ public partial class KubernetesService
                 _contextName
             );
 
-            var kubectlPath = string.IsNullOrWhiteSpace(_settingsService.Settings.KubectlPath)
-                ? "kubectl"
-                : _settingsService.Settings.KubectlPath;
+            var basePath = string.IsNullOrEmpty(resourceType.Group)
+                ? $"api/{resourceType.Version}"
+                : $"apis/{resourceType.Group}/{resourceType.Version}";
 
-            var result = await Cli.Wrap(kubectlPath)
-                .WithArguments(args =>
-                {
-                    args.Add("get");
-                    args.Add(resourceType.Plural);
-                    args.Add(resourceName);
-                    if (resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(resourceNamespace))
-                    {
-                        args.Add("-n");
-                        args.Add(resourceNamespace);
-                    }
-                    args.Add("--context");
-                    args.Add(_contextName);
-                    args.Add("-o");
-                    args.Add("yaml");
-                })
-                .ExecuteBufferedAsync(cancellationToken);
+            var path = resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(resourceNamespace)
+                ? $"{basePath}/namespaces/{resourceNamespace}/{resourceType.Plural}/{resourceName}"
+                : $"{basePath}/{resourceType.Plural}/{resourceName}";
+
+            var k8s = (Kubernetes)_kubernetes!;
+            var requestUri = new Uri(k8s.BaseUri, path);
+            var result = await k8s.HttpClient.GetAsync(
+                requestUri,
+                cancellationToken
+            );
+            result.EnsureSuccessStatusCode();
+
+            var json = await result.Content.ReadAsStringAsync(cancellationToken);
+            var deserializer = new DeserializerBuilder().Build();
+            var resource = deserializer.Deserialize(new StringReader(json));
+            var serializer = new SerializerBuilder()
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+                .Build();
+            var yaml = serializer.Serialize(resource!);
 
             Log.ResourceYamlRetrieved(
                 _logger,
@@ -330,7 +336,7 @@ public partial class KubernetesService
                 resourceType.Plural,
                 _contextName
             );
-            return result.StandardOutput;
+            return yaml;
         }
         catch (Exception ex)
         {
@@ -346,8 +352,9 @@ public partial class KubernetesService
         }
     }
 
-    public async Task ApplyResourceFromYamlAsync(
-        string yaml,
+    public async Task PatchResourceFromYamlAsync(
+        string originalYaml,
+        string modifiedYaml,
         ResourceType resourceType,
         string? resourceNamespace = null,
         CancellationToken cancellationToken = default
@@ -357,37 +364,30 @@ public partial class KubernetesService
         {
             Log.ApplyingResourceYaml(_logger, resourceType.Plural, _contextName);
 
-            var filePath = Path.GetTempFileName();
-            await File.WriteAllTextAsync(filePath, yaml, cancellationToken);
+            var resourceNameFromYaml = ExtractResourceNameFromYaml(modifiedYaml);
 
-            try
+            var basePath = string.IsNullOrEmpty(resourceType.Group)
+                ? $"api/{resourceType.Version}"
+                : $"apis/{resourceType.Group}/{resourceType.Version}";
+
+            var path = resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(resourceNamespace)
+                ? $"{basePath}/namespaces/{resourceNamespace}/{resourceType.Plural}/{resourceNameFromYaml}"
+                : $"{basePath}/{resourceType.Plural}/{resourceNameFromYaml}";
+
+            // Convert both YAML versions to JSON
+            var deserializer = new DeserializerBuilder().Build();
+
+            var originalObject = deserializer.Deserialize(new StringReader(originalYaml));
+            var originalJson = KubernetesJson.Serialize(originalObject);
+
+            var modifiedObject = deserializer.Deserialize(new StringReader(modifiedYaml));
+            var modifiedJson = KubernetesJson.Serialize(modifiedObject);
+
+            // Compute RFC 6902 JSON Patch between original and modified
+            var patch = JsonDiffPatcher.Diff(originalJson, modifiedJson, new JsonPatchDeltaFormatter());
+
+            if (patch is not JsonArray { Count: > 0 })
             {
-                var kubectlPath = string.IsNullOrWhiteSpace(_settingsService.Settings.KubectlPath)
-                    ? "kubectl"
-                    : _settingsService.Settings.KubectlPath;
-
-                var result = await Cli.Wrap(kubectlPath)
-                    .WithArguments(args =>
-                    {
-                        args.Add("apply");
-                        args.Add("-f");
-                        args.Add(filePath);
-                        if (
-                            resourceType.IsNamespaceScoped
-                            && !string.IsNullOrEmpty(resourceNamespace)
-                        )
-                        {
-                            args.Add("-n");
-                            args.Add(resourceNamespace);
-                        }
-                        args.Add("--context");
-                        args.Add(_contextName);
-                    })
-                    .ExecuteBufferedAsync(cancellationToken);
-
-                // Extract resource name from the result or yaml for logging
-                var resourceNameFromYaml = ExtractResourceNameFromYaml(yaml);
-
                 Log.ResourceYamlApplied(
                     _logger,
                     resourceNameFromYaml,
@@ -395,14 +395,37 @@ public partial class KubernetesService
                     resourceType.Plural,
                     _contextName
                 );
+                return; // No changes detected
             }
-            finally
+
+            var patchJson = patch.ToJsonString();
+            _logger.LogDebug("Sending JSON Patch with {OperationCount} operations to {Path}", patch.AsArray().Count, path);
+
+            var k8s = (Kubernetes)_kubernetes!;
+            var requestUri = new Uri(k8s.BaseUri, path);
+            var content = new StringContent(patchJson, Encoding.UTF8, new System.Net.Http.Headers.MediaTypeHeaderValue("application/json-patch+json"));
+
+            var request = new HttpRequestMessage(HttpMethod.Patch, requestUri)
             {
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
+                Content = content
+            };
+
+            var result = await k8s.HttpClient.SendAsync(request, cancellationToken);
+
+            if (!result.IsSuccessStatusCode)
+            {
+                var responseBody = await result.Content.ReadAsStringAsync(cancellationToken);
+                throw new HttpRequestException(
+                    $"Failed to patch resource ({result.StatusCode}): {responseBody}");
             }
+
+            Log.ResourceYamlApplied(
+                _logger,
+                resourceNameFromYaml,
+                resourceNamespace ?? string.Empty,
+                resourceType.Plural,
+                _contextName
+            );
         }
         catch (Exception ex)
         {

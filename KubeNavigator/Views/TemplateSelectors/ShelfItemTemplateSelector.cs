@@ -8,6 +8,8 @@ public partial class ShelfItemTemplateSelector : DataTemplateSelector
 {
     public DataTemplate? EditTemplate { get; set; }
 
+    public DataTemplate? CreateTemplate { get; set; }
+
     public DataTemplate? LogsTemplate { get; set; }
 
     public DataTemplate? ShellTemplate { get; set; }
@@ -19,6 +21,10 @@ public partial class ShelfItemTemplateSelector : DataTemplateSelector
         if (item is EditKubernetesResourceViewModel && EditTemplate != null)
         {
             return EditTemplate;
+        }
+        else if (item is CreateKubernetesResourceViewModel && CreateTemplate != null)
+        {
+            return CreateTemplate;
         }
         else if (item is PodLogsViewModel && LogsTemplate != null)
         {

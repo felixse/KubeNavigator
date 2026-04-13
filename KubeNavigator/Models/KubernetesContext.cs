@@ -232,6 +232,21 @@ public partial class KubernetesContext
         );
     }
 
+    public Task CreateResourceFromYamlAsync(
+        string yaml,
+        ResourceType resourceType,
+        string? resourceNamespace = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return _kubernetesService.CreateResourceFromYamlAsync(
+            yaml,
+            resourceType,
+            resourceNamespace,
+            cancellationToken
+        );
+    }
+
     public async Task StartListenAsync(
         IKubernetesObject<V1ObjectMeta> resource,
         int targetPort,

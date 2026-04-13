@@ -434,6 +434,67 @@ public partial class KubernetesService
         }
     }
 
+    public async Task CreateResourceFromYamlAsync(
+        string yaml,
+        ResourceType resourceType,
+        string? resourceNamespace = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            Log.CreatingResourceFromYaml(_logger, resourceType.Plural, _contextName);
+
+            var deserializer = new DeserializerBuilder().Build();
+            var yamlObject = deserializer.Deserialize(new StringReader(yaml));
+            var json = KubernetesJson.Serialize(yamlObject);
+
+            // When namespace-scoped, always resolve the namespace from the
+            // YAML body so the URL is correct even when no explicit namespace
+            // was provided by the caller (e.g. "All Namespaces" filter).
+            var effectiveNamespace = resourceNamespace;
+            if (resourceType.IsNamespaceScoped && string.IsNullOrEmpty(effectiveNamespace))
+            {
+                effectiveNamespace = ExtractResourceNamespaceFromYaml(yaml);
+            }
+
+            var basePath = string.IsNullOrEmpty(resourceType.Group)
+                ? $"api/{resourceType.Version}"
+                : $"apis/{resourceType.Group}/{resourceType.Version}";
+
+            var path = resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(effectiveNamespace)
+                ? $"{basePath}/namespaces/{effectiveNamespace}/{resourceType.Plural}"
+                : $"{basePath}/{resourceType.Plural}";
+
+            var k8s = (Kubernetes)_kubernetes!;
+            var requestUri = new Uri(k8s.BaseUri, path);
+            var content = new StringContent(json, Encoding.UTF8, new System.Net.Http.Headers.MediaTypeHeaderValue("application/json"));
+
+            var result = await k8s.HttpClient.PostAsync(requestUri, content, cancellationToken);
+
+            if (!result.IsSuccessStatusCode)
+            {
+                var responseBody = await result.Content.ReadAsStringAsync(cancellationToken);
+                throw new HttpRequestException(
+                    $"Failed to create resource ({result.StatusCode}): {responseBody}");
+            }
+
+            var resourceName = ExtractResourceNameFromYaml(yaml);
+            Log.ResourceCreatedFromYaml(
+                _logger,
+                resourceName,
+                effectiveNamespace ?? string.Empty,
+                resourceType.Plural,
+                _contextName
+            );
+        }
+        catch (Exception ex)
+        {
+            Log.CreateResourceFromYamlFailed(_logger, resourceType.Plural, _contextName, ex);
+            throw;
+        }
+    }
+
     public async Task SaveConfigMapAsync(V1ConfigMap configMap)
     {
         await _kubernetes.CoreV1.ReplaceNamespacedConfigMapAsync(
@@ -452,16 +513,31 @@ public partial class KubernetesService
         );
     }
 
-    private static string ExtractResourceNameFromYaml(string yaml)
+    private string ExtractResourceNameFromYaml(string yaml)
     {
         try
         {
             var resource = KubernetesYaml.Deserialize<GenericKubernetesObject>(yaml);
             return resource.Name();
         }
-        catch
+        catch (Exception ex)
         {
+            Log.ExtractResourceNameFailed(_logger, _contextName, ex);
             return "unknown";
+        }
+    }
+
+    private string? ExtractResourceNamespaceFromYaml(string yaml)
+    {
+        try
+        {
+            var resource = KubernetesYaml.Deserialize<GenericKubernetesObject>(yaml);
+            return resource.Namespace();
+        }
+        catch (Exception ex)
+        {
+            Log.ExtractResourceNamespaceFailed(_logger, _contextName, ex);
+            return null;
         }
     }
 
@@ -815,6 +891,64 @@ public partial class KubernetesService
         public static partial void ApplyResourceYamlFailed(
             ILogger logger,
             string resourceType,
+            string contextName,
+            Exception exception
+        );
+
+        [LoggerMessage(
+            EventId = 2031,
+            Level = LogLevel.Information,
+            Message = "Creating {ResourceType} resource from YAML in cluster {ContextName}"
+        )]
+        public static partial void CreatingResourceFromYaml(
+            ILogger logger,
+            string resourceType,
+            string contextName
+        );
+
+        [LoggerMessage(
+            EventId = 2032,
+            Level = LogLevel.Information,
+            Message = "Created {ResourceType} resource {ResourceName} in namespace {Namespace} in cluster {ContextName}"
+        )]
+        public static partial void ResourceCreatedFromYaml(
+            ILogger logger,
+            string resourceName,
+            string @namespace,
+            string resourceType,
+            string contextName
+        );
+
+        [LoggerMessage(
+            EventId = 2033,
+            Level = LogLevel.Error,
+            Message = "Failed to create {ResourceType} resource from YAML in cluster {ContextName}"
+        )]
+        public static partial void CreateResourceFromYamlFailed(
+            ILogger logger,
+            string resourceType,
+            string contextName,
+            Exception exception
+        );
+
+        [LoggerMessage(
+            EventId = 2034,
+            Level = LogLevel.Warning,
+            Message = "Failed to extract resource name from YAML in cluster {ContextName}"
+        )]
+        public static partial void ExtractResourceNameFailed(
+            ILogger logger,
+            string contextName,
+            Exception exception
+        );
+
+        [LoggerMessage(
+            EventId = 2035,
+            Level = LogLevel.Warning,
+            Message = "Failed to extract resource namespace from YAML in cluster {ContextName}"
+        )]
+        public static partial void ExtractResourceNamespaceFailed(
+            ILogger logger,
             string contextName,
             Exception exception
         );

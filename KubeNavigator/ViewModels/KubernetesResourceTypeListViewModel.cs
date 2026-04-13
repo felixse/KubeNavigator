@@ -147,6 +147,20 @@ public partial class KubernetesResourceTypeListViewModel
         Workspace.UnPinResourceType(this);
     }
 
+    public override void AddNewItem()
+    {
+        string? targetNamespace = null;
+
+        if (ResourceType.IsNamespaceScoped && Workspace.SelectedNamespaceFilter is NamespaceFilter nsFilter)
+        {
+            targetNamespace = nsFilter.Name;
+        }
+
+        Workspace.OpenShelfItem(
+            new Shelf.CreateKubernetesResourceViewModel(Cluster, ResourceType, targetNamespace)
+        );
+    }
+
     protected override async Task DeleteItemsAsync(IReadOnlyCollection<ISelectable> items)
     {
         await Cluster.DeleteResourcesAsync(

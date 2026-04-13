@@ -23,6 +23,9 @@ public partial class ShelfItemToViewConverter : IValueConverter
                     EditKubernetesResourceViewModel editViewModel => new ResourceEditView(
                         editViewModel
                     ),
+                    CreateKubernetesResourceViewModel createViewModel => new ResourceCreateView(
+                        createViewModel
+                    ),
                     PodShellViewModel shellViewModel => new PodShellView(shellViewModel),
                     ApplicationLogViewModel appLogViewModel => new ApplicationLogView(
                         appLogViewModel

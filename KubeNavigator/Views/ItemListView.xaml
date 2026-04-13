@@ -130,7 +130,7 @@
           Icon="Delete"
           ToolTipService.ToolTip="Delete"
         />
-        <AppBarButton Width="36" Icon="Add" ToolTipService.ToolTip="Add" />
+        <AppBarButton Width="36" Command="{x:Bind ViewModel.AddNewItemCommand}" Icon="Add" ToolTipService.ToolTip="Add" />
       </CommandBar>
       <TextBlock Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Run Text="{x:Bind ViewModel.Items.Count, Mode=OneWay}" />

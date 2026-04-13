@@ -31,6 +31,7 @@
     <None Remove="Views\PortForwardDialog.xaml" />
     <None Remove="Views\PortForwardsView.xaml" />
     <None Remove="Views\ResourceDetailsView.xaml" />
+    <None Remove="Views\ResourceCreateView.xaml" />
     <None Remove="Views\ResourceEditView.xaml" />
     <None Remove="Views\Resources\ConfigMapResources.xaml" />
     <None Remove="Views\Resources\EventResources.xaml" />
@@ -41,6 +42,7 @@
     <None Remove="Views\SettingsView.xaml" />
     <None Remove="Views\TerminalView.xaml" />
   </ItemGroup>
+
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -159,6 +161,9 @@
       <Generator>MSBuild:Compile</Generator>
     </None>
     <None Update="Views\Controls\StatusTextBlock.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Views\ResourceCreateView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
     <None Update="Views\Resources\DeploymentResources.xaml">

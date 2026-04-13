@@ -92,6 +92,9 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
     }
 
     [RelayCommand]
+    public virtual void AddNewItem() { }
+
+    [RelayCommand]
     public async Task OpenInNewTab()
     {
         await Workspace.Window.OpenInNewWorkspaceAsync(this, Workspace.Cluster);

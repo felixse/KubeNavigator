@@ -19,6 +19,15 @@
         </TabViewItem>
       </DataTemplate>
     </templateselectors:ShelfItemTemplateSelector.EditTemplate>
+    <templateselectors:ShelfItemTemplateSelector.CreateTemplate>
+      <DataTemplate x:DataType="shelf:CreateKubernetesResourceViewModel">
+        <TabViewItem Header="{x:Bind Title}">
+          <TabViewItem.IconSource>
+            <SymbolIconSource Symbol="Add" />
+          </TabViewItem.IconSource>
+        </TabViewItem>
+      </DataTemplate>
+    </templateselectors:ShelfItemTemplateSelector.CreateTemplate>
     <templateselectors:ShelfItemTemplateSelector.LogsTemplate>
       <DataTemplate x:DataType="shelf:PodLogsViewModel">
         <TabViewItem Header="{x:Bind Title}">

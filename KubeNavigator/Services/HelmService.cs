@@ -81,6 +81,7 @@ public partial class HelmService
 
     public async Task<string> GetValuesYamlAsync(
         HelmRelease release,
+        string contextName,
         CancellationToken cancellationToken = default
     )
     {
@@ -104,6 +105,8 @@ public partial class HelmService
                     args.Add(release.Version.ToString());
                     args.Add("--output");
                     args.Add("yaml");
+                    args.Add("--kube-context");
+                    args.Add(contextName);
                 })
                 .ExecuteBufferedAsync(cancellationToken);
 

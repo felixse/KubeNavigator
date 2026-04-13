@@ -68,7 +68,7 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
 
     public async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
-        var values = await Cluster.App.HelmService.GetValuesYamlAsync(HelmRelease);
+        var values = await Cluster.App.HelmService.GetValuesYamlAsync(HelmRelease, Cluster.Context.Name);
         return
         [
             new DetailsSection

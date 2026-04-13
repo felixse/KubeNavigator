@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using CliWrap;
@@ -55,14 +56,20 @@ public partial class App : Application, IWindowManager
 
     protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
+        var startupTimer = Stopwatch.StartNew();
+
+        var sw = Stopwatch.StartNew();
         await _settingsService.LoadAsync();
+        sw.Stop();
 
         var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         _themeManager = new ThemeManager(_settingsService, dispatcherQueue);
         _logger = _loggingService!.LoggerFactory.CreateLogger<App>();
 
         Log.ApplicationStarting(_logger);
+        Log.StartupPhaseCompleted(_logger, "LoadSettings", sw.ElapsedMilliseconds);
 
+        sw.Restart();
         var settings = new SettingsViewModel(_settingsService, this, _loggingService!);
         var app = new AppViewModel(
             () => new ConfirmationDialogService(_themeManager),
@@ -79,20 +86,33 @@ public partial class App : Application, IWindowManager
         mainWindow.Closed += OnWindowClosed;
         mainWindow.Activated += OnWindowActivated;
         _windows.Add(mainWindow);
+        sw.Stop();
+        Log.StartupPhaseCompleted(_logger, "CreateViewModelsAndWindow", sw.ElapsedMilliseconds);
 
+        sw.Restart();
         RegisterWindowForTheming(mainWindow);
         mainWindow.Activate();
+        sw.Stop();
+        Log.StartupPhaseCompleted(_logger, "ActivateWindow", sw.ElapsedMilliseconds);
 
+        sw.Restart();
         await CheckCliToolsAsync(mainWindow, app.MainWindow);
+        sw.Stop();
+        Log.StartupPhaseCompleted(_logger, "CheckCliTools", sw.ElapsedMilliseconds);
 
+        startupTimer.Stop();
+        Log.StartupTotalTime(_logger, startupTimer.ElapsedMilliseconds);
         Log.ApplicationStartedSuccessfully(_logger);
     }
 
     private async Task CheckCliToolsAsync(MainWindow mainWindow, WindowViewModel viewModel)
     {
         var settings = viewModel.App.Settings;
-        var kubectlAvailable = await IsToolAvailableAsync(settings.KubectlPath, "kubectl");
-        var helmAvailable = await IsToolAvailableAsync(settings.HelmPath, "helm");
+        var kubectlTask = IsToolAvailableAsync(settings.KubectlPath, "kubectl");
+        var helmTask = IsToolAvailableAsync(settings.HelmPath, "helm");
+        await Task.WhenAll(kubectlTask, helmTask);
+        var kubectlAvailable = kubectlTask.Result;
+        var helmAvailable = helmTask.Result;
 
         if (kubectlAvailable && helmAvailable)
         {
@@ -128,20 +148,25 @@ public partial class App : Application, IWindowManager
         }
     }
 
-    private static async Task<bool> IsToolAvailableAsync(string customPath, string defaultName)
+    private async Task<bool> IsToolAvailableAsync(string customPath, string defaultName)
     {
         var tool = string.IsNullOrWhiteSpace(customPath) ? defaultName : customPath;
 
+        var sw = Stopwatch.StartNew();
         try
         {
             await Cli.Wrap(tool)
-                .WithArguments("version")
+                .WithArguments(["version", "--client"])
                 .WithValidation(CommandResultValidation.None)
                 .ExecuteAsync();
+            sw.Stop();
+            Log.CliToolCheckCompleted(_logger!, tool, sw.ElapsedMilliseconds, true);
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            sw.Stop();
+            Log.CliToolCheckFailed(_logger!, tool, sw.ElapsedMilliseconds, ex);
             return false;
         }
     }
@@ -228,5 +253,33 @@ public partial class App : Application, IWindowManager
             Message = "KubeNavigator started successfully"
         )]
         public static partial void ApplicationStartedSuccessfully(ILogger logger);
+
+        [LoggerMessage(
+            EventId = 1004,
+            Level = LogLevel.Debug,
+            Message = "Startup phase '{Phase}' completed in {ElapsedMs}ms"
+        )]
+        public static partial void StartupPhaseCompleted(ILogger logger, string phase, long elapsedMs);
+
+        [LoggerMessage(
+            EventId = 1005,
+            Level = LogLevel.Debug,
+            Message = "Total startup time: {ElapsedMs}ms"
+        )]
+        public static partial void StartupTotalTime(ILogger logger, long elapsedMs);
+
+        [LoggerMessage(
+            EventId = 1006,
+            Level = LogLevel.Debug,
+            Message = "CLI tool check for '{Tool}' completed in {ElapsedMs}ms (available: {Available})"
+        )]
+        public static partial void CliToolCheckCompleted(ILogger logger, string tool, long elapsedMs, bool available);
+
+        [LoggerMessage(
+            EventId = 1007,
+            Level = LogLevel.Debug,
+            Message = "CLI tool check for '{Tool}' failed after {ElapsedMs}ms"
+        )]
+        public static partial void CliToolCheckFailed(ILogger logger, string tool, long elapsedMs, Exception exception);
     }
 }

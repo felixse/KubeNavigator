@@ -20,7 +20,7 @@
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
-      <Button Grid.Column="0" Command="{x:Bind ViewModel.ClearCommand}" Content="Clear" />
+      <Button Grid.Column="0" Click="OnClearButtonClicked" Command="{x:Bind ViewModel.ClearCommand}" Content="Clear" />
       <TextBox
         Grid.Column="2"
         MinWidth="200"

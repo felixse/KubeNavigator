@@ -83,15 +83,9 @@
               </StackPanel>
             </DataTemplate>
           </ListView.ItemTemplate>
-          <ListView.ItemsPanel>
-            <ItemsPanelTemplate>
-              <StackPanel>
-                <StackPanel.ChildrenTransitions>
-                  <TransitionCollection />
-                </StackPanel.ChildrenTransitions>
-              </StackPanel>
-            </ItemsPanelTemplate>
-          </ListView.ItemsPanel>
+          <ListView.ItemContainerTransitions>
+            <TransitionCollection />
+          </ListView.ItemContainerTransitions>
         </ListView>
         <TextBlock
           Margin="16,8,16,12"

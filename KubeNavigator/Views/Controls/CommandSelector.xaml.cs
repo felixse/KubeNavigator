@@ -59,14 +59,11 @@ public sealed partial class CommandSelector : UserControl
 
     private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        // todo: this crashes
-        //DispatcherQueue.TryEnqueue(() =>
-        //{
-        //    if (e.AddedItems.Count > 0)
-        //    {
-        //        Commands.ScrollIntoView(e.AddedItems.First());
-        //    }
-        //});
+        if (e.AddedItems.Count > 0)
+        {
+            var container = Commands.ContainerFromItem(e.AddedItems[0]) as UIElement;
+            container?.StartBringIntoView();
+        }
     }
 
     private void SelectorPopup_Opened(object sender, object e)

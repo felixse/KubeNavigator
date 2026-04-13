@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -19,6 +20,17 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
     public string Name => Resource.Name();
     public string Namespace => Resource.Namespace();
     public DateTime? Age => Resource.Metadata.CreationTimestamp;
+
+    private static readonly ImmutableArray<ResourceColumn> DefaultColumns =
+    [
+        new("Name", vm => vm.Name, PropertyName: nameof(Name)),
+        new("Namespace", vm => vm.Namespace, PropertyName: nameof(Namespace)),
+        new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
+    ];
+
+    public static ImmutableArray<ResourceColumn> GetDefaultColumns() => DefaultColumns;
+
+    public virtual ImmutableArray<ResourceColumn> Columns => DefaultColumns;
 
     [ObservableProperty]
     public partial bool IsSelected { get; set; }

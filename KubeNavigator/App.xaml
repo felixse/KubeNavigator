@@ -11,14 +11,8 @@
       <ResourceDictionary.MergedDictionaries>
         <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
         <local:ApplicationResources />
-        <resources:PodResources />
-        <resources:ServiceResources />
-        <resources:ConfigMapResources />
-        <resources:SecretResources />
-        <resources:EventResources />
-        <resources:NamespaceResources />
-        <resources:DeploymentResources />
         <resources:HelmReleaseResources />
+        <resources:DynamicTableResources />
         <!--  Other merged dictionaries here  -->
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>

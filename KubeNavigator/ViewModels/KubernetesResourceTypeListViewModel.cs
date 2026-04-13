@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,6 +29,8 @@ public partial class KubernetesResourceTypeListViewModel
 
     public ResourceType ResourceType { get; }
 
+    public ImmutableArray<ResourceColumn> Columns { get; }
+
     private readonly Func<
         IKubernetesObject<V1ObjectMeta>,
         KubernetesResourceViewModel
@@ -38,7 +41,8 @@ public partial class KubernetesResourceTypeListViewModel
         ClusterViewModel cluster,
         ResourceType resourceType,
         Func<IKubernetesObject<V1ObjectMeta>, KubernetesResourceViewModel>? itemViewModelFactory =
-            null
+            null,
+        ImmutableArray<ResourceColumn>? columns = null
     )
         : base(
             workspace,
@@ -52,6 +56,8 @@ public partial class KubernetesResourceTypeListViewModel
 
         _itemViewModelFactory = itemViewModelFactory ??= (x) =>
             new KubernetesResourceViewModel(x, ResourceType, Cluster);
+
+        Columns = columns ?? KubernetesResourceViewModel.GetDefaultColumns();
     }
 
     public async Task ActivateAsync()

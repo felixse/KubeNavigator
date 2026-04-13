@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -16,6 +17,20 @@ internal partial class EventViewModel : KubernetesResourceViewModel
         : base(resource, ResourceType.Event, cluster) { }
 
     public Eventsv1Event Event => (Eventsv1Event)Resource;
+
+    public static readonly ImmutableArray<ResourceColumn> EventColumns =
+    [
+        new("Type", vm => ((EventViewModel)vm).Type, PropertyName: nameof(Type)),
+        new("Message", vm => ((EventViewModel)vm).Message, PropertyName: nameof(Message)),
+        new("Namespace", vm => vm.Namespace, PropertyName: nameof(Namespace)),
+        new("Involved Object", vm => ((EventViewModel)vm).InvolvedObject, PropertyName: nameof(InvolvedObject)),
+        new("Source", vm => ((EventViewModel)vm).Source, PropertyName: nameof(Source)),
+        new("Count", vm => ((EventViewModel)vm).Count, PropertyName: nameof(Count)),
+        new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
+        new("Last Seen", vm => ((EventViewModel)vm).LastSeen, ResourceColumnType.Age, nameof(LastSeen)),
+    ];
+
+    public override ImmutableArray<ResourceColumn> Columns => EventColumns;
 
     public string Type => Event.Type;
 

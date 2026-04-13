@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using k8s;
@@ -14,6 +15,16 @@ internal partial class NamespaceViewModel : KubernetesResourceViewModel
         : base(resource, ResourceType.Namespace, cluster) { }
 
     public V1Namespace Namespace => (V1Namespace)Resource;
+
+    public static readonly ImmutableArray<ResourceColumn> NamespaceColumns =
+    [
+        new("Name", vm => vm.Name, PropertyName: nameof(Name)),
+        new("Labels", vm => ((NamespaceViewModel)vm).Labels, PropertyName: nameof(Labels)),
+        new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
+        new("Status", vm => ((NamespaceViewModel)vm).Status, ResourceColumnType.Status, nameof(Status)),
+    ];
+
+    public override ImmutableArray<ResourceColumn> Columns => NamespaceColumns;
 
     public string Labels =>
         Resource.Metadata?.Labels != null

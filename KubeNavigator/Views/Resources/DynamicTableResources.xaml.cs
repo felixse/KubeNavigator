@@ -2,9 +2,9 @@ using Microsoft.UI.Xaml;
 
 namespace KubeNavigator.Views.Resources;
 
-partial class DeploymentResources : ResourceDictionary
+partial class DynamicTableResources : ResourceDictionary
 {
-    public DeploymentResources()
+    public DynamicTableResources()
     {
         this.InitializeComponent();
     }

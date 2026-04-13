@@ -4,16 +4,10 @@
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:behaviors="using:CommunityToolkit.WinUI.Behaviors"
-  xmlns:communityConverters="using:CommunityToolkit.WinUI.Converters"
   xmlns:controls="using:CommunityToolkit.WinUI.Controls"
-  xmlns:converters="using:KubeNavigator.Converters"
-  xmlns:customcontrols="using:KubeNavigator.Views.Controls"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:helm="using:KubeNavigator.ViewModels.Helm"
   xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
-  xmlns:local="using:KubeNavigator.Views"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:resourceViewModels="using:KubeNavigator.ViewModels.Resources"
   xmlns:templateselectors="using:KubeNavigator.TemplateSelectors"
   xmlns:viewmodels="using:KubeNavigator.ViewModels"
   x:Name="Root"
@@ -36,20 +30,6 @@
       </templateselectors:NamespaceFilterTemplateSelector.NamespaceTemplate>
     </templateselectors:NamespaceFilterTemplateSelector>
     <templateselectors:TableTemplateSelector x:Key="TableTemplateSelector">
-      <templateselectors:TableTemplateSelector.KubernetesResourceTemplate>
-        <DataTemplate x:DataType="resourceViewModels:KubernetesResourceViewModel">
-          <controls:DataRow
-            HorizontalAlignment="Left"
-            Background="Transparent"
-            ContextFlyout="{x:Bind Converter={StaticResource ListItemToMenuConverter}}"
-          >
-            <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Namespace}" />
-            <customcontrols:AgeTextBlock VerticalAlignment="Center" Timestamp="{x:Bind Age}" />
-          </controls:DataRow>
-        </DataTemplate>
-      </templateselectors:TableTemplateSelector.KubernetesResourceTemplate>
       <templateselectors:TableTemplateSelector.ForwardedPortTemplate>
         <DataTemplate x:DataType="viewmodels:ForwardedPortViewModel">
           <controls:DataRow HorizontalAlignment="Left" Background="Transparent">
@@ -60,33 +40,6 @@
       </templateselectors:TableTemplateSelector.ForwardedPortTemplate>
     </templateselectors:TableTemplateSelector>
     <templateselectors:TableHeaderTemplateSelector x:Key="TableHeaderTemplateSelector">
-      <templateselectors:TableHeaderTemplateSelector.KubernetesResourceTemplate>
-        <DataTemplate x:DataType="viewmodels:KubernetesResourceTypeListViewModel">
-          <controls:DataTable ColumnSpacing="16">
-            <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
-              <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
-            </controls:DataColumn>
-            <controls:DataColumn
-              CanResize="True"
-              Content="Name"
-              DesiredWidth="Auto"
-              FontWeight="SemiBold"
-            />
-            <controls:DataColumn
-              CanResize="True"
-              Content="Namespace"
-              DesiredWidth="Auto"
-              FontWeight="SemiBold"
-            />
-            <controls:DataColumn
-              CanResize="True"
-              Content="Age"
-              DesiredWidth="Auto"
-              FontWeight="SemiBold"
-            />
-          </controls:DataTable>
-        </DataTemplate>
-      </templateselectors:TableHeaderTemplateSelector.KubernetesResourceTemplate>
       <templateselectors:TableHeaderTemplateSelector.ForwardedPortTemplate>
         <DataTemplate x:DataType="viewmodels:PortForwardsViewModel">
           <controls:DataTable ColumnSpacing="16">

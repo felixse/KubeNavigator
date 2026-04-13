@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using k8s;
@@ -14,6 +15,20 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
         : base(resource, ResourceType.Deployment, cluster) { }
 
     public V1Deployment Deployment => (V1Deployment)Resource;
+
+    public static readonly ImmutableArray<ResourceColumn> DeploymentColumns =
+    [
+        new("Name", vm => vm.Name, PropertyName: nameof(Name)),
+        new("Namespace", vm => vm.Namespace, PropertyName: nameof(Namespace)),
+        new("Ready", vm => ((DeploymentViewModel)vm).Ready, PropertyName: nameof(Ready)),
+        new("Desired", vm => ((DeploymentViewModel)vm).Desired, PropertyName: nameof(Desired)),
+        new("Updated", vm => ((DeploymentViewModel)vm).Updated, PropertyName: nameof(Updated)),
+        new("Available", vm => ((DeploymentViewModel)vm).Available, PropertyName: nameof(Available)),
+        new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
+        new("Conditions", vm => ((DeploymentViewModel)vm).Conditions, ResourceColumnType.Conditions, nameof(Conditions)),
+    ];
+
+    public override ImmutableArray<ResourceColumn> Columns => DeploymentColumns;
 
     public string Ready =>
         $"{Deployment.Status?.ReadyReplicas ?? 0}/{Deployment.Status?.Replicas ?? 0}";

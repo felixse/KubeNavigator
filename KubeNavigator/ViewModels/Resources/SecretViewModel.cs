@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,17 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
     }
 
     public V1Secret Secret => (V1Secret)Resource;
+
+    public static readonly ImmutableArray<ResourceColumn> SecretColumns =
+    [
+        new("Name", vm => vm.Name, PropertyName: nameof(Name)),
+        new("Namespace", vm => vm.Namespace, PropertyName: nameof(Namespace)),
+        new("Keys", vm => ((SecretViewModel)vm).Keys, PropertyName: nameof(Keys)),
+        new("Type", vm => ((SecretViewModel)vm).Type, PropertyName: nameof(Type)),
+        new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
+    ];
+
+    public override ImmutableArray<ResourceColumn> Columns => SecretColumns;
 
     public string Keys => string.Join(", ", Secret.Data?.Keys ?? []);
 

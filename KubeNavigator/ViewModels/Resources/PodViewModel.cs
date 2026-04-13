@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
@@ -60,6 +61,21 @@ public partial class PodViewModel : KubernetesResourceViewModel
     }
 
     public V1Pod Pod => (V1Pod)Resource;
+
+    public static readonly ImmutableArray<ResourceColumn> PodColumns =
+    [
+        new("Name", vm => vm.Name, PropertyName: nameof(Name)),
+        new("Namespace", vm => vm.Namespace, PropertyName: nameof(Namespace)),
+        new("Containers", vm => ((PodViewModel)vm).ContainerStatuses, ResourceColumnType.ContainerStatuses, nameof(ContainerStatuses)),
+        new("Restarts", vm => ((PodViewModel)vm).Restarts, PropertyName: nameof(Restarts)),
+        new("Controlled By", vm => ((PodViewModel)vm).ControlledBy, PropertyName: nameof(ControlledBy)),
+        new("Node", vm => ((PodViewModel)vm).Node, PropertyName: nameof(Node)),
+        new("QoS", vm => ((PodViewModel)vm).QoS, PropertyName: nameof(QoS)),
+        new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
+        new("Status", vm => ((PodViewModel)vm).Status, ResourceColumnType.Status, nameof(Status)),
+    ];
+
+    public override ImmutableArray<ResourceColumn> Columns => PodColumns;
 
     public List<V1ContainerStatus> ContainerStatuses =>
         Pod.Status?.ContainerStatuses?.ToList() ?? Enumerable.Empty<V1ContainerStatus>().ToList();

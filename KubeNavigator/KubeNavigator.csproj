@@ -21,8 +21,6 @@
     <None Remove="ApplicationResources.xaml" />
     <None Remove="DetailWindow.xaml" />
     <None Remove="Pages\DetailsWindowRootPage.xaml" />
-    <None Remove="Resources\PodResources.xaml" />
-    <None Remove="Resources\ServiceResources.xaml" />
     <None Remove="RootPage.xaml" />
     <None Remove="Views\ApplicationLogView.xaml" />
     <None Remove="Views\MainView.xaml" />
@@ -33,12 +31,8 @@
     <None Remove="Views\ResourceDetailsView.xaml" />
     <None Remove="Views\ResourceCreateView.xaml" />
     <None Remove="Views\ResourceEditView.xaml" />
-    <None Remove="Views\Resources\ConfigMapResources.xaml" />
-    <None Remove="Views\Resources\EventResources.xaml" />
     <None Remove="Views\Resources\HelmReleaseResources.xaml" />
-    <None Remove="Views\Resources\NamespaceResources.xaml" />
-    <None Remove="Views\Resources\SecretResources.xaml" />
-    <None Remove="Views\Resources\ServiceResources.xaml" />
+    <None Remove="Views\Resources\DynamicTableResources.xaml" />
     <None Remove="Views\SettingsView.xaml" />
     <None Remove="Views\TerminalView.xaml" />
   </ItemGroup>
@@ -166,7 +160,7 @@
     <None Update="Views\ResourceCreateView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
-    <None Update="Views\Resources\DeploymentResources.xaml">
+    <None Update="Views\Resources\DynamicTableResources.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
   </ItemGroup>
@@ -176,32 +170,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\Resources\NamespaceResources.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <Page Update="Views\Controls\CommandSelector.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Resources\EventResources.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Resources\SecretResources.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Resources\ConfigMapResources.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Resources\ServiceResources.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

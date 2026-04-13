@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using k8s.Models;
@@ -13,6 +14,20 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
         : base(resource, ResourceType.Service, cluster) { }
 
     public V1Service Service => (V1Service)Resource;
+
+    public static readonly ImmutableArray<ResourceColumn> ServiceColumns =
+    [
+        new("Name", vm => vm.Name, PropertyName: nameof(Name)),
+        new("Namespace", vm => vm.Namespace, PropertyName: nameof(Namespace)),
+        new("Type", vm => ((ServiceViewModel)vm).Type, PropertyName: nameof(Type)),
+        new("Cluster IP", vm => ((ServiceViewModel)vm).ClusterIP, PropertyName: nameof(ClusterIP)),
+        new("External IP", vm => ((ServiceViewModel)vm).ExternalIP, PropertyName: nameof(ExternalIP)),
+        new("Ports", vm => ((ServiceViewModel)vm).Ports, PropertyName: nameof(Ports)),
+        new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
+        new("Status", vm => ((ServiceViewModel)vm).Status, ResourceColumnType.Status, nameof(Status)),
+    ];
+
+    public override ImmutableArray<ResourceColumn> Columns => ServiceColumns;
 
     public string Type => Service.Spec.Type;
 

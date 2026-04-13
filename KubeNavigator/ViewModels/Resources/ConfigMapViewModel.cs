@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
@@ -21,6 +22,16 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
     }
 
     public V1ConfigMap ConfigMap => (V1ConfigMap)Resource;
+
+    public static readonly ImmutableArray<ResourceColumn> ConfigMapColumns =
+    [
+        new("Name", vm => vm.Name, PropertyName: nameof(Name)),
+        new("Namespace", vm => vm.Namespace, PropertyName: nameof(Namespace)),
+        new("Keys", vm => ((ConfigMapViewModel)vm).Keys, PropertyName: nameof(Keys)),
+        new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
+    ];
+
+    public override ImmutableArray<ResourceColumn> Columns => ConfigMapColumns;
 
     public string Keys => string.Join(", ", ConfigMap.Data?.Keys ?? []);
 

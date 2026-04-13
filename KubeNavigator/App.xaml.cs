@@ -108,29 +108,18 @@ public partial class App : Application, IWindowManager
     private async Task CheckCliToolsAsync(MainWindow mainWindow, WindowViewModel viewModel)
     {
         var settings = viewModel.App.Settings;
-        var kubectlTask = IsToolAvailableAsync(settings.KubectlPath, "kubectl");
-        var helmTask = IsToolAvailableAsync(settings.HelmPath, "helm");
-        await Task.WhenAll(kubectlTask, helmTask);
-        var kubectlAvailable = kubectlTask.Result;
-        var helmAvailable = helmTask.Result;
+        var helmAvailable = await IsToolAvailableAsync(settings.HelmPath, "helm");
 
-        if (kubectlAvailable && helmAvailable)
+        if (helmAvailable)
         {
             return;
         }
-
-        var missing = (kubectlAvailable, helmAvailable) switch
-        {
-            (false, false) => "kubectl and helm",
-            (false, true) => "kubectl",
-            _ => "helm",
-        };
 
         var dialog = new ContentDialog
         {
             Title = "CLI tools not found",
             Content =
-                $"Could not find {missing} on this system. Some functionality may not work correctly.\n\nYou can configure custom paths in Settings.",
+                $"Could not find helm on this system. Some functionality may not work correctly.\n\nYou can configure a custom path in Settings.",
             PrimaryButtonText = "Go to Settings",
             CloseButtonText = "Close",
             DefaultButton = ContentDialogButton.Primary,

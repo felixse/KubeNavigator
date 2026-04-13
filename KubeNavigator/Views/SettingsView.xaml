@@ -42,19 +42,6 @@
         />
       </controls:SettingsCard>
       <controls:SettingsCard
-        Description="Leave empty to use kubectl from PATH."
-        Header="Custom kubectl.exe Path"
-      >
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <TextBox
-            MinWidth="300"
-            PlaceholderText="kubectl"
-            Text="{x:Bind ViewModel.KubectlPath, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-          />
-          <Button Command="{x:Bind ViewModel.BrowseKubectlPathCommand}" Content="Browse..." />
-        </StackPanel>
-      </controls:SettingsCard>
-      <controls:SettingsCard
         Description="Leave empty to use helm from PATH."
         Header="Custom helm.exe Path"
       >

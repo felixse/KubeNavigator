@@ -34,19 +34,6 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
         set => _settingsService.Settings.Theme = value;
     }
 
-    public string KubectlPath
-    {
-        get => _settingsService.Settings.KubectlPath;
-        set
-        {
-            if (_settingsService.Settings.KubectlPath != value)
-            {
-                _settingsService.Settings.KubectlPath = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
     public string HelmPath
     {
         get => _settingsService.Settings.HelmPath;
@@ -73,16 +60,6 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
     private async Task OpenLogDirectoryAsync()
     {
         await global::Windows.System.Launcher.LaunchFolderPathAsync(LogDirectory);
-    }
-
-    [RelayCommand]
-    private async Task BrowseKubectlPathAsync()
-    {
-        var path = await _windowManager.ActiveWindow.PickFileAsync([".exe", "*"]);
-        if (path is not null)
-        {
-            KubectlPath = path;
-        }
     }
 
     [RelayCommand]

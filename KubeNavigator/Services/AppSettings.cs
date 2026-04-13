@@ -8,9 +8,6 @@ public partial class AppSettings : ObservableObject
     public partial AppTheme Theme { get; set; } = AppTheme.System;
 
     [ObservableProperty]
-    public partial string KubectlPath { get; set; } = string.Empty;
-
-    [ObservableProperty]
     public partial string HelmPath { get; set; } = string.Empty;
 }
 

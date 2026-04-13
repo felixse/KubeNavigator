@@ -310,6 +310,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         {
             AppCommands.Add(new NavigateToViewAppCommand(footerItem, this));
         }
+        AppCommands.Add(new OpenApplicationLogCommand(this));
 
         _customResourceDefinitions = await cluster.GetResourcesAsync(
             ResourceType.CustomResourceDefinition

@@ -66,10 +66,11 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
     [RelayCommand]
     public async Task DeleteAsync() { }
 
-    public async Task<List<IDetailsSection>> CreateDetailsAsync()
+    public Task<List<IDetailsSection>> CreateDetailsAsync()
     {
-        var values = await Cluster.App.HelmService.GetValuesYamlAsync(HelmRelease, Cluster.Context.Name);
-        return
+        var values = Cluster.App.HelmService.GetValuesYaml(HelmRelease);
+        var computedValues = Cluster.App.HelmService.GetComputedValuesYaml(HelmRelease);
+        return Task.FromResult<List<IDetailsSection>>(
         [
             new DetailsSection
             {
@@ -84,8 +85,13 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
             },
             new DetailsSection
             {
-                Header = "Values",
+                Header = "User Values",
                 Items = [new DetailsEditorItem(string.Empty, values)],
+            },
+            new DetailsSection
+            {
+                Header = "Computed Values",
+                Items = [new DetailsEditorItem(string.Empty, computedValues)],
             },
             new DetailsSection
             {
@@ -99,6 +105,6 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
                     },
                 ],
             },
-        ];
+        ]);
     }
 }

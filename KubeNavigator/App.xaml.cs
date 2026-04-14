@@ -95,10 +95,10 @@ public partial class App : Application, IWindowManager
         sw.Stop();
         Log.StartupPhaseCompleted(_logger, "ActivateWindow", sw.ElapsedMilliseconds);
 
-        sw.Restart();
-        await CheckCliToolsAsync(mainWindow, app.MainWindow);
-        sw.Stop();
-        Log.StartupPhaseCompleted(_logger, "CheckCliTools", sw.ElapsedMilliseconds);
+        //sw.Restart();
+        //await CheckCliToolsAsync(mainWindow, app.MainWindow);
+        //sw.Stop();
+        //Log.StartupPhaseCompleted(_logger, "CheckCliTools", sw.ElapsedMilliseconds);
 
         startupTimer.Stop();
         Log.StartupTotalTime(_logger, startupTimer.ElapsedMilliseconds);

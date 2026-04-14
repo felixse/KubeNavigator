@@ -1,27 +1,23 @@
 using System;
 using System.Buffers.Text;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using CliWrap;
-using CliWrap.Buffered;
 using k8s.Models;
 using KubeNavigator.Models.Helm;
 using Microsoft.Extensions.Logging;
+using YamlDotNet.Serialization;
 
 namespace KubeNavigator.Services;
 
 public partial class HelmService
 {
     private readonly ILogger<HelmService> _logger;
-    private readonly ISettingsService _settingsService;
 
-    public HelmService(ILogger<HelmService> logger, ISettingsService settingsService)
+    public HelmService(ILogger<HelmService> logger)
     {
         _logger = logger;
-        _settingsService = settingsService;
     }
 
     public HelmRelease? ParseReleaseFromSecret(V1Secret secret)
@@ -79,44 +75,86 @@ public partial class HelmService
         }
     }
 
-    public async Task<string> GetValuesYamlAsync(
-        HelmRelease release,
-        string contextName,
-        CancellationToken cancellationToken = default
-    )
+    public string GetValuesYaml(HelmRelease release)
     {
-        try
+        return JsonElementToYaml(release.Config);
+    }
+
+    public string GetComputedValuesYaml(HelmRelease release)
+    {
+        var chartValues = release.Chart.Values;
+        var userConfig = release.Config;
+
+        // If there are no chart defaults, the computed values are just the user config.
+        if (chartValues is not { ValueKind: JsonValueKind.Object }
+            || chartValues.Value.GetRawText() is "{}")
         {
-            Log.GettingHelmValues(_logger, release.Name, release.Namespace, release.Version);
-
-            var helmPath = string.IsNullOrWhiteSpace(_settingsService.Settings.HelmPath)
-                ? "helm"
-                : _settingsService.Settings.HelmPath;
-
-            var result = await Cli.Wrap(helmPath)
-                .WithArguments(args =>
-                {
-                    args.Add("get");
-                    args.Add("values");
-                    args.Add(release.Name);
-                    args.Add("--namespace");
-                    args.Add(release.Namespace);
-                    args.Add("--revision");
-                    args.Add(release.Version.ToString());
-                    args.Add("--output");
-                    args.Add("yaml");
-                    args.Add("--kube-context");
-                    args.Add(contextName);
-                })
-                .ExecuteBufferedAsync(cancellationToken);
-
-            Log.HelmGetValuesSucceeded(_logger, release.Name, release.Namespace, release.Version);
-            return result.StandardOutput;
+            return JsonElementToYaml(userConfig);
         }
-        catch (Exception ex)
+
+        // If there is no user config, the computed values are just the chart defaults.
+        if (userConfig is not { ValueKind: JsonValueKind.Object }
+            || userConfig.Value.GetRawText() is "{}")
         {
-            Log.HelmGetValuesFailed(_logger, release.Name, release.Namespace, release.Version, ex);
-            throw;
+            return JsonElementToYaml(chartValues);
+        }
+
+        // Merge chart defaults with user overrides (user wins).
+        var deserializer = new DeserializerBuilder().Build();
+        var baseDictionary = deserializer.Deserialize<Dictionary<object, object>>(
+            new StringReader(chartValues.Value.GetRawText()));
+        var overrideDictionary = deserializer.Deserialize<Dictionary<object, object>>(
+            new StringReader(userConfig.Value.GetRawText()));
+
+        if (baseDictionary is not null && overrideDictionary is not null)
+        {
+            MergeDictionaries(baseDictionary, overrideDictionary);
+        }
+
+        var merged = baseDictionary ?? overrideDictionary;
+        if (merged is null)
+        {
+            return string.Empty;
+        }
+
+        var serializer = new SerializerBuilder()
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+            .Build();
+        return serializer.Serialize(merged);
+    }
+
+    private static string JsonElementToYaml(JsonElement? element)
+    {
+        if (element is not { ValueKind: JsonValueKind.Object } json
+            || json.GetRawText() is "{}")
+        {
+            return string.Empty;
+        }
+
+        var deserializer = new DeserializerBuilder().Build();
+        var values = deserializer.Deserialize(new StringReader(json.GetRawText()));
+        var serializer = new SerializerBuilder()
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+            .Build();
+        return serializer.Serialize(values!);
+    }
+
+    private static void MergeDictionaries(
+        Dictionary<object, object> target,
+        Dictionary<object, object> overrides)
+    {
+        foreach (var (key, value) in overrides)
+        {
+            if (value is Dictionary<object, object> overrideChild
+                && target.TryGetValue(key, out var existing)
+                && existing is Dictionary<object, object> existingChild)
+            {
+                MergeDictionaries(existingChild, overrideChild);
+            }
+            else
+            {
+                target[key] = value;
+            }
         }
     }
 
@@ -191,19 +229,6 @@ public partial class HelmService
             string releaseName,
             string @namespace,
             int version
-        );
-
-        [LoggerMessage(
-            EventId = 3007,
-            Level = LogLevel.Error,
-            Message = "helm get values failed for release {ReleaseName} in namespace {Namespace} revision {Version}"
-        )]
-        public static partial void HelmGetValuesFailed(
-            ILogger logger,
-            string releaseName,
-            string @namespace,
-            int version,
-            Exception exception
         );
 
         [LoggerMessage(

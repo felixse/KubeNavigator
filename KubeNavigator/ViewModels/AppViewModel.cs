@@ -57,8 +57,7 @@ public partial class AppViewModel : ObservableObject
         LoggingService = loggingService;
         _settingsService = settingsService;
         HelmService = new HelmService(
-            LoggerFactoryExtensions.CreateLogger<HelmService>(loggingService.LoggerFactory),
-            settingsService
+            LoggerFactoryExtensions.CreateLogger<HelmService>(loggingService.LoggerFactory)
         );
 
         var configContent = System.IO.File.ReadAllText(

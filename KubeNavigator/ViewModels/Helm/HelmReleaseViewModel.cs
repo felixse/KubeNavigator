@@ -74,35 +74,31 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
         [
             new DetailsSection
             {
-                Items =
+                Rows =
                 [
-                    new DetailsTextItem { Title = "Chart", Value = Chart },
-                    new DetailsTextItem { Title = "Updated", Value = Updated?.ToString() },
-                    new DetailsTextItem { Title = "Namespace", Value = Namespace },
-                    new DetailsTextItem { Title = "Version", Value = Version },
-                    new DetailsTextItem { Title = "Status", Value = Status },
+                    new HeaderedRow { Header = "Chart", Content = new TextContent { Value = Chart } },
+                    new HeaderedRow { Header = "Updated", Content = new TextContent { Value = Updated?.ToString() } },
+                    new HeaderedRow { Header = "Namespace", Content = new TextContent { Value = Namespace } },
+                    new HeaderedRow { Header = "Version", Content = new TextContent { Value = Version } },
+                    new HeaderedRow { Header = "Status", Content = new TextContent { Value = Status } },
                 ],
             },
             new DetailsSection
             {
                 Header = "User Values",
-                Items = [new DetailsEditorItem(string.Empty, values)],
+                Rows = [new FullWidthRow { Content = new EditorContent { Value = values } }],
             },
             new DetailsSection
             {
                 Header = "Computed Values",
-                Items = [new DetailsEditorItem(string.Empty, computedValues)],
+                Rows = [new FullWidthRow { Content = new EditorContent { Value = computedValues } }],
             },
             new DetailsSection
             {
                 Header = "Notes",
-                Items =
+                Rows =
                 [
-                    new DetailsMarkdownItem
-                    {
-                        Title = string.Empty,
-                        Value = HelmRelease.Info.Notes,
-                    },
+                    new FullWidthRow { Content = new MarkdownContent { Value = HelmRelease.Info.Notes } },
                 ],
             },
         ]);

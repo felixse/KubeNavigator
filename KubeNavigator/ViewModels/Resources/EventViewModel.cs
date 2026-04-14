@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using k8s;
@@ -48,64 +47,30 @@ internal partial class EventViewModel : KubernetesResourceViewModel
     {
         return
         [
-            new DetailsSection { Items = [.. GetEventItems()] },
+            new DetailsSection { Rows = [.. GetEventRows()] },
             new DetailsSection
             {
                 Header = "Involved object",
-                Items = [.. GetInvolvedObjectItems()],
+                Rows = [.. GetInvolvedObjectRows()],
             },
         ];
     }
 
-    private IEnumerable<IDetailsItem> GetEventItems()
+    private IEnumerable<IDetailsRow> GetEventRows()
     {
-        yield return new DetailsTextItem
-        {
-            Title = "Created",
-            Value = Event.CreationTimestamp().ToString(),
-        };
-
-        yield return new DetailsTextItem { Title = "Name", Value = Event.Name() };
-
-        yield return new DetailsLinkItem
-        {
-            Title = "Namespace",
-            ResourceName = Resource.Namespace(),
-            ResourceType = ResourceType.Namespace,
-        };
-
-        yield return new DetailsTextItem { Title = "Message", Value = Event.Note };
-
-        yield return new DetailsTextItem { Title = "Reason", Value = Event.Reason };
-
-        yield return new DetailsTextItem
-        {
-            Title = "Source",
-            Value = Event.DeprecatedSource?.Component,
-        };
-
-        yield return new DetailsTextItem
-        {
-            Title = "First seen",
-            Value = Event.DeprecatedFirstTimestamp.ToString(),
-        };
-
-        yield return new DetailsTextItem
-        {
-            Title = "Last seen",
-            Value = Event.DeprecatedLastTimestamp.ToString(),
-        };
-
-        yield return new DetailsTextItem
-        {
-            Title = "Count",
-            Value = Event.DeprecatedCount?.ToString(),
-        };
-
-        yield return new DetailsTextItem { Title = "Type", Value = Event.Type };
+        yield return new HeaderedRow { Header = "Created", Content = new TextContent { Value = Event.CreationTimestamp().ToString() } };
+        yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = Event.Name() } };
+        yield return new HeaderedRow { Header = "Namespace", Content = new LinkContent { ResourceName = Resource.Namespace(), ResourceType = ResourceType.Namespace } };
+        yield return new HeaderedRow { Header = "Message", Content = new TextContent { Value = Event.Note } };
+        yield return new HeaderedRow { Header = "Reason", Content = new TextContent { Value = Event.Reason } };
+        yield return new HeaderedRow { Header = "Source", Content = new TextContent { Value = Event.DeprecatedSource?.Component } };
+        yield return new HeaderedRow { Header = "First seen", Content = new TextContent { Value = Event.DeprecatedFirstTimestamp.ToString() } };
+        yield return new HeaderedRow { Header = "Last seen", Content = new TextContent { Value = Event.DeprecatedLastTimestamp.ToString() } };
+        yield return new HeaderedRow { Header = "Count", Content = new TextContent { Value = Event.DeprecatedCount?.ToString() } };
+        yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = Event.Type } };
     }
 
-    private IEnumerable<IDetailsItem> GetInvolvedObjectItems()
+    private IEnumerable<IDetailsRow> GetInvolvedObjectRows()
     {
         if (Event.Regarding == null)
         {
@@ -114,26 +79,23 @@ internal partial class EventViewModel : KubernetesResourceViewModel
 
         if (ResourceType.FromKind(Event.Regarding.Kind) is ResourceType resourceType)
         {
-            yield return new DetailsLinkItem
+            yield return new HeaderedRow
             {
-                Title = "Name",
-                ResourceName = Event.Regarding?.Name,
-                ResourceType = resourceType,
+                Header = "Name",
+                Content = new LinkContent
+                {
+                    ResourceName = Event.Regarding?.Name,
+                    ResourceType = resourceType,
+                },
             };
         }
         else
         {
-            yield return new DetailsTextItem { Title = "Name", Value = Event.Regarding?.Name };
+            yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = Event.Regarding?.Name } };
         }
 
-        yield return new DetailsTextItem { Title = "Namespace", Value = Event.Namespace() };
-
-        yield return new DetailsTextItem { Title = "Kind", Value = Event.Regarding.Kind };
-
-        yield return new DetailsTextItem
-        {
-            Title = "Field Path",
-            Value = Event.Regarding.FieldPath,
-        };
+        yield return new HeaderedRow { Header = "Namespace", Content = new TextContent { Value = Event.Namespace() } };
+        yield return new HeaderedRow { Header = "Kind", Content = new TextContent { Value = Event.Regarding.Kind } };
+        yield return new HeaderedRow { Header = "Field Path", Content = new TextContent { Value = Event.Regarding.FieldPath } };
     }
 }

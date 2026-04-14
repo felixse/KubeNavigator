@@ -1,9 +1,7 @@
-﻿namespace KubeNavigator.ViewModels.Details;
+namespace KubeNavigator.ViewModels.Details;
 
-public class DetailsTextItem : IDetailsItem
+public class TextContent : IDetailsContent
 {
-    public required string Title { get; set; }
-
     public string? Value { get; set; }
 
     public Category ValueColor { get; set; } = Category.Default;

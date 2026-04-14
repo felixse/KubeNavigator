@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,9 +12,8 @@ public class DetailsDictionaryEntry
     public required string Value { get; init; }
 }
 
-public partial class DetailsDictionaryItem : ObservableObject, IDetailsItem
+public partial class DictionaryContent : ObservableObject, IDetailsContent
 {
-    public required string Title { get; init; }
     public required List<DetailsDictionaryEntry> Items { get; init; }
 
     [RelayCommand]

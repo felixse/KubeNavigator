@@ -36,7 +36,7 @@ public partial class DetailsViewModel : ObservableObject
     public IShelfHost ShelfHost { get; }
 
     [RelayCommand]
-    public async Task NavigateAsync(DetailsTypes.DetailsLinkItem link)
+    public async Task NavigateAsync(DetailsTypes.LinkContent link)
     {
         if (link.ResourceName == null)
         {

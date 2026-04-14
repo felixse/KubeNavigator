@@ -45,7 +45,9 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
         }
 
         var newData = dataSection
-            .Items.OfType<DetailsEditorItem>()
+            .Rows.OfType<FullWidthRow>()
+            .Select(r => r.Content)
+            .OfType<EditorContent>()
             .ToDictionary(item => item.Title, item => item.TextRetriever?.Invoke() ?? item.Value);
         ConfigMap.Data = newData;
 
@@ -62,42 +64,35 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
         var events = await GetEventsSectionAsync();
         return
         [
-            new DetailsSection { Items = [.. GetConfigMapItems()] },
+            new DetailsSection { Rows = [.. GetConfigMapRows()] },
             new DetailsSection
             {
                 Header = "Data",
-                Items = [.. GetDataItems()],
+                Rows = [.. GetDataRows()],
                 SaveCommand = SaveCommand,
             },
             events,
         ];
     }
 
-    private IEnumerable<IDetailsItem> GetConfigMapItems()
+    private IEnumerable<IDetailsRow> GetConfigMapRows()
     {
-        yield return new DetailsTextItem
-        {
-            Title = "Created",
-            Value = ConfigMap.CreationTimestamp().ToString(),
-        };
-
-        yield return new DetailsTextItem { Title = "Name", Value = ConfigMap.Name() };
-
-        yield return new DetailsLinkItem
-        {
-            Title = "Namespace",
-            ResourceName = Resource.Namespace(),
-            ResourceType = ResourceType.Namespace,
-        };
+        yield return new HeaderedRow { Header = "Created", Content = new TextContent { Value = ConfigMap.CreationTimestamp().ToString() } };
+        yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = ConfigMap.Name() } };
+        yield return new HeaderedRow { Header = "Namespace", Content = new LinkContent { ResourceName = Resource.Namespace(), ResourceType = ResourceType.Namespace } };
     }
 
-    private IEnumerable<IDetailsItem> GetDataItems()
+    private IEnumerable<IDetailsRow> GetDataRows()
     {
         if (ConfigMap.Data != null)
         {
             foreach (var (key, value) in ConfigMap.Data)
             {
-                yield return new DetailsEditorItem(key, value);
+                yield return new FullWidthRow
+                {
+                    Header = key,
+                    Content = new EditorContent { Title = key, Value = value },
+                };
             }
         }
     }

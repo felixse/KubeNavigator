@@ -97,28 +97,28 @@ public partial class PodViewModel : KubernetesResourceViewModel
         var events = await GetEventsSectionAsync();
         return
         [
-            new DetailsSection { Items = [.. GetPodItems()] },
-            new GroupedDetailsSection
+            new DetailsSection { Rows = [.. GetPodRows()] },
+            new DetailsSection
             {
-                Title = "Containers",
-                Groups =
+                Header = "Containers",
+                Rows =
                 [
-                    .. Pod.Spec.Containers.Select(c => new DetailsGroup
+                    .. Pod.Spec.Containers.Select(c => new GroupRow
                     {
                         Header = new DetailsGroupHeader { Title = c.Name },
-                        Items = [.. GetContainerItems(c)],
+                        Rows = [.. GetContainerRows(c)],
                     }),
                 ],
             },
-            new GroupedDetailsSection
+            new DetailsSection
             {
-                Title = "Volumes",
-                Groups =
+                Header = "Volumes",
+                Rows =
                 [
-                    .. Pod.Spec.Volumes?.Select(v => new DetailsGroup
+                    .. Pod.Spec.Volumes?.Select(v => new GroupRow
                     {
                         Header = new DetailsGroupHeader { Title = v.Name, Symbol = "\uEDA2" },
-                        Items = [.. GetVolumeItems(v)],
+                        Rows = [.. GetVolumeRows(v)],
                     })
                         ?? [],
                 ],
@@ -127,178 +127,230 @@ public partial class PodViewModel : KubernetesResourceViewModel
         ];
     }
 
-    private IEnumerable<IDetailsItem> GetPodItems()
+    private IEnumerable<IDetailsRow> GetPodRows()
     {
-        yield return new DetailsTextItem
+        yield return new HeaderedRow
         {
-            Title = "Created",
-            Value = Pod.CreationTimestamp().ToString(),
-        };
-
-        yield return new DetailsTextItem { Title = "Name", Value = Pod.Name() };
-
-        yield return new DetailsLinkItem
-        {
-            Title = "Namespace",
-            ResourceName = Resource.Namespace(),
-            ResourceType = ResourceType.Namespace,
-        };
-
-        yield return new DetailsCollectionItem
-        {
-            Title = "Labels",
-            Items =
-            [
-                .. Pod.Metadata.Labels?.Select(l => new DetailsCollectionItemElement
-                {
-                    Value = $"{l.Key}={l.Value}",
-                }) ?? [],
-            ],
-        };
-
-        if (Pod.Metadata.Annotations?.Count > 0)
-        {
-            yield return new DetailsCollectionItem
+            Header = "Created",
+            Content = new TextContent
             {
-                Title = "Annotations",
+                Value = Pod.CreationTimestamp().ToString(),
+            },
+        };
+
+        yield return new HeaderedRow
+        {
+            Header = "Name",
+            Content = new TextContent { Value = Pod.Name() },
+        };
+
+        yield return new HeaderedRow
+        {
+            Header = "Namespace",
+            Content = new LinkContent
+            {
+                ResourceName = Resource.Namespace(),
+                ResourceType = ResourceType.Namespace,
+            },
+        };
+
+        yield return new HeaderedRow
+        {
+            Header = "Labels",
+            Content = new CollectionContent
+            {
                 Items =
                 [
-                    .. Pod.Metadata.Annotations?.Select(l => new DetailsCollectionItemElement
+                    .. Pod.Metadata.Labels?.Select(l => new TextCollectionElement
                     {
                         Value = $"{l.Key}={l.Value}",
                     }) ?? [],
                 ],
+            },
+        };
+
+        if (Pod.Metadata.Annotations?.Count > 0)
+        {
+            yield return new HeaderedRow
+            {
+                Header = "Annotations",
+                Content = new CollectionContent
+                {
+                    Items =
+                    [
+                        .. Pod.Metadata.Annotations?.Select(l => new TextCollectionElement
+                        {
+                            Value = $"{l.Key}={l.Value}",
+                        }) ?? [],
+                    ],
+                },
             };
         }
 
         if (Pod.Metadata.OwnerReferences?.Count > 0)
         {
-            yield return new DetailsLinkItem
+            yield return new HeaderedRow
             {
-                Title = "Controlled by",
-                Prefix = $"{Pod.Metadata.OwnerReferences.First().Kind}: ",
-                ResourceName = Pod.Metadata.OwnerReferences.First().Name,
-                ResourceType = Pod
-                    .Metadata.OwnerReferences.First(o => o.Controller == true)
-                    .Kind switch
+                Header = "Controlled by",
+                Content = new LinkContent
                 {
-                    "ReplicaSet" => ResourceType.ReplicaSet,
-                    "Deployment" => ResourceType.Deployment,
-                    "DaemonSet" => ResourceType.DaemonSet,
-                    "Node" => ResourceType.Node,
-                    _ => new ResourceType(
-                        "Unknown",
-                        "Unknown",
-                        "Unknown",
-                        "unknown",
-                        true,
-                        "Unknowns",
-                        "Unknown"
-                    ),
+                    Prefix = $"{Pod.Metadata.OwnerReferences.First().Kind}: ",
+                    ResourceName = Pod.Metadata.OwnerReferences.First().Name,
+                    ResourceType = Pod
+                        .Metadata.OwnerReferences.First(o => o.Controller == true)
+                        .Kind switch
+                    {
+                        "ReplicaSet" => ResourceType.ReplicaSet,
+                        "Deployment" => ResourceType.Deployment,
+                        "DaemonSet" => ResourceType.DaemonSet,
+                        "Node" => ResourceType.Node,
+                        _ => new ResourceType(
+                            "Unknown",
+                            "Unknown",
+                            "Unknown",
+                            "unknown",
+                            true,
+                            "Unknowns",
+                            "Unknown"
+                        ),
+                    },
                 },
             };
         }
 
-        yield return new DetailsTextItem
+        yield return new HeaderedRow
         {
-            Title = "Status",
-            Value = Status,
-            ValueColor = Status switch
+            Header = "Status",
+            Content = new TextContent
             {
-                "Running" => Category.Success,
-                "Succeeded" => Category.Success,
-                "Failed" => Category.Error,
-                "Pending" => Category.Warning,
-                "Terminating" => Category.Default,
-                _ => Category.Default,
+                Value = Status,
+                ValueColor = Status switch
+                {
+                    "Running" => Category.Success,
+                    "Succeeded" => Category.Success,
+                    "Failed" => Category.Error,
+                    "Pending" => Category.Warning,
+                    "Terminating" => Category.Default,
+                    _ => Category.Default,
+                },
             },
         };
 
-        yield return new DetailsLinkItem
+        yield return new HeaderedRow
         {
-            Title = "Node",
-            ResourceName = Pod.Spec.NodeName,
-            ResourceType = ResourceType.Node,
+            Header = "Node",
+            Content = new LinkContent
+            {
+                ResourceName = Pod.Spec.NodeName,
+                ResourceType = ResourceType.Node,
+            },
         };
 
-        yield return new DetailsTextItem { Title = "Pod IP", Value = Pod.Status.PodIP };
-
-        yield return new DetailsCollectionItem
+        yield return new HeaderedRow
         {
-            Title = "Pod IPs",
-            Items =
-            [
-                .. Pod.Status.PodIPs?.Select(p => new DetailsCollectionItemElement { Value = p.Ip })
+            Header = "Pod IP",
+            Content = new TextContent { Value = Pod.Status.PodIP },
+        };
+
+        yield return new HeaderedRow
+        {
+            Header = "Pod IPs",
+            Content = new CollectionContent
+            {
+                Items =
+                [
+                    .. Pod.Status.PodIPs?.Select(p => new TextCollectionElement { Value = p.Ip })
+                        ?? [],
+                ],
+            },
+        };
+
+        yield return new HeaderedRow
+        {
+            Header = "Service Account",
+            Content = new LinkContent
+            {
+                ResourceName = Pod.Spec.ServiceAccountName,
+                ResourceType = ResourceType.ServiceAccount,
+            },
+        };
+
+        yield return new HeaderedRow
+        {
+            Header = "Priority Class",
+            Content = new LinkContent
+            {
+                ResourceName = Pod.Spec.PriorityClassName,
+                ResourceType = ResourceType.PriorityClass,
+            },
+        };
+
+        yield return new HeaderedRow
+        {
+            Header = "QoS Class",
+            Content = new TextContent { Value = Pod.Status.QosClass },
+        };
+
+        yield return new HeaderedRow
+        {
+            Header = "Conditions",
+            Content = new CollectionContent
+            {
+                Items =
+                [
+                    .. Pod.Status.Conditions?.Select(c => new ConditionCollectionElement
+                    {
+                        Type = c.Type,
+                        Status = c.Status,
+                        Message = c.Message,
+                        Reason = c.Reason,
+                        LastHeartbeatTime = c.LastProbeTime,
+                        LastTransitionTime = c.LastTransitionTime,
+                    }) ?? [],
+                ],
+            },
+        };
+
+        yield return new HeaderedRow
+        {
+            Header = "Node Selector",
+            Content = new CollectionContent
+            {
+                Items =
+                [
+                    .. Pod.Spec.NodeSelector?.Select(n => new TextCollectionElement
+                    {
+                        Value = $"{n.Key}: {n.Value}",
+                    }) ?? [],
+                ],
+            },
+        };
+
+        yield return new HeaderedRow
+        {
+            Header = "Tolerations",
+            Content = new TableContent
+            {
+                IsExpandable = true,
+                Columns = ["Key", "Operator", "Value", "Effect", "Seconds"],
+                Rows = Pod.Spec.Tolerations?.Select(t =>
+                    new[]
+                    {
+                        t.Key,
+                        t.OperatorProperty,
+                        t.Value,
+                        t.Effect,
+                        t.TolerationSeconds?.ToString() ?? string.Empty,
+                    }
+                )
                     ?? [],
-            ],
+            },
         };
-
-        yield return new DetailsLinkItem
-        {
-            Title = "Service Account",
-            ResourceName = Pod.Spec.ServiceAccountName,
-            ResourceType = ResourceType.ServiceAccount,
-        };
-
-        yield return new DetailsLinkItem
-        {
-            Title = "Priority Class",
-            ResourceName = Pod.Spec.PriorityClassName,
-            ResourceType = ResourceType.PriorityClass,
-        };
-
-        yield return new DetailsTextItem { Title = "QoS Class", Value = Pod.Status.QosClass };
-
-        yield return new DetailsConditionsItem
-        {
-            Title = "Conditions",
-            Items =
-            [
-                .. Pod.Status.Conditions?.Select(c => new DetailsConditionsElement
-                {
-                    Type = c.Type,
-                    Status = c.Status,
-                    Message = c.Message,
-                    Reason = c.Reason,
-                    LastHeartbeatTime = c.LastProbeTime,
-                    LastTransitionTime = c.LastTransitionTime,
-                }) ?? [],
-            ],
-        };
-
-        yield return new DetailsCollectionItem
-        {
-            Title = "Node Selector",
-            Items =
-            [
-                .. Pod.Spec.NodeSelector?.Select(n => new DetailsCollectionItemElement
-                {
-                    Value = $"{n.Key}: {n.Value}",
-                }) ?? [],
-            ],
-        };
-
-        yield return new DetailsTableItem(
-            "Tolerations",
-            isExpandable: true,
-            ["Key", "Operator", "Value", "Effect", "Seconds"],
-            Pod.Spec.Tolerations?.Select(t =>
-                new[]
-                {
-                    t.Key,
-                    t.OperatorProperty,
-                    t.Value,
-                    t.Effect,
-                    t.TolerationSeconds?.ToString() ?? string.Empty,
-                }
-            )
-                ?? []
-        );
 
         // todo affinities?
     }
 
-    private IEnumerable<IDetailsItem> GetContainerItems(V1Container container)
+    private IEnumerable<IDetailsRow> GetContainerRows(V1Container container)
     {
         if (Pod.Status.ContainerStatuses is null)
         {
@@ -323,100 +375,119 @@ public partial class PodViewModel : KubernetesResourceViewModel
             statusText += ", Ready";
         }
 
-        yield return new DetailsTextItem
+        yield return new HeaderedRow
         {
-            Title = "Status",
-            ValueColor = status.State switch
+            Header = "Status",
+            Content = new TextContent
             {
-                V1ContainerState { Running: V1ContainerStateRunning } => Category.Success,
-                V1ContainerState { Terminated: V1ContainerStateTerminated } => Category.Error,
-                _ => Category.Warning,
+                ValueColor = status.State switch
+                {
+                    V1ContainerState { Running: V1ContainerStateRunning } => Category.Success,
+                    V1ContainerState { Terminated: V1ContainerStateTerminated } => Category.Error,
+                    _ => Category.Warning,
+                },
+                Value = statusText,
             },
-            Value = statusText,
         };
 
         if (status.LastState is not null)
         {
-            yield return new DetailsTextItem
+            yield return new HeaderedRow
             {
-                Title = "Last Status",
-                Value = Pod
-                    .Status.ContainerStatuses.First(s => s.Name == container.Name)
-                    .LastState switch
+                Header = "Last Status",
+                Content = new TextContent
                 {
-                    V1ContainerState { Terminated: V1ContainerStateTerminated } => $"terminated\r\n"
-                        + $"Reason: {status.LastState.Terminated.Reason}\r\n"
-                        + $"Started at: {status.LastState.Terminated.StartedAt}\r\n"
-                        + $"Finished at: {status.LastState.Terminated.FinishedAt}",
-                    _ => "Unknown",
+                    Value = Pod
+                        .Status.ContainerStatuses.First(s => s.Name == container.Name)
+                        .LastState switch
+                    {
+                        V1ContainerState { Terminated: V1ContainerStateTerminated } => $"terminated\r\n"
+                            + $"Reason: {status.LastState.Terminated.Reason}\r\n"
+                            + $"Started at: {status.LastState.Terminated.StartedAt}\r\n"
+                            + $"Finished at: {status.LastState.Terminated.FinishedAt}",
+                        _ => "Unknown",
+                    },
                 },
             };
         }
 
-        yield return new DetailsTextItem { Title = "Image", Value = container.Image };
+        yield return new HeaderedRow
+        {
+            Header = "Image",
+            Content = new TextContent { Value = container.Image },
+        };
 
         if (container.Ports != null)
         {
-            yield return new DetailsPortsItem
+            yield return new FullWidthRow
             {
-                Ports =
-                [
-                    .. container.Ports.Select(p => new PortViewModel(
-                        p,
-                        this,
-                        Cluster,
-                        Cluster.App.ForwardedPorts.FirstOrDefault(fp =>
-                            fp.Resource == this && fp.TargetPort == p.ContainerPort
-                        )
-                    )) ?? [],
-                ],
+                Content = new PortsContent
+                {
+                    Ports =
+                    [
+                        .. container.Ports.Select(p => new PortViewModel(
+                            p,
+                            this,
+                            Cluster,
+                            Cluster.App.ForwardedPorts.FirstOrDefault(fp =>
+                                fp.Resource == this && fp.TargetPort == p.ContainerPort
+                            )
+                        )) ?? [],
+                    ],
+                },
             };
         }
 
-        yield return new DetailsDictionaryItem
+        yield return new HeaderedRow
         {
-            Title = "Environment",
-            Items =
-                container
-                    .Env?.Select(e => new DetailsDictionaryEntry
-                    {
-                        Key = e.Name,
-                        Value = GetEnvValueRepresentation(e),
-                    })
-                    .ToList()
-                ?? [],
+            Header = "Environment",
+            Content = new DictionaryContent
+            {
+                Items =
+                    container
+                        .Env?.Select(e => new DetailsDictionaryEntry
+                        {
+                            Key = e.Name,
+                            Value = GetEnvValueRepresentation(e),
+                        })
+                        .ToList()
+                    ?? [],
+            },
         };
 
-        yield return new DetailsCollectionItem
+        yield return new HeaderedRow
         {
-            Title = "Mounts",
-            IsWrapLayout = false,
-            Items =
-            [
-                .. container.VolumeMounts.Select(m => new DetailsCollectionItemElement
-                {
-                    Value = m.MountPath,
-                    SecondaryValue =
-                        $"from {m.Name} ({(m.ReadOnlyProperty == true ? "ro" : "rw")})",
-                }),
-            ],
+            Header = "Mounts",
+            Content = new CollectionContent
+            {
+                Layout = CollectionLayout.Stack,
+                Items =
+                [
+                    .. container.VolumeMounts.Select(m => new TextCollectionElement
+                    {
+                        Value = m.MountPath,
+                        SecondaryValue =
+                            $"from {m.Name} ({(m.ReadOnlyProperty == true ? "ro" : "rw")})",
+                    }),
+                ],
+            },
         };
 
         if (container.LivenessProbe != null)
         {
-            var elements = new List<DetailsCollectionItemElement>();
+            var elements = new List<TextCollectionElement>();
             if (container.LivenessProbe.HttpGet != null)
             {
-                elements.Add(new DetailsCollectionItemElement { Value = "http-get" });
+                elements.Add(new TextCollectionElement { Value = "http-get" });
                 elements.Add(
-                    new DetailsCollectionItemElement
+                    new TextCollectionElement
                     {
                         Value =
                             $"{container.LivenessProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.LivenessProbe.HttpGet.Host}{container.LivenessProbe.HttpGet.Path}:{container.LivenessProbe.HttpGet.Port}",
                     }
                 );
                 elements.Add(
-                    new DetailsCollectionItemElement
+                    new TextCollectionElement
                     {
                         Value = $"port: {container.LivenessProbe.HttpGet.Port}",
                     }
@@ -426,54 +497,58 @@ public partial class PodViewModel : KubernetesResourceViewModel
             // todo fill for exec
 
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"delay={container.LivenessProbe.InitialDelaySeconds}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"timeout={container.LivenessProbe.TimeoutSeconds}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"period={container.LivenessProbe.PeriodSeconds}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"#success={container.LivenessProbe.SuccessThreshold}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"#failure={container.LivenessProbe.FailureThreshold}s",
                 }
             );
 
-            yield return new DetailsCollectionItem { Title = "Liveness", Items = elements };
+            yield return new HeaderedRow
+            {
+                Header = "Liveness",
+                Content = new CollectionContent { Items = [.. elements] },
+            };
         }
 
         if (container.ReadinessProbe != null)
         {
-            var elements = new List<DetailsCollectionItemElement>();
+            var elements = new List<TextCollectionElement>();
             if (container.ReadinessProbe.HttpGet != null)
             {
-                elements.Add(new DetailsCollectionItemElement { Value = "http-get" });
+                elements.Add(new TextCollectionElement { Value = "http-get" });
                 elements.Add(
-                    new DetailsCollectionItemElement
+                    new TextCollectionElement
                     {
                         Value =
                             $"{container.ReadinessProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.ReadinessProbe.HttpGet.Host}{container.ReadinessProbe.HttpGet.Path}:{container.ReadinessProbe.HttpGet.Port}",
                     }
                 );
                 elements.Add(
-                    new DetailsCollectionItemElement
+                    new TextCollectionElement
                     {
                         Value = $"port: {container.ReadinessProbe.HttpGet.Port}",
                     }
@@ -483,54 +558,58 @@ public partial class PodViewModel : KubernetesResourceViewModel
             // todo fill for exec
 
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"delay={container.ReadinessProbe.InitialDelaySeconds}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"timeout={container.ReadinessProbe.TimeoutSeconds}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"period={container.ReadinessProbe.PeriodSeconds}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"#success={container.ReadinessProbe.SuccessThreshold}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"#failure={container.ReadinessProbe.FailureThreshold}s",
                 }
             );
 
-            yield return new DetailsCollectionItem { Title = "Readiness", Items = elements };
+            yield return new HeaderedRow
+            {
+                Header = "Readiness",
+                Content = new CollectionContent { Items = [.. elements] },
+            };
         }
 
         if (container.StartupProbe != null)
         {
-            var elements = new List<DetailsCollectionItemElement>();
+            var elements = new List<TextCollectionElement>();
             if (container.StartupProbe.HttpGet != null)
             {
-                elements.Add(new DetailsCollectionItemElement { Value = "http-get" });
+                elements.Add(new TextCollectionElement { Value = "http-get" });
                 elements.Add(
-                    new DetailsCollectionItemElement
+                    new TextCollectionElement
                     {
                         Value =
                             $"{container.StartupProbe.HttpGet.Scheme.ToLowerInvariant()}://{container.StartupProbe.HttpGet.Host}{container.StartupProbe.HttpGet.Path}:{container.StartupProbe.HttpGet.Port}",
                     }
                 );
                 elements.Add(
-                    new DetailsCollectionItemElement
+                    new TextCollectionElement
                     {
                         Value = $"port: {container.StartupProbe.HttpGet.Port}",
                     }
@@ -540,731 +619,423 @@ public partial class PodViewModel : KubernetesResourceViewModel
             // todo fill for exec
 
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"delay={container.StartupProbe.InitialDelaySeconds}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"timeout={container.StartupProbe.TimeoutSeconds}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"period={container.StartupProbe.PeriodSeconds}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"#success={container.StartupProbe.SuccessThreshold}s",
                 }
             );
             elements.Add(
-                new DetailsCollectionItemElement
+                new TextCollectionElement
                 {
                     Value = $"#failure={container.StartupProbe.FailureThreshold}s",
                 }
             );
 
-            yield return new DetailsCollectionItem { Title = "Startup", Items = elements };
+            yield return new HeaderedRow
+            {
+                Header = "Startup",
+                Content = new CollectionContent { Items = [.. elements] },
+            };
         }
 
         if (container.Command != null)
         {
-            yield return new DetailsTextItem
+            yield return new HeaderedRow
             {
-                Title = "Command",
-                Value = string.Join(" ", container.Command),
+                Header = "Command",
+                Content = new TextContent
+                {
+                    Value = string.Join(" ", container.Command),
+                },
             };
         }
 
         if (container.Args != null)
         {
-            yield return new DetailsTextItem
+            yield return new HeaderedRow
             {
-                Title = "Args",
-                Value = string.Join(" ", container.Args),
+                Header = "Args",
+                Content = new TextContent
+                {
+                    Value = string.Join(" ", container.Args),
+                },
             };
         }
 
         if (container.Resources.Requests != null)
         {
-            yield return new DetailsCollectionItem
+            yield return new HeaderedRow
             {
-                Title = "Requests",
-                Items =
-                [
-                    .. container.Resources.Requests.Select(r => new DetailsCollectionItemElement
-                    {
-                        Value = $"{r.Key}={r.Value}",
-                    }),
-                ],
+                Header = "Requests",
+                Content = new CollectionContent
+                {
+                    Items =
+                    [
+                        .. container.Resources.Requests.Select(r => new TextCollectionElement
+                        {
+                            Value = $"{r.Key}={r.Value}",
+                        }),
+                    ],
+                },
             };
         }
     }
 
-    private static IEnumerable<IDetailsItem> GetVolumeItems(V1Volume volume)
+    private static IEnumerable<IDetailsRow> GetVolumeRows(V1Volume volume)
     {
         if (volume.AwsElasticBlockStore != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "AWS Elastic Block Store" };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.AwsElasticBlockStore.FsType,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.AwsElasticBlockStore.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Partition",
-                Value = volume.AwsElasticBlockStore.Partition.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Volume ID",
-                Value = volume.AwsElasticBlockStore.VolumeID,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "AWS Elastic Block Store" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.AwsElasticBlockStore.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.AwsElasticBlockStore.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Partition", Content = new TextContent { Value = volume.AwsElasticBlockStore.Partition.ToString() } };
+            yield return new HeaderedRow { Header = "Volume ID", Content = new TextContent { Value = volume.AwsElasticBlockStore.VolumeID } };
         }
         else if (volume.AzureDisk != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Azure Disk" };
-            yield return new DetailsTextItem { Title = "FS Type", Value = volume.AzureDisk.FsType };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.AzureDisk.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem { Title = "Kind", Value = volume.AzureDisk.Kind };
-            yield return new DetailsTextItem
-            {
-                Title = "Disk Name",
-                Value = volume.AzureDisk.DiskName,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Disk URI",
-                Value = volume.AzureDisk.DiskURI,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Caching Mode",
-                Value = volume.AzureDisk.CachingMode,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Azure Disk" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.AzureDisk.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.AzureDisk.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Kind", Content = new TextContent { Value = volume.AzureDisk.Kind } };
+            yield return new HeaderedRow { Header = "Disk Name", Content = new TextContent { Value = volume.AzureDisk.DiskName } };
+            yield return new HeaderedRow { Header = "Disk URI", Content = new TextContent { Value = volume.AzureDisk.DiskURI } };
+            yield return new HeaderedRow { Header = "Caching Mode", Content = new TextContent { Value = volume.AzureDisk.CachingMode } };
         }
         else if (volume.AzureFile != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Azure File" };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.AzureFile.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Share Name",
-                Value = volume.AzureFile.ShareName,
-            };
-
-            yield return new DetailsTextItem
-            {
-                Title = "Secret Name",
-                Value = volume.AzureFile.SecretName,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Azure File" } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.AzureFile.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Share Name", Content = new TextContent { Value = volume.AzureFile.ShareName } };
+            yield return new HeaderedRow { Header = "Secret Name", Content = new TextContent { Value = volume.AzureFile.SecretName } };
         }
         else if (volume.Cephfs != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "CephFS" };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.Cephfs.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Monitors",
-                Value = string.Join(", ", volume.Cephfs.Monitors),
-            };
-            yield return new DetailsTextItem { Title = "Path", Value = volume.Cephfs.Path };
-            yield return new DetailsTextItem { Title = "User", Value = volume.Cephfs.User };
-            yield return new DetailsTextItem
-            {
-                Title = "Secret File",
-                Value = volume.Cephfs.SecretFile,
-            };
-            yield return new DetailsLinkItem
-            {
-                Title = "Secret Ref",
-                ResourceType = ResourceType.Secret,
-                ResourceName = volume.Cephfs.SecretRef?.Name,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "CephFS" } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Cephfs.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Monitors", Content = new TextContent { Value = string.Join(", ", volume.Cephfs.Monitors) } };
+            yield return new HeaderedRow { Header = "Path", Content = new TextContent { Value = volume.Cephfs.Path } };
+            yield return new HeaderedRow { Header = "User", Content = new TextContent { Value = volume.Cephfs.User } };
+            yield return new HeaderedRow { Header = "Secret File", Content = new TextContent { Value = volume.Cephfs.SecretFile } };
+            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Cephfs.SecretRef?.Name } };
         }
         else if (volume.Cinder != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Cinder" };
-            yield return new DetailsTextItem { Title = "FS Type", Value = volume.Cinder.FsType };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.Cinder.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Volume ID",
-                Value = volume.Cinder.VolumeID,
-            };
-            yield return new DetailsLinkItem
-            {
-                Title = "Secret Ref",
-                ResourceType = ResourceType.Secret,
-                ResourceName = volume.Cinder.SecretRef?.Name,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Cinder" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.Cinder.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Cinder.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Volume ID", Content = new TextContent { Value = volume.Cinder.VolumeID } };
+            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Cinder.SecretRef?.Name } };
         }
         else if (volume.ConfigMap != null) // todo items
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Config Map" };
-            yield return new DetailsLinkItem
-            {
-                Title = "Name",
-                ResourceType = ResourceType.ConfigMap,
-                ResourceName = volume.ConfigMap.Name,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Default Mode",
-                Value = volume.ConfigMap.DefaultMode?.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Optional",
-                Value = volume.ConfigMap.Optional?.ToString(),
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Config Map" } };
+            yield return new HeaderedRow { Header = "Name", Content = new LinkContent { ResourceType = ResourceType.ConfigMap, ResourceName = volume.ConfigMap.Name } };
+            yield return new HeaderedRow { Header = "Default Mode", Content = new TextContent { Value = volume.ConfigMap.DefaultMode?.ToString() } };
+            yield return new HeaderedRow { Header = "Optional", Content = new TextContent { Value = volume.ConfigMap.Optional?.ToString() } };
         }
         else if (volume.Csi != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "CSI" };
-            yield return new DetailsTextItem { Title = "FS Type", Value = volume.Csi.FsType };
-            yield return new DetailsTextItem
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "CSI" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.Csi.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Csi.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Driver", Content = new TextContent { Value = volume.Csi.Driver } };
+            yield return new HeaderedRow { Header = "Node Publish Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Csi.NodePublishSecretRef?.Name } };
+            yield return new HeaderedRow
             {
-                Title = "Read Only",
-                Value = volume.Csi.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem { Title = "Driver", Value = volume.Csi.Driver };
-            yield return new DetailsLinkItem
-            {
-                Title = "Node Publish Secret Ref",
-                ResourceType = ResourceType.Secret,
-                ResourceName = volume.Csi.NodePublishSecretRef?.Name,
-            };
-            yield return new DetailsDictionaryItem
-            {
-                Title = "Volume Attributes",
-                Items =
-                    volume
-                        .Csi.VolumeAttributes?.Select(va => new DetailsDictionaryEntry
-                        {
-                            Key = va.Key,
-                            Value = va.Value,
-                        })
-                        .ToList()
-                    ?? [],
+                Header = "Volume Attributes",
+                Content = new DictionaryContent
+                {
+                    Items =
+                        volume
+                            .Csi.VolumeAttributes?.Select(va => new DetailsDictionaryEntry
+                            {
+                                Key = va.Key,
+                                Value = va.Value,
+                            })
+                            .ToList()
+                        ?? [],
+                },
             };
         }
         else if (volume.DownwardAPI != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Downward API" };
-            yield return new DetailsDictionaryItem
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Downward API" } };
+            yield return new HeaderedRow
             {
-                Title = "Default Mode",
-                Items = volume.DownwardAPI.DefaultMode.HasValue
-                    ?
-                    [
-                        new DetailsDictionaryEntry
-                        {
-                            Key = "Default Mode",
-                            Value = volume.DownwardAPI.DefaultMode.Value.ToString(),
-                        },
-                    ]
-                    : [],
+                Header = "Default Mode",
+                Content = new DictionaryContent
+                {
+                    Items = volume.DownwardAPI.DefaultMode.HasValue
+                        ?
+                        [
+                            new DetailsDictionaryEntry
+                            {
+                                Key = "Default Mode",
+                                Value = volume.DownwardAPI.DefaultMode.Value.ToString(),
+                            },
+                        ]
+                        : [],
+                },
             };
-            yield return new DetailsCollectionItem
+            yield return new HeaderedRow
             {
-                Title = "Items",
-                Items =
-                    volume
-                        .DownwardAPI.Items?.Select(i => new DetailsCollectionItemElement
-                        {
-                            Value = i.Path,
-                            SecondaryValue =
-                                i.FieldRef != null ? $"FieldRef: {i.FieldRef.FieldPath}"
-                                : i.ResourceFieldRef != null
-                                    ? $"ResourceFieldRef: {i.ResourceFieldRef.Resource}"
-                                : string.Empty,
-                        })
-                        .ToList()
-                    ?? [],
+                Header = "Items",
+                Content = new CollectionContent
+                {
+                    Items =
+                    [
+                        .. volume
+                            .DownwardAPI.Items?.Select(i => new TextCollectionElement
+                            {
+                                Value = i.Path,
+                                SecondaryValue =
+                                    i.FieldRef != null ? $"FieldRef: {i.FieldRef.FieldPath}"
+                                    : i.ResourceFieldRef != null
+                                        ? $"ResourceFieldRef: {i.ResourceFieldRef.Resource}"
+                                    : string.Empty,
+                            })
+                            ?? [],
+                    ],
+                },
             };
         }
         else if (volume.EmptyDir != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Empty Dir" };
-            yield return new DetailsTextItem { Title = "Medium", Value = volume.EmptyDir.Medium };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Empty Dir" } };
+            yield return new HeaderedRow { Header = "Medium", Content = new TextContent { Value = volume.EmptyDir.Medium } };
             if (volume.EmptyDir.SizeLimit != null)
             {
-                yield return new DetailsTextItem
-                {
-                    Title = "Size Limit",
-                    Value = volume.EmptyDir.SizeLimit.ToString(),
-                };
+                yield return new HeaderedRow { Header = "Size Limit", Content = new TextContent { Value = volume.EmptyDir.SizeLimit.ToString() } };
             }
         }
         else if (volume.Ephemeral != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Ephemeral" };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Ephemeral" } };
             if (volume.Ephemeral.VolumeClaimTemplate != null)
             {
-                yield return new DetailsLinkItem
-                {
-                    Title = "Volume Claim Template",
-                    ResourceType = ResourceType.PersistentVolumeClaim,
-                    ResourceName = volume.Ephemeral.VolumeClaimTemplate.Metadata?.Name,
-                };
+                yield return new HeaderedRow { Header = "Volume Claim Template", Content = new LinkContent { ResourceType = ResourceType.PersistentVolumeClaim, ResourceName = volume.Ephemeral.VolumeClaimTemplate.Metadata?.Name } };
             }
         }
         else if (volume.Fc != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Fibre Channel" };
-            yield return new DetailsTextItem { Title = "FSType", Value = volume.Fc.FsType };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.Fc.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Target WWNs",
-                Value = string.Join(", ", volume.Fc.TargetWWNs),
-            };
-            yield return new DetailsTextItem { Title = "Lun", Value = volume.Fc.Lun.ToString() };
-
-            yield return new DetailsTextItem
-            {
-                Title = "Wwids",
-                Value = string.Join(", ", volume.Fc.Wwids),
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Fibre Channel" } };
+            yield return new HeaderedRow { Header = "FSType", Content = new TextContent { Value = volume.Fc.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Fc.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Target WWNs", Content = new TextContent { Value = string.Join(", ", volume.Fc.TargetWWNs) } };
+            yield return new HeaderedRow { Header = "Lun", Content = new TextContent { Value = volume.Fc.Lun.ToString() } };
+            yield return new HeaderedRow { Header = "Wwids", Content = new TextContent { Value = string.Join(", ", volume.Fc.Wwids) } };
         }
         else if (volume.FlexVolume != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Flex Volume" };
-            yield return new DetailsTextItem { Title = "Driver", Value = volume.FlexVolume.Driver };
-            yield return new DetailsTextItem
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Flex Volume" } };
+            yield return new HeaderedRow { Header = "Driver", Content = new TextContent { Value = volume.FlexVolume.Driver } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.FlexVolume.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.FlexVolume.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow
             {
-                Title = "FS Type",
-                Value = volume.FlexVolume.FsType,
+                Header = "Options",
+                Content = new DictionaryContent
+                {
+                    Items =
+                        volume
+                            .FlexVolume.Options?.Select(o => new DetailsDictionaryEntry
+                            {
+                                Key = o.Key,
+                                Value = o.Value,
+                            })
+                            .ToList()
+                        ?? [],
+                },
             };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.FlexVolume.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsDictionaryItem
-            {
-                Title = "Options",
-                Items =
-                    volume
-                        .FlexVolume.Options?.Select(o => new DetailsDictionaryEntry
-                        {
-                            Key = o.Key,
-                            Value = o.Value,
-                        })
-                        .ToList()
-                    ?? [],
-            };
-            yield return new DetailsLinkItem
-            {
-                Title = "Secret Ref",
-                ResourceType = ResourceType.Secret,
-                ResourceName = volume.FlexVolume.SecretRef?.Name,
-            };
+            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.FlexVolume.SecretRef?.Name } };
         }
         else if (volume.Flocker != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Flocker" };
-            yield return new DetailsTextItem
-            {
-                Title = "Dataset Name",
-                Value = volume.Flocker.DatasetName,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Dataset UUID",
-                Value = volume.Flocker.DatasetUUID,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Flocker" } };
+            yield return new HeaderedRow { Header = "Dataset Name", Content = new TextContent { Value = volume.Flocker.DatasetName } };
+            yield return new HeaderedRow { Header = "Dataset UUID", Content = new TextContent { Value = volume.Flocker.DatasetUUID } };
         }
         else if (volume.GcePersistentDisk != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "GCE Persistent Disk" };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.GcePersistentDisk.FsType,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.GcePersistentDisk.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Partition",
-                Value = volume.GcePersistentDisk.Partition.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "PD Name",
-                Value = volume.GcePersistentDisk.PdName,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "GCE Persistent Disk" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.GcePersistentDisk.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.GcePersistentDisk.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Partition", Content = new TextContent { Value = volume.GcePersistentDisk.Partition.ToString() } };
+            yield return new HeaderedRow { Header = "PD Name", Content = new TextContent { Value = volume.GcePersistentDisk.PdName } };
         }
         else if (volume.GitRepo != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Git Repo" };
-            yield return new DetailsTextItem
-            {
-                Title = "Repository",
-                Value = volume.GitRepo.Repository,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Revision",
-                Value = volume.GitRepo.Revision,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Directory",
-                Value = volume.GitRepo.Directory,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Git Repo" } };
+            yield return new HeaderedRow { Header = "Repository", Content = new TextContent { Value = volume.GitRepo.Repository } };
+            yield return new HeaderedRow { Header = "Revision", Content = new TextContent { Value = volume.GitRepo.Revision } };
+            yield return new HeaderedRow { Header = "Directory", Content = new TextContent { Value = volume.GitRepo.Directory } };
         }
         else if (volume.Glusterfs != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "GlusterFS" };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.Glusterfs.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Endpoints",
-                Value = volume.Glusterfs.Endpoints,
-            };
-            yield return new DetailsTextItem { Title = "Path", Value = volume.Glusterfs.Path };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "GlusterFS" } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Glusterfs.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Endpoints", Content = new TextContent { Value = volume.Glusterfs.Endpoints } };
+            yield return new HeaderedRow { Header = "Path", Content = new TextContent { Value = volume.Glusterfs.Path } };
         }
         else if (volume.HostPath != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Host Path" };
-            yield return new DetailsTextItem { Title = "Path", Value = volume.HostPath.Path };
-            yield return new DetailsTextItem { Title = "Type", Value = volume.HostPath.Type };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Host Path" } };
+            yield return new HeaderedRow { Header = "Path", Content = new TextContent { Value = volume.HostPath.Path } };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = volume.HostPath.Type } };
         }
         else if (volume.Image != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Image" };
-            yield return new DetailsTextItem
-            {
-                Title = "Reference",
-                Value = volume.Image.Reference,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Pull Policy",
-                Value = volume.Image.PullPolicy,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Image" } };
+            yield return new HeaderedRow { Header = "Reference", Content = new TextContent { Value = volume.Image.Reference } };
+            yield return new HeaderedRow { Header = "Pull Policy", Content = new TextContent { Value = volume.Image.PullPolicy } };
         }
         else if (volume.Iscsi != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "iSCSI" };
-            yield return new DetailsTextItem { Title = "FS Type", Value = volume.Iscsi.FsType };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.Iscsi.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Target Portal",
-                Value = volume.Iscsi.TargetPortal,
-            };
-            yield return new DetailsTextItem { Title = "IQN", Value = volume.Iscsi.Iqn };
-            yield return new DetailsTextItem { Title = "Lun", Value = volume.Iscsi.Lun.ToString() };
-            yield return new DetailsTextItem
-            {
-                Title = "ISCSI Interface",
-                Value = volume.Iscsi.IscsiInterface,
-            };
-            yield return new DetailsLinkItem
-            {
-                Title = "Secret Ref",
-                ResourceType = ResourceType.Secret,
-                ResourceName = volume.Iscsi.SecretRef?.Name,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Portals",
-                Value = string.Join(", ", volume.Iscsi.Portals),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Initiator Name",
-                Value = volume.Iscsi.InitiatorName,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "iSCSI" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.Iscsi.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Iscsi.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Target Portal", Content = new TextContent { Value = volume.Iscsi.TargetPortal } };
+            yield return new HeaderedRow { Header = "IQN", Content = new TextContent { Value = volume.Iscsi.Iqn } };
+            yield return new HeaderedRow { Header = "Lun", Content = new TextContent { Value = volume.Iscsi.Lun.ToString() } };
+            yield return new HeaderedRow { Header = "ISCSI Interface", Content = new TextContent { Value = volume.Iscsi.IscsiInterface } };
+            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Iscsi.SecretRef?.Name } };
+            yield return new HeaderedRow { Header = "Portals", Content = new TextContent { Value = string.Join(", ", volume.Iscsi.Portals) } };
+            yield return new HeaderedRow { Header = "Initiator Name", Content = new TextContent { Value = volume.Iscsi.InitiatorName } };
         }
         else if (volume.Nfs != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "NFS" };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.Nfs.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem { Title = "Server", Value = volume.Nfs.Server };
-            yield return new DetailsTextItem { Title = "Path", Value = volume.Nfs.Path };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "NFS" } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Nfs.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Server", Content = new TextContent { Value = volume.Nfs.Server } };
+            yield return new HeaderedRow { Header = "Path", Content = new TextContent { Value = volume.Nfs.Path } };
         }
         else if (volume.PersistentVolumeClaim != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Persistent Volume Claim" };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.PersistentVolumeClaim.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsLinkItem
-            {
-                Title = "Claim Name",
-                ResourceType = ResourceType.PersistentVolumeClaim,
-                ResourceName = volume.PersistentVolumeClaim.ClaimName,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Persistent Volume Claim" } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.PersistentVolumeClaim.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Claim Name", Content = new LinkContent { ResourceType = ResourceType.PersistentVolumeClaim, ResourceName = volume.PersistentVolumeClaim.ClaimName } };
         }
         else if (volume.PhotonPersistentDisk != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Photon Persistent Disk" };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.PhotonPersistentDisk.FsType,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "PD ID",
-                Value = volume.PhotonPersistentDisk.PdID,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Photon Persistent Disk" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.PhotonPersistentDisk.FsType } };
+            yield return new HeaderedRow { Header = "PD ID", Content = new TextContent { Value = volume.PhotonPersistentDisk.PdID } };
         }
         else if (volume.PortworxVolume != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Portworx Volume" };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.PortworxVolume.FsType,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.PortworxVolume.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Volume ID",
-                Value = volume.PortworxVolume.VolumeID,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Portworx Volume" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.PortworxVolume.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.PortworxVolume.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Volume ID", Content = new TextContent { Value = volume.PortworxVolume.VolumeID } };
         }
         else if (volume.Projected != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Projected" };
-            yield return new DetailsCollectionItem // todo support a link collection
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Projected" } };
+            yield return new HeaderedRow
             {
-                Title = "Sources",
-                Items =
-                    volume
-                        .Projected.Sources?.Select(s => new DetailsCollectionItemElement
-                        {
-                            Value =
-                                s.ConfigMap != null ? $"ConfigMap: {s.ConfigMap.Name}"
-                                : s.Secret != null ? $"Secret: {s.Secret.Name}"
-                                : s.ServiceAccountToken != null ? "ServiceAccountToken"
-                                : "Unknown Source",
-                        })
-                        .ToList()
-                    ?? [],
+                Header = "Sources", // todo support a link collection
+                Content = new CollectionContent
+                {
+                    Items =
+                    [
+                        .. volume
+                            .Projected.Sources?.Select(s => new TextCollectionElement
+                            {
+                                Value =
+                                    s.ConfigMap != null ? $"ConfigMap: {s.ConfigMap.Name}"
+                                    : s.Secret != null ? $"Secret: {s.Secret.Name}"
+                                    : s.ServiceAccountToken != null ? "ServiceAccountToken"
+                                    : "Unknown Source",
+                            })
+                            ?? [],
+                    ],
+                },
             };
         }
         else if (volume.Quobyte != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Quobyte" };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.Quobyte.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Registry",
-                Value = volume.Quobyte.Registry,
-            };
-            yield return new DetailsTextItem { Title = "Volume", Value = volume.Quobyte.Volume };
-            yield return new DetailsTextItem { Title = "User", Value = volume.Quobyte.User };
-            yield return new DetailsTextItem { Title = "Group", Value = volume.Quobyte.Group };
-            yield return new DetailsTextItem { Title = "Tenant", Value = volume.Quobyte.Tenant };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Quobyte" } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Quobyte.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Registry", Content = new TextContent { Value = volume.Quobyte.Registry } };
+            yield return new HeaderedRow { Header = "Volume", Content = new TextContent { Value = volume.Quobyte.Volume } };
+            yield return new HeaderedRow { Header = "User", Content = new TextContent { Value = volume.Quobyte.User } };
+            yield return new HeaderedRow { Header = "Group", Content = new TextContent { Value = volume.Quobyte.Group } };
+            yield return new HeaderedRow { Header = "Tenant", Content = new TextContent { Value = volume.Quobyte.Tenant } };
         }
         else if (volume.Rbd != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "RBD (RADOS Block Device)" };
-            yield return new DetailsTextItem { Title = "FS Type", Value = volume.Rbd.FsType };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.Rbd.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem { Title = "Pool", Value = volume.Rbd.Pool };
-            yield return new DetailsTextItem { Title = "Image", Value = volume.Rbd.Image };
-            yield return new DetailsTextItem { Title = "User", Value = volume.Rbd.User };
-            yield return new DetailsTextItem { Title = "Keyring", Value = volume.Rbd.Keyring };
-            yield return new DetailsLinkItem
-            {
-                Title = "Secret Ref",
-                ResourceType = ResourceType.Secret,
-                ResourceName = volume.Rbd.SecretRef?.Name,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Ceph Monitors",
-                Value = string.Join(", ", volume.Rbd.Monitors),
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "RBD (RADOS Block Device)" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.Rbd.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Rbd.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Pool", Content = new TextContent { Value = volume.Rbd.Pool } };
+            yield return new HeaderedRow { Header = "Image", Content = new TextContent { Value = volume.Rbd.Image } };
+            yield return new HeaderedRow { Header = "User", Content = new TextContent { Value = volume.Rbd.User } };
+            yield return new HeaderedRow { Header = "Keyring", Content = new TextContent { Value = volume.Rbd.Keyring } };
+            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Rbd.SecretRef?.Name } };
+            yield return new HeaderedRow { Header = "Ceph Monitors", Content = new TextContent { Value = string.Join(", ", volume.Rbd.Monitors) } };
         }
         else if (volume.ScaleIO != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "ScaleIO" };
-            yield return new DetailsTextItem { Title = "FS Type", Value = volume.ScaleIO.FsType };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.ScaleIO.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem { Title = "Gateway", Value = volume.ScaleIO.Gateway };
-            yield return new DetailsTextItem { Title = "System", Value = volume.ScaleIO.System };
-            yield return new DetailsTextItem
-            {
-                Title = "Volume Name",
-                Value = volume.ScaleIO.VolumeName,
-            };
-            yield return new DetailsLinkItem
-            {
-                Title = "Secret Ref",
-                ResourceType = ResourceType.Secret,
-                ResourceName = volume.ScaleIO.SecretRef?.Name,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "SSLEnabled",
-                Value = volume.ScaleIO.SslEnabled.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Protection Domain",
-                Value = volume.ScaleIO.ProtectionDomain,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Storage Pool",
-                Value = volume.ScaleIO.StoragePool,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Storage Mode",
-                Value = volume.ScaleIO.StorageMode,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "ScaleIO" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.ScaleIO.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.ScaleIO.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Gateway", Content = new TextContent { Value = volume.ScaleIO.Gateway } };
+            yield return new HeaderedRow { Header = "System", Content = new TextContent { Value = volume.ScaleIO.System } };
+            yield return new HeaderedRow { Header = "Volume Name", Content = new TextContent { Value = volume.ScaleIO.VolumeName } };
+            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.ScaleIO.SecretRef?.Name } };
+            yield return new HeaderedRow { Header = "SSLEnabled", Content = new TextContent { Value = volume.ScaleIO.SslEnabled.ToString() } };
+            yield return new HeaderedRow { Header = "Protection Domain", Content = new TextContent { Value = volume.ScaleIO.ProtectionDomain } };
+            yield return new HeaderedRow { Header = "Storage Pool", Content = new TextContent { Value = volume.ScaleIO.StoragePool } };
+            yield return new HeaderedRow { Header = "Storage Mode", Content = new TextContent { Value = volume.ScaleIO.StorageMode } };
         }
         else if (volume.Secret != null) // todo items
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "Secret" };
-            yield return new DetailsLinkItem
-            {
-                Title = "Name",
-                ResourceType = ResourceType.Secret,
-                ResourceName = volume.Secret.SecretName,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Default Mode",
-                Value = volume.Secret.DefaultMode?.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Optional",
-                Value = volume.Secret.Optional?.ToString(),
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Secret" } };
+            yield return new HeaderedRow { Header = "Name", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Secret.SecretName } };
+            yield return new HeaderedRow { Header = "Default Mode", Content = new TextContent { Value = volume.Secret.DefaultMode?.ToString() } };
+            yield return new HeaderedRow { Header = "Optional", Content = new TextContent { Value = volume.Secret.Optional?.ToString() } };
         }
         else if (volume.Storageos != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "StorageOS" };
-            yield return new DetailsTextItem { Title = "FS Type", Value = volume.Storageos.FsType };
-            yield return new DetailsTextItem
-            {
-                Title = "Read Only",
-                Value = volume.Storageos.ReadOnlyProperty.ToString(),
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Volume Name",
-                Value = volume.Storageos.VolumeName,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Volume Namespace",
-                Value = volume.Storageos.VolumeNamespace,
-            };
-            yield return new DetailsLinkItem
-            {
-                Title = "Secret Ref",
-                ResourceType = ResourceType.Secret,
-                ResourceName = volume.Storageos.SecretRef?.Name,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "StorageOS" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.Storageos.FsType } };
+            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Storageos.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow { Header = "Volume Name", Content = new TextContent { Value = volume.Storageos.VolumeName } };
+            yield return new HeaderedRow { Header = "Volume Namespace", Content = new TextContent { Value = volume.Storageos.VolumeNamespace } };
+            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Storageos.SecretRef?.Name } };
         }
         else if (volume.VsphereVolume != null)
         {
-            yield return new DetailsTextItem { Title = "Type", Value = "vSphere Volume" };
-            yield return new DetailsTextItem
-            {
-                Title = "FS Type",
-                Value = volume.VsphereVolume.FsType,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Volume Path",
-                Value = volume.VsphereVolume.VolumePath,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Storage Policy Name",
-                Value = volume.VsphereVolume.StoragePolicyName,
-            };
-            yield return new DetailsTextItem
-            {
-                Title = "Storage Policy ID",
-                Value = volume.VsphereVolume.StoragePolicyID,
-            };
+            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "vSphere Volume" } };
+            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.VsphereVolume.FsType } };
+            yield return new HeaderedRow { Header = "Volume Path", Content = new TextContent { Value = volume.VsphereVolume.VolumePath } };
+            yield return new HeaderedRow { Header = "Storage Policy Name", Content = new TextContent { Value = volume.VsphereVolume.StoragePolicyName } };
+            yield return new HeaderedRow { Header = "Storage Policy ID", Content = new TextContent { Value = volume.VsphereVolume.StoragePolicyID } };
         }
         else
         {
-            yield return new DetailsTextItem
+            yield return new HeaderedRow
             {
-                Title = "Type",
-                Value = "Unknown or Unsupported Volume Type",
+                Header = "Type",
+                Content = new TextContent { Value = "Unknown or Unsupported Volume Type" },
             };
         }
     }

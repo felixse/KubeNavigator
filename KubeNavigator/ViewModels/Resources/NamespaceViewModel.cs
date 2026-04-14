@@ -40,35 +40,41 @@ internal partial class NamespaceViewModel : KubernetesResourceViewModel
         [
             new DetailsSection
             {
-                Items =
+                Rows =
                 [
-                    new DetailsTextItem
+                    new HeaderedRow
                     {
-                        Title = "Created",
-                        Value = Resource.CreationTimestamp().ToString(),
+                        Header = "Created",
+                        Content = new TextContent { Value = Resource.CreationTimestamp().ToString() },
                     },
-                    new DetailsTextItem { Title = "Name", Value = Resource.Name() },
-                    new DetailsCollectionItem
+                    new HeaderedRow { Header = "Name", Content = new TextContent { Value = Resource.Name() } },
+                    new HeaderedRow
                     {
-                        Title = "Labels",
-                        Items =
-                        [
-                            .. Resource.Metadata.Labels?.Select(
-                                a => new DetailsCollectionItemElement
-                                {
-                                    Value = $"{a.Key}={a.Value}",
-                                }
-                            ) ?? [],
-                        ],
-                    },
-                    new DetailsTextItem
-                    {
-                        Title = "Status",
-                        Value = Status,
-                        ValueColor = Status switch
+                        Header = "Labels",
+                        Content = new CollectionContent
                         {
-                            "Active" => Category.Success,
-                            _ => Category.Default,
+                            Items =
+                            [
+                                .. Resource.Metadata.Labels?.Select(
+                                    a => new TextCollectionElement
+                                    {
+                                        Value = $"{a.Key}={a.Value}",
+                                    }
+                                ) ?? [],
+                            ],
+                        },
+                    },
+                    new HeaderedRow
+                    {
+                        Header = "Status",
+                        Content = new TextContent
+                        {
+                            Value = Status,
+                            ValueColor = Status switch
+                            {
+                                "Active" => Category.Success,
+                                _ => Category.Default,
+                            },
                         },
                     },
                 ],

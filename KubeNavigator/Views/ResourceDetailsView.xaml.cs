@@ -1,27 +1,13 @@
-using CommunityToolkit.WinUI.Controls;
 using KubeNavigator.ViewModels;
 using KubeNavigator.ViewModels.Details;
-using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Serilog;
 using WinUIEditor;
 
 namespace KubeNavigator.Views;
 
 public sealed partial class ResourceDetailsView : UserControl
 {
-    private static MarkdownConfig _markdownConfig = new MarkdownConfig
-    {
-        //Themes = new()
-        //{
-        //    InlineCodePadding = new(4),
-        //    InlineCodeBorderBrush = new SolidColorBrush(Colors.Transparent),
-        //    InlineCodeBorderThickness = new(4),
-        //},
-    };
-
     public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
         nameof(ViewModel),
         typeof(DetailsViewModel),
@@ -43,11 +29,6 @@ public sealed partial class ResourceDetailsView : UserControl
         }
     }
 
-    public static MarkdownConfig GetMarkdownConfig()
-    {
-        return _markdownConfig;
-    }
-
     public ResourceDetailsView()
     {
         this.InitializeComponent();
@@ -57,11 +38,11 @@ public sealed partial class ResourceDetailsView : UserControl
     {
         if (
             sender is HyperlinkButton hyperlink
-            && hyperlink.DataContext is DetailsLinkItem linkItem
+            && hyperlink.DataContext is LinkContent linkContent
             && ViewModel != null
         )
         {
-            await ViewModel.NavigateAsync(linkItem);
+            await ViewModel.NavigateAsync(linkContent);
         }
     }
 
@@ -69,11 +50,11 @@ public sealed partial class ResourceDetailsView : UserControl
     {
         if (
             sender is CodeEditorControl codeEditor
-            && codeEditor.DataContext is DetailsEditorItem editorItem
+            && codeEditor.DataContext is EditorContent editorContent
         )
         {
-            codeEditor.Editor.SetText(editorItem.Value);
-            editorItem.TextRetriever = () => codeEditor.Editor.GetText(long.MaxValue);
+            codeEditor.Editor.SetText(editorContent.Value);
+            editorContent.TextRetriever = () => codeEditor.Editor.GetText(long.MaxValue);
         }
     }
 }

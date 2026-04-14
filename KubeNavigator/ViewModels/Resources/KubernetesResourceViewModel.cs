@@ -101,32 +101,45 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
         [
             new DetailsSection
             {
-                Items =
+                Rows =
                 [
-                    new DetailsTextItem
+                    new HeaderedRow
                     {
-                        Title = "Created",
-                        Value = Resource.CreationTimestamp().ToString(),
+                        Header = "Created",
+                        Content = new TextContent
+                        {
+                            Value = Resource.CreationTimestamp().ToString(),
+                        },
                     },
-                    new DetailsTextItem { Title = "Name", Value = Resource.Name() },
-                    new DetailsLinkItem
+                    new HeaderedRow
                     {
-                        Title = "Namespace",
-                        ResourceName = Resource.Namespace(),
-                        ResourceType = ResourceType.Namespace,
+                        Header = "Name",
+                        Content = new TextContent { Value = Resource.Name() },
                     },
-                    new DetailsCollectionItem
+                    new HeaderedRow
                     {
-                        Title = "Annotations",
-                        Items =
-                        [
-                            .. Resource.Metadata.Annotations?.Select(
-                                a => new DetailsCollectionItemElement
-                                {
-                                    Value = $"{a.Key}={a.Value}",
-                                }
-                            ) ?? [],
-                        ],
+                        Header = "Namespace",
+                        Content = new LinkContent
+                        {
+                            ResourceName = Resource.Namespace(),
+                            ResourceType = ResourceType.Namespace,
+                        },
+                    },
+                    new HeaderedRow
+                    {
+                        Header = "Annotations",
+                        Content = new CollectionContent
+                        {
+                            Items =
+                            [
+                                .. Resource.Metadata.Annotations?.Select(
+                                    a => new TextCollectionElement
+                                    {
+                                        Value = $"{a.Key}={a.Value}",
+                                    }
+                                ) ?? [],
+                            ],
+                        },
                     },
                 ],
             },
@@ -137,48 +150,60 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
     protected async Task<IDetailsSection> GetEventsSectionAsync()
     {
         var events = await Cluster.Context.GetEventsForResourceAsync(Resource);
-        return new GroupedDetailsSection
+        return new DetailsSection
         {
-            Title = "Events",
-            Groups =
+            Header = "Events",
+            Rows =
             [
-                .. events.Select(e => new DetailsGroup
+                .. events.Select(e => new GroupRow
                 {
                     Header = new DetailsGroupHeader
                     {
                         Title = e.Note,
                         Category = e.Type == "Warning" ? Category.Warning : Category.Default,
                     },
-                    Items = [.. GetEventItems(e)],
+                    Rows = [.. GetEventRows(e)],
                 }),
             ],
         };
     }
 
-    private static IEnumerable<IDetailsItem> GetEventItems(Eventsv1Event @event)
+    private static IEnumerable<IDetailsRow> GetEventRows(Eventsv1Event @event)
     {
-        yield return new DetailsTextItem
+        yield return new HeaderedRow
         {
-            Title = "Source",
-            Value = $"{@event.ReportingController} {@event.ReportingInstance}",
+            Header = "Source",
+            Content = new TextContent
+            {
+                Value = $"{@event.ReportingController} {@event.ReportingInstance}",
+            },
         };
 
-        yield return new DetailsTextItem
+        yield return new HeaderedRow
         {
-            Title = "Count",
-            Value = @event.DeprecatedCount?.ToString(),
+            Header = "Count",
+            Content = new TextContent
+            {
+                Value = @event.DeprecatedCount?.ToString(),
+            },
         };
 
-        yield return new DetailsTextItem
+        yield return new HeaderedRow
         {
-            Title = "Sub-object",
-            Value = @event.Regarding.FieldPath,
+            Header = "Sub-object",
+            Content = new TextContent
+            {
+                Value = @event.Regarding.FieldPath,
+            },
         };
 
-        yield return new DetailsTextItem
+        yield return new HeaderedRow
         {
-            Title = "Last seen",
-            Value = @event.DeprecatedLastTimestamp?.ToString(),
+            Header = "Last seen",
+            Content = new TextContent
+            {
+                Value = @event.DeprecatedLastTimestamp?.ToString(),
+            },
         };
     }
 }

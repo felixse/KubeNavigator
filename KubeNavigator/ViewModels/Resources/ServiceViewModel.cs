@@ -53,7 +53,7 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
         var events = await GetEventsSectionAsync();
         var sections = new List<IDetailsSection>
         {
-            new DetailsSection { Items = [.. GetServiceItems()] },
+            new DetailsSection { Rows = [.. GetServiceRows()] },
         };
 
         if (Service.Spec.Type == "LoadBalancer")
@@ -62,25 +62,34 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
                 new DetailsSection
                 {
                     Header = "Load Balancer",
-                    Items =
+                    Rows =
                     [
-                        new DetailsTextItem
+                        new HeaderedRow
                         {
-                            Title = "Allocate Load Balancer Node Ports",
-                            Value =
-                                Service.Spec.AllocateLoadBalancerNodePorts ?? false
-                                    ? "True"
-                                    : "False",
+                            Header = "Allocate Load Balancer Node Ports",
+                            Content = new TextContent
+                            {
+                                Value =
+                                    Service.Spec.AllocateLoadBalancerNodePorts ?? false
+                                        ? "True"
+                                        : "False",
+                            },
                         },
-                        new DetailsTextItem
+                        new HeaderedRow
                         {
-                            Title = "External Traffic Policy",
-                            Value = Service.Spec.ExternalTrafficPolicy,
+                            Header = "External Traffic Policy",
+                            Content = new TextContent
+                            {
+                                Value = Service.Spec.ExternalTrafficPolicy,
+                            },
                         },
-                        new DetailsTextItem
+                        new HeaderedRow
                         {
-                            Title = "Hostname",
-                            Value = Service.Spec.LoadBalancerIP,
+                            Header = "Hostname",
+                            Content = new TextContent
+                            {
+                                Value = Service.Spec.LoadBalancerIP,
+                            },
                         },
                     ],
                 }
@@ -88,127 +97,88 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
         }
 
         sections.Add(
-            new DetailsSection { Header = "Connection", Items = [.. GetConnectionItems()] }
+            new DetailsSection { Header = "Connection", Rows = [.. GetConnectionRows()] }
         );
 
-        sections.AddRange(events);
+        sections.Add(events);
 
         return sections;
     }
 
-    private IEnumerable<IDetailsItem> GetServiceItems()
+    private IEnumerable<IDetailsRow> GetServiceRows()
     {
-        yield return new DetailsTextItem
-        {
-            Title = "Created",
-            Value = Service.CreationTimestamp().ToString(),
-        };
+        yield return new HeaderedRow { Header = "Created", Content = new TextContent { Value = Service.CreationTimestamp().ToString() } };
+        yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = Service.Name() } };
+        yield return new HeaderedRow { Header = "Namespace", Content = new LinkContent { ResourceName = Resource.Namespace(), ResourceType = ResourceType.Namespace } };
 
-        yield return new DetailsTextItem { Title = "Name", Value = Service.Name() };
-
-        yield return new DetailsLinkItem
+        yield return new HeaderedRow
         {
-            Title = "Namespace",
-            ResourceName = Resource.Namespace(),
-            ResourceType = ResourceType.Namespace,
-        };
-
-        yield return new DetailsCollectionItem
-        {
-            Title = "Labels",
-            Items =
-            [
-                .. Service.Metadata.Labels?.Select(l => new DetailsCollectionItemElement
-                {
-                    Value = $"{l.Key}={l.Value}",
-                }) ?? [],
-            ],
+            Header = "Labels",
+            Content = new CollectionContent
+            {
+                Items = [.. Service.Metadata.Labels?.Select(l => new TextCollectionElement { Value = $"{l.Key}={l.Value}" }) ?? []],
+            },
         };
 
         if (Service.Metadata.Annotations?.Count > 0)
         {
-            yield return new DetailsCollectionItem
+            yield return new HeaderedRow
             {
-                Title = "Annotations",
-                Items =
-                [
-                    .. Service.Metadata.Annotations?.Select(l => new DetailsCollectionItemElement
-                    {
-                        Value = $"{l.Key}={l.Value}",
-                    }) ?? [],
-                ],
+                Header = "Annotations",
+                Content = new CollectionContent
+                {
+                    Items = [.. Service.Metadata.Annotations?.Select(l => new TextCollectionElement { Value = $"{l.Key}={l.Value}" }) ?? []],
+                },
             };
         }
 
-        yield return new DetailsCollectionItem
+        yield return new HeaderedRow
         {
-            Title = "Selector",
-            Items =
-            [
-                .. Service.Spec.Selector?.Select(s => new DetailsCollectionItemElement
-                {
-                    Value = $"{s.Key}={s.Value}",
-                }) ?? [],
-            ],
+            Header = "Selector",
+            Content = new CollectionContent
+            {
+                Items = [.. Service.Spec.Selector?.Select(s => new TextCollectionElement { Value = $"{s.Key}={s.Value}" }) ?? []],
+            },
         };
 
-        yield return new DetailsTextItem { Title = "Type", Value = Type };
-
-        yield return new DetailsTextItem
-        {
-            Title = "Session Affinity",
-            Value = Service.Spec.SessionAffinity,
-        };
-
-        yield return new DetailsTextItem
-        {
-            Title = "Internal Traffic Policy",
-            Value = Service.Spec.InternalTrafficPolicy,
-        };
+        yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = Type } };
+        yield return new HeaderedRow { Header = "Session Affinity", Content = new TextContent { Value = Service.Spec.SessionAffinity } };
+        yield return new HeaderedRow { Header = "Internal Traffic Policy", Content = new TextContent { Value = Service.Spec.InternalTrafficPolicy } };
     }
 
-    private IEnumerable<IDetailsItem> GetConnectionItems()
+    private IEnumerable<IDetailsRow> GetConnectionRows()
     {
-        yield return new DetailsTextItem { Title = "Cluster IP", Value = ClusterIP };
+        yield return new HeaderedRow { Header = "Cluster IP", Content = new TextContent { Value = ClusterIP } };
 
-        yield return new DetailsCollectionItem
+        yield return new HeaderedRow
         {
-            Title = "Cluster IPs",
-            Items =
-            [
-                .. Service.Spec.ClusterIPs?.Select(c => new DetailsCollectionItemElement
-                {
-                    Value = c,
-                }) ?? [],
-            ],
+            Header = "Cluster IPs",
+            Content = new CollectionContent
+            {
+                Items = [.. Service.Spec.ClusterIPs?.Select(c => new TextCollectionElement { Value = c }) ?? []],
+            },
         };
 
-        yield return new DetailsTextItem
-        {
-            Title = "IP family policy",
-            Value = Service.Spec.IpFamilyPolicy,
-        };
+        yield return new HeaderedRow { Header = "IP family policy", Content = new TextContent { Value = Service.Spec.IpFamilyPolicy } };
+        yield return new HeaderedRow { Header = "IP families", Content = new TextContent { Value = string.Join(", ", Service.Spec.IpFamilies ?? []) } };
 
-        yield return new DetailsTextItem
+        yield return new FullWidthRow
         {
-            Title = "IP families",
-            Value = string.Join(", ", Service.Spec.IpFamilies ?? []),
-        };
-
-        yield return new DetailsPortsItem
-        {
-            Ports =
-            [
-                .. Service.Spec.Ports?.Select(p => new PortViewModel(
-                    p,
-                    this,
-                    Cluster,
-                    Cluster.App.ForwardedPorts.FirstOrDefault(fp =>
-                        fp.Resource == this && fp.TargetPort == p.TargetPort.ToInt()
-                    )
-                ))
-                    ?? [],
-            ],
+            Content = new PortsContent
+            {
+                Ports =
+                [
+                    .. Service.Spec.Ports?.Select(p => new PortViewModel(
+                        p,
+                        this,
+                        Cluster,
+                        Cluster.App.ForwardedPorts.FirstOrDefault(fp =>
+                            fp.Resource == this && fp.TargetPort == p.TargetPort.ToInt()
+                        )
+                    ))
+                        ?? [],
+                ],
+            },
         };
     }
 }

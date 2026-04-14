@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 
 namespace KubeNavigator.ViewModels.Details;
 
@@ -10,7 +9,7 @@ public enum ConditionKind
     Neutral,
 }
 
-internal class DetailsConditionsElement
+public class ConditionCollectionElement : IDetailsCollectionElement
 {
     public required string Type { get; set; }
     public required string Status { get; set; }
@@ -37,16 +36,6 @@ internal class DetailsConditionsElement
 
     public string KindString => Kind.ToString();
 
-    /// <summary>
-    /// multi-line details text combining Reason and Message
-    /// </summary>
     public string DetailsText =>
         $"Last Transition Time: {LastTransitionTime}\r\nStatus: {Status}\r\nReason: {Reason}\r\nMessage: {Message}";
-}
-
-internal class DetailsConditionsItem : IDetailsItem
-{
-    public required string Title { get; set; }
-
-    public required List<DetailsConditionsElement> Items { get; set; }
 }

@@ -49,9 +49,11 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
         }
 
         var newData = dataSection
-            .Items.OfType<DetailsEditorItem>()
+            .Rows.OfType<FullWidthRow>()
+            .Select(r => r.Content)
+            .OfType<EditorContent>()
             .ToDictionary(
-                item => item.Title,
+                item => item.Title!,
                 item => Encoding.UTF8.GetBytes(item.TextRetriever?.Invoke() ?? item.Value)
             );
         Secret.Data = newData;
@@ -69,71 +71,71 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
         var events = await GetEventsSectionAsync();
         return
         [
-            new DetailsSection { Items = [.. GetConfigMapItems()] },
+            new DetailsSection { Rows = [.. GetSecretRows()] },
             new DetailsSection
             {
                 Header = "Data",
-                Items = [.. GetDataItems()],
+                Rows = [.. GetDataRows()],
                 SaveCommand = SaveCommand,
             },
             events,
         ];
     }
 
-    private IEnumerable<IDetailsItem> GetConfigMapItems()
+    private IEnumerable<IDetailsRow> GetSecretRows()
     {
-        yield return new DetailsTextItem
-        {
-            Title = "Created",
-            Value = Secret.CreationTimestamp().ToString(),
-        };
+        yield return new HeaderedRow { Header = "Created", Content = new TextContent { Value = Secret.CreationTimestamp().ToString() } };
 
-        yield return new DetailsTextItem { Title = "Name", Value = Secret.Name() };
+        yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = Secret.Name() } };
 
-        yield return new DetailsLinkItem
-        {
-            Title = "Namespace",
-            ResourceName = Resource.Namespace(),
-            ResourceType = ResourceType.Namespace,
-        };
+        yield return new HeaderedRow { Header = "Namespace", Content = new LinkContent { ResourceName = Resource.Namespace(), ResourceType = ResourceType.Namespace } };
 
-        yield return new DetailsCollectionItem
+        yield return new HeaderedRow
         {
-            Title = "Labels",
-            Items =
-            [
-                .. Secret.Metadata.Labels?.Select(l => new DetailsCollectionItemElement
-                {
-                    Value = $"{l.Key}={l.Value}",
-                }) ?? [],
-            ],
-        };
-
-        if (Secret.Metadata.Annotations?.Count > 0)
-        {
-            yield return new DetailsCollectionItem
+            Header = "Labels",
+            Content = new CollectionContent
             {
-                Title = "Annotations",
                 Items =
                 [
-                    .. Secret.Metadata.Annotations?.Select(l => new DetailsCollectionItemElement
+                    .. Secret.Metadata.Labels?.Select(l => new TextCollectionElement
                     {
                         Value = $"{l.Key}={l.Value}",
                     }) ?? [],
                 ],
+            },
+        };
+
+        if (Secret.Metadata.Annotations?.Count > 0)
+        {
+            yield return new HeaderedRow
+            {
+                Header = "Annotations",
+                Content = new CollectionContent
+                {
+                    Items =
+                    [
+                        .. Secret.Metadata.Annotations?.Select(l => new TextCollectionElement
+                        {
+                            Value = $"{l.Key}={l.Value}",
+                        }) ?? [],
+                    ],
+                },
             };
         }
 
-        yield return new DetailsTextItem { Title = "Type", Value = Secret.Type };
+        yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = Secret.Type } };
     }
 
-    private IEnumerable<IDetailsItem> GetDataItems()
+    private IEnumerable<IDetailsRow> GetDataRows()
     {
         if (Secret.Data != null)
         {
             foreach (var (key, value) in Secret.Data)
             {
-                yield return new DetailsEditorItem(key, Encoding.UTF8.GetString(value));
+                yield return new FullWidthRow
+                {
+                    Content = new EditorContent { Title = key, Value = Encoding.UTF8.GetString(value) },
+                };
             }
         }
     }

@@ -52,7 +52,7 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
         var events = await GetEventsSectionAsync();
         var sections = new List<IDetailsSection>
         {
-            new DetailsSection { Items = [.. GetDeploymentItems()] },
+            new DetailsSection { Rows = [.. GetDeploymentRows()] },
         };
 
         var revisionRows = await GetReplicaSetRowsAsync();
@@ -60,14 +60,17 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             new DetailsSection
             {
                 Header = "Deploy Revisions",
-                Items =
+                Rows =
                 [
-                    new DetailsTableItem(
-                        string.Empty,
-                        isExpandable: false,
-                        ["Name", "Namespace", "Pods", "Age"],
-                        revisionRows
-                    ),
+                    new FullWidthRow
+                    {
+                        Content = new TableContent
+                        {
+                            IsExpandable = false,
+                            Columns = ["Name", "Namespace", "Pods", "Age"],
+                            Rows = revisionRows,
+                        },
+                    },
                 ],
             }
         );
@@ -77,14 +80,17 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             new DetailsSection
             {
                 Header = "Pods",
-                Items =
+                Rows =
                 [
-                    new DetailsTableItem(
-                        string.Empty,
-                        isExpandable: false,
-                        ["Name", "Node", "Namespace", "Ready", "CPU", "Memory", "Status"],
-                        podRows
-                    ),
+                    new FullWidthRow
+                    {
+                        Content = new TableContent
+                        {
+                            IsExpandable = false,
+                            Columns = ["Name", "Node", "Namespace", "Ready", "CPU", "Memory", "Status"],
+                            Rows = podRows,
+                        },
+                    },
                 ],
             }
         );
@@ -94,124 +100,116 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
         return sections;
     }
 
-    private IEnumerable<IDetailsItem> GetDeploymentItems()
+    private IEnumerable<IDetailsRow> GetDeploymentRows()
     {
-        yield return new DetailsTextItem
-        {
-            Title = "Created",
-            Value = Deployment.CreationTimestamp().ToString(),
-        };
+        yield return new HeaderedRow { Header = "Created", Content = new TextContent { Value = Deployment.CreationTimestamp().ToString() } };
+        yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = Deployment.Name() } };
+        yield return new HeaderedRow { Header = "Namespace", Content = new LinkContent { ResourceName = Resource.Namespace(), ResourceType = ResourceType.Namespace } };
 
-        yield return new DetailsTextItem { Title = "Name", Value = Deployment.Name() };
-
-        yield return new DetailsLinkItem
+        yield return new HeaderedRow
         {
-            Title = "Namespace",
-            ResourceName = Resource.Namespace(),
-            ResourceType = ResourceType.Namespace,
-        };
-
-        yield return new DetailsCollectionItem
-        {
-            Title = "Labels",
-            Items =
-            [
-                .. Deployment.Metadata.Labels?.Select(l => new DetailsCollectionItemElement
-                {
-                    Value = $"{l.Key}={l.Value}",
-                }) ?? [],
-            ],
+            Header = "Labels",
+            Content = new CollectionContent
+            {
+                Items = [.. Deployment.Metadata.Labels?.Select(l => new TextCollectionElement { Value = $"{l.Key}={l.Value}" }) ?? []],
+            },
         };
 
         if (Deployment.Metadata.Annotations?.Count > 0)
         {
-            yield return new DetailsCollectionItem
+            yield return new HeaderedRow
             {
-                Title = "Annotations",
-                Items =
-                [
-                    .. Deployment.Metadata.Annotations?.Select(l => new DetailsCollectionItemElement
-                    {
-                        Value = $"{l.Key}={l.Value}",
-                    }) ?? [],
-                ],
+                Header = "Annotations",
+                Content = new CollectionContent
+                {
+                    Items = [.. Deployment.Metadata.Annotations?.Select(l => new TextCollectionElement { Value = $"{l.Key}={l.Value}" }) ?? []],
+                },
             };
         }
 
-        yield return new DetailsTextItem
+        yield return new HeaderedRow
         {
-            Title = "Replicas",
-            Value =
-                $"{Deployment.Status?.ReadyReplicas ?? 0} ready / {Deployment.Spec?.Replicas ?? 0} desired",
+            Header = "Replicas",
+            Content = new TextContent
+            {
+                Value = $"{Deployment.Status?.ReadyReplicas ?? 0} ready / {Deployment.Spec?.Replicas ?? 0} desired",
+            },
         };
 
-        yield return new DetailsCollectionItem
+        yield return new HeaderedRow
         {
-            Title = "Selector",
-            Items =
-            [
-                .. Deployment.Spec?.Selector?.MatchLabels?.Select(
-                    s => new DetailsCollectionItemElement { Value = $"{s.Key}={s.Value}" }
-                ) ?? [],
-            ],
+            Header = "Selector",
+            Content = new CollectionContent
+            {
+                Items = [.. Deployment.Spec?.Selector?.MatchLabels?.Select(s => new TextCollectionElement { Value = $"{s.Key}={s.Value}" }) ?? []],
+            },
         };
 
-        yield return new DetailsCollectionItem
+        yield return new HeaderedRow
         {
-            Title = "Node Selector",
-            Items =
-            [
-                .. Deployment.Spec?.Template?.Spec?.NodeSelector?.Select(
-                    n => new DetailsCollectionItemElement { Value = $"{n.Key}: {n.Value}" }
-                ) ?? [],
-            ],
+            Header = "Node Selector",
+            Content = new CollectionContent
+            {
+                Items = [.. Deployment.Spec?.Template?.Spec?.NodeSelector?.Select(n => new TextCollectionElement { Value = $"{n.Key}: {n.Value}" }) ?? []],
+            },
         };
 
-        yield return new DetailsTextItem
+        yield return new HeaderedRow
         {
-            Title = "Strategy Type",
-            Value = Deployment.Spec?.Strategy?.Type ?? string.Empty,
+            Header = "Strategy Type",
+            Content = new TextContent { Value = Deployment.Spec?.Strategy?.Type ?? string.Empty },
         };
 
-        yield return new DetailsConditionsItem
+        yield return new HeaderedRow
         {
-            Title = "Conditions",
-            Items =
-            [
-                .. Deployment.Status?.Conditions?.Select(c => new DetailsConditionsElement
-                {
-                    Type = c.Type,
-                    Status = c.Status,
-                    Message = c.Message,
-                    Reason = c.Reason,
-                    LastTransitionTime = c.LastTransitionTime,
-                }) ?? [],
-            ],
+            Header = "Conditions",
+            Content = new CollectionContent
+            {
+                Items =
+                [
+                    .. Deployment.Status?.Conditions?.Select(c => new ConditionCollectionElement
+                    {
+                        Type = c.Type,
+                        Status = c.Status,
+                        Message = c.Message,
+                        Reason = c.Reason,
+                        LastTransitionTime = c.LastTransitionTime,
+                    }) ?? [],
+                ],
+            },
         };
 
-        yield return new DetailsTableItem(
-            "Tolerations",
-            isExpandable: true,
-            ["Key", "Operator", "Value", "Effect", "Seconds"],
-            Deployment.Spec?.Template?.Spec?.Tolerations?.Select(t =>
-                new[]
-                {
-                    t.Key,
-                    t.OperatorProperty,
-                    t.Value,
-                    t.Effect,
-                    t.TolerationSeconds?.ToString() ?? string.Empty,
-                }
-            )
-                ?? []
-        );
+        yield return new HeaderedRow
+        {
+            Header = "Tolerations",
+            Content = new TableContent
+            {
+                IsExpandable = true,
+                Columns = ["Key", "Operator", "Value", "Effect", "Seconds"],
+                Rows = Deployment.Spec?.Template?.Spec?.Tolerations?.Select(t =>
+                    new[]
+                    {
+                        t.Key,
+                        t.OperatorProperty,
+                        t.Value,
+                        t.Effect,
+                        t.TolerationSeconds?.ToString() ?? string.Empty,
+                    }
+                )
+                    ?? [],
+            },
+        };
 
         var affinityYaml =
             Deployment.Spec?.Template?.Spec?.Affinity != null
                 ? KubernetesYaml.Serialize(Deployment.Spec.Template.Spec.Affinity)
                 : string.Empty;
 
-        yield return new DetailsEditorItem("Affinities", affinityYaml) { ShowTitleInColumn = true };
+        yield return new HeaderedRow
+        {
+            Header = "Affinities",
+            Content = new EditorContent { Value = affinityYaml },
+        };
     }
 
     private async Task<IEnumerable<IEnumerable<string>>> GetReplicaSetRowsAsync()

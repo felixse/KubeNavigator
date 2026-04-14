@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 
 namespace KubeNavigator.ViewModels.Details;
@@ -10,5 +9,5 @@ public class DetailsSection : IDetailsSection
 
     public IRelayCommand? SaveCommand { get; set; }
 
-    public required List<IDetailsItem> Items { get; set; }
+    public required List<IDetailsRow> Rows { get; set; }
 }

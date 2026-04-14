@@ -24,7 +24,7 @@ public partial class WindowViewModel : ObservableObject, IWindow
 {
     private readonly ILogger<WindowViewModel> _logger;
 
-    public IUserConfirmationService UserConfirmationService { get; }
+    public IContentDialogService ContentDialogService { get; }
 
     public IShelfHost ShelfHost => SelectedWorkspace;
 
@@ -44,11 +44,11 @@ public partial class WindowViewModel : ObservableObject, IWindow
 
     public int WorkspacesCount => Workspaces.Count;
 
-    public WindowViewModel(AppViewModel app, IUserConfirmationService userConfirmationService)
+    public WindowViewModel(AppViewModel app, IContentDialogService contentDialogService)
     {
         App = app;
         _logger = app.LoggingService.LoggerFactory.CreateLogger<WindowViewModel>();
-        UserConfirmationService = userConfirmationService;
+        ContentDialogService = contentDialogService;
 
         Notifications = [];
         Workspaces = [new WorkspaceViewModel(this)];

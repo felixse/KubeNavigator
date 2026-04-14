@@ -63,7 +63,7 @@ public partial class KubernetesContext
         _kubernetesService = new KubernetesService(name, logger, settingsService);
     }
 
-    public async Task ConnectAsync()
+    public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -77,7 +77,8 @@ public partial class KubernetesContext
             Status = new ClusterStatus { Status = ConnectionStatus.Connecting };
 
             await _kubernetesService.InitializeAsync();
-            var connected = await _kubernetesService.TestConnectionAsync();
+            cancellationToken.ThrowIfCancellationRequested();
+            var connected = await _kubernetesService.TestConnectionAsync(cancellationToken);
 
             if (connected)
             {
@@ -93,6 +94,11 @@ public partial class KubernetesContext
                     ErrorMessage = "Connection test failed",
                 };
             }
+        }
+        catch (OperationCanceledException)
+        {
+            Status = new ClusterStatus { Status = ConnectionStatus.Disconnected };
+            throw;
         }
         catch (Exception e)
         {

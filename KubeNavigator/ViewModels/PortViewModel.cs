@@ -105,7 +105,7 @@ public partial class PortViewModel : ObservableObject
                 ? new PortForwardOptions { Port = ForwardedPort.LocalPort }
                 : null;
         var options =
-            await Cluster.App.WindowManager.ActiveWindow.UserConfirmationService.GetPortForwardOptionsAsync(
+            await Cluster.App.WindowManager.ActiveWindow.ContentDialogService.GetPortForwardOptionsAsync(
                 Resource,
                 currentOptions
             );

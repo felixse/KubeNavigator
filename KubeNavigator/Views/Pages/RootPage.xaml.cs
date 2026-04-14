@@ -20,11 +20,11 @@ public sealed partial class RootPage : Page
         {
             ViewModel = windowViewModel;
             if (
-                ViewModel.UserConfirmationService
-                is ConfirmationDialogService confirmationDialogService
+                ViewModel.ContentDialogService
+                is ContentDialogService contentDialogService
             ) // todo: avoid this hack
             {
-                confirmationDialogService.Page = this;
+                contentDialogService.Page = this;
             }
         }
     }

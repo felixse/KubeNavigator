@@ -13,7 +13,6 @@ using KubeNavigator.Windows;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 
 namespace KubeNavigator;
 
@@ -72,7 +71,7 @@ public partial class App : Application, IWindowManager
         sw.Restart();
         var settings = new SettingsViewModel(_settingsService, this, _loggingService!);
         var app = new AppViewModel(
-            () => new ConfirmationDialogService(_themeManager),
+            () => new ContentDialogService(_themeManager),
             this,
             settings,
             dispatcherQueue,
@@ -115,23 +114,11 @@ public partial class App : Application, IWindowManager
             return;
         }
 
-        var dialog = new ContentDialog
-        {
-            Title = "CLI tools not found",
-            Content =
-                $"Could not find helm on this system. Some functionality may not work correctly.\n\nYou can configure a custom path in Settings.",
-            PrimaryButtonText = "Go to Settings",
-            CloseButtonText = "Close",
-            DefaultButton = ContentDialogButton.Primary,
-            XamlRoot = mainWindow.Content.XamlRoot,
-            RequestedTheme =
-                _themeManager!.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark
-                    ? ElementTheme.Dark
-                    : ElementTheme.Light,
-        };
+        var goToSettings = await viewModel.ContentDialogService.ShowToolsNotFoundDialogAsync(
+            "Could not find helm on this system. Some functionality may not work correctly.\n\nYou can configure a custom path in Settings."
+        );
 
-        var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary)
+        if (goToSettings)
         {
             viewModel.NavigateToSettings();
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KubeNavigator.ViewModels.Navigation;
@@ -22,11 +23,18 @@ public partial class ClusterListViewModel : ObservableObject, INavigationTarget
     {
         try
         {
-            await cluster.Context.ConnectAsync();
+            var connected = await Workspace.Window.ContentDialogService
+                .ShowConnectingDialogAsync(
+                    cluster.Name,
+                    ct => cluster.Context.ConnectAsync(ct)
+                );
 
-            await Workspace.SetContextAsync(cluster);
+            if (connected)
+            {
+                await Workspace.SetContextAsync(cluster);
+            }
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             Workspace.Window.ShowMessage(
                 "Error",
@@ -38,8 +46,16 @@ public partial class ClusterListViewModel : ObservableObject, INavigationTarget
 
     public async Task ConnectInNewTabAsync(ClusterViewModel cluster)
     {
-        await cluster.Context.ConnectAsync();
-        await Workspace.Window.OpenInNewWorkspaceAsync(null, cluster);
+        var connected = await Workspace.Window.ContentDialogService
+            .ShowConnectingDialogAsync(
+                cluster.Name,
+                ct => cluster.Context.ConnectAsync(ct)
+            );
+
+        if (connected)
+        {
+            await Workspace.Window.OpenInNewWorkspaceAsync(null, cluster);
+        }
     }
 
     public Task OnNavigatedTo()

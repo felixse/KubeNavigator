@@ -20,7 +20,7 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
 
     public DetailsViewModel Details { get; }
 
-    public IUserConfirmationService UserConfirmationService { get; }
+    public IContentDialogService ContentDialogService { get; }
 
     public IShelfHost ShelfHost => this;
 
@@ -38,11 +38,12 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
 
     public DetailWindowViewModel(
         IDetailsSource detailsSource,
-        IUserConfirmationService userConfirmationService
+        IContentDialogService contentDialogService
     )
     {
         App = detailsSource.Cluster.App;
         _logger = App.LoggingService.LoggerFactory.CreateLogger<DetailWindowViewModel>();
+        ContentDialogService = contentDialogService;
         Details = new DetailsViewModel(detailsSource, this);
 
         Details.PropertyChanged += (s, e) =>

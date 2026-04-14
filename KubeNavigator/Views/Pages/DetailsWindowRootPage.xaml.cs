@@ -21,11 +21,11 @@ public sealed partial class DetailsWindowRootPage : Page
         {
             ViewModel = viewModel;
             if (
-                ViewModel.UserConfirmationService
-                is ConfirmationDialogService confirmationDialogService
+                ViewModel.ContentDialogService
+                is ContentDialogService contentDialogService
             )
             {
-                confirmationDialogService.Page = this;
+                contentDialogService.Page = this;
             }
         }
     }

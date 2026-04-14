@@ -16,7 +16,7 @@ namespace KubeNavigator.ViewModels;
 
 public partial class AppViewModel : ObservableObject
 {
-    private readonly Func<IUserConfirmationService> _userConfirmationServiceFactory;
+    private readonly Func<IContentDialogService> _contentDialogServiceFactory;
     private readonly ISettingsService _settingsService;
 
     public ObservableCollection<DetailWindowViewModel> DetailWindowViewModels { get; } = [];
@@ -40,7 +40,7 @@ public partial class AppViewModel : ObservableObject
     public HelmService HelmService { get; }
 
     public AppViewModel(
-        Func<IUserConfirmationService> userConfirmationServiceFactory,
+        Func<IContentDialogService> contentDialogServiceFactory,
         IWindowManager windowManager,
         SettingsViewModel settings,
         DispatcherQueue dispatcherQueue,
@@ -49,7 +49,7 @@ public partial class AppViewModel : ObservableObject
         ISettingsService settingsService
     )
     {
-        _userConfirmationServiceFactory = userConfirmationServiceFactory;
+        _contentDialogServiceFactory = contentDialogServiceFactory;
         WindowManager = windowManager;
         Settings = settings;
         DispatcherQueue = dispatcherQueue;
@@ -74,7 +74,7 @@ public partial class AppViewModel : ObservableObject
             )),
         ];
 
-        MainWindow = new WindowViewModel(this, _userConfirmationServiceFactory());
+        MainWindow = new WindowViewModel(this, _contentDialogServiceFactory());
     }
 
     [RelayCommand]
@@ -82,7 +82,7 @@ public partial class AppViewModel : ObservableObject
     {
         var detailsWindow = new DetailWindowViewModel(
             detailsSource,
-            _userConfirmationServiceFactory()
+            _contentDialogServiceFactory()
         );
         DetailWindowViewModels.Add(detailsWindow);
     }

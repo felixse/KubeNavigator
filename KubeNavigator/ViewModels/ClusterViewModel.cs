@@ -238,7 +238,7 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
     )
     {
         var confirmed =
-            await App.WindowManager.ActiveWindow.UserConfirmationService.ConfirmResourceDeletionAsync(
+            await App.WindowManager.ActiveWindow.ContentDialogService.ConfirmResourceDeletionAsync(
                 resourceType,
                 resources.Select(r => r.Name),
                 Name

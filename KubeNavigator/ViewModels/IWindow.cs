@@ -7,7 +7,7 @@ namespace KubeNavigator.ViewModels;
 
 public interface IWindow
 {
-    IUserConfirmationService UserConfirmationService { get; }
+    IContentDialogService ContentDialogService { get; }
 
     IShelfHost ShelfHost { get; }
 

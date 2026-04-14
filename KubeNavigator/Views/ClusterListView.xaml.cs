@@ -13,7 +13,7 @@ public sealed partial class ClusterListView : UserControl
         InitializeComponent();
     }
 
-    private async void OnOpen(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private async void OnOpen(object sender, RoutedEventArgs e)
     {
         if (
             ViewModel is not null
@@ -25,7 +25,7 @@ public sealed partial class ClusterListView : UserControl
         }
     }
 
-    private async void OnOpenInNewTab(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private async void OnOpenInNewTab(object sender, RoutedEventArgs e)
     {
         if (
             ViewModel is not null

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.Models;
 
-public interface IUserConfirmationService
+public interface IContentDialogService
 {
     Task<bool> ConfirmResourceDeletionAsync(
         ResourceType resourceType,
@@ -16,4 +18,11 @@ public interface IUserConfirmationService
         KubernetesResourceViewModel resource,
         PortForwardOptions? options
     );
+
+    Task<bool> ShowConnectingDialogAsync(
+        string clusterName,
+        Func<CancellationToken, Task> connectAction
+    );
+
+    Task<bool> ShowToolsNotFoundDialogAsync(string message);
 }

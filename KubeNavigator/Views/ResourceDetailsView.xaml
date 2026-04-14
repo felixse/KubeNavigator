@@ -212,21 +212,22 @@
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBlock Style="{StaticResource DetailsRowHeaderStyle}" Text="{x:Bind Title}" />
-            <ItemsRepeater
+            <ItemsControl
               Grid.Column="1"
               MaxWidth="360"
               HorizontalAlignment="Left"
               ItemTemplate="{StaticResource DetailsCollectionItemElementTemplate}"
               ItemsSource="{x:Bind Items}"
             >
-              <ItemsRepeater.Layout>
-                <controls:WrapLayout
-                  HorizontalSpacing="4"
-                  Orientation="Horizontal"
-                  VerticalSpacing="4"
-                />
-              </ItemsRepeater.Layout>
-            </ItemsRepeater>
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <controls:WrapPanel
+                    HorizontalSpacing="4"
+                    VerticalSpacing="4"
+                  />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+            </ItemsControl>
           </Grid>
         </DataTemplate>
       </templateselectors:DetailsContentTemplateSelector.CollectionTemplate>
@@ -489,21 +490,22 @@
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBlock Style="{StaticResource DetailsRowHeaderStyle}" Text="{x:Bind Title}" />
-            <ItemsRepeater
+            <ItemsControl
               Grid.Column="1"
               MaxWidth="360"
               HorizontalAlignment="Left"
               ItemTemplate="{StaticResource DetailsConditionElementTemplate}"
               ItemsSource="{x:Bind Items}"
             >
-              <ItemsRepeater.Layout>
-                <controls:WrapLayout
-                  HorizontalSpacing="4"
-                  Orientation="Horizontal"
-                  VerticalSpacing="4"
-                />
-              </ItemsRepeater.Layout>
-            </ItemsRepeater>
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <controls:WrapPanel
+                    HorizontalSpacing="4"
+                    VerticalSpacing="4"
+                  />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+            </ItemsControl>
           </Grid>
         </DataTemplate>
       </templateselectors:DetailsContentTemplateSelector.ConditionsTemplate>
@@ -656,7 +658,7 @@
       </templateselectors:DetailsSectionTemplateSelector.GroupedSectionTemplate>
     </templateselectors:DetailsSectionTemplateSelector>
   </UserControl.Resources>
-  <ScrollViewer VerticalScrollBarVisibility="Auto">
+  <ScrollViewer x:Name="DetailScrollViewer" VerticalScrollBarVisibility="Auto">
     <ItemsControl
       Margin="8,8,16,8"
       ItemTemplateSelector="{StaticResource DetailsSectionTemplateSelector}"

@@ -26,13 +26,21 @@ public sealed partial class ResourceDetailsView : UserControl
         nameof(ViewModel),
         typeof(DetailsViewModel),
         typeof(ResourceDetailsView),
-        new PropertyMetadata(null)
+        new PropertyMetadata(null, OnViewModelChanged)
     );
 
     public DetailsViewModel? ViewModel
     {
         get { return (DetailsViewModel?)GetValue(ViewModelProperty); }
         set { SetValue(ViewModelProperty, value); }
+    }
+
+    private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is ResourceDetailsView view)
+        {
+            view.DetailScrollViewer.ChangeView(null, 0, null, disableAnimation: true);
+        }
     }
 
     public static MarkdownConfig GetMarkdownConfig()

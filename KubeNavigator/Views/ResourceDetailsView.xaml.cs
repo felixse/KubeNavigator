@@ -1,8 +1,10 @@
 using KubeNavigator.ViewModels;
 using KubeNavigator.ViewModels.Details;
 using KubeNavigator.Views.Controls;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using WinUIEditor;
 
 namespace KubeNavigator.Views;
@@ -33,6 +35,18 @@ public sealed partial class ResourceDetailsView : UserControl
     public ResourceDetailsView()
     {
         this.InitializeComponent();
+        this.PointerPressed += OnPointerPressed;
+    }
+
+    private async void OnPointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        var properties = e.GetCurrentPoint(this).Properties;
+
+        if (properties.IsXButton1Pressed && ViewModel?.CanGoBack == true)
+        {
+            e.Handled = true;
+            await ViewModel.GoBackAsync();
+        }
     }
 
     private async void HyperlinkButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

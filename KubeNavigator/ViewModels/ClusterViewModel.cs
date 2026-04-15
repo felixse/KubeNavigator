@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -45,6 +46,7 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         NamespaceFilters.Add(new AllNamespacesFilter());
 
         context.StatusChanged += Context_StatusChanged;
+        context.PodMetricsUpdated += OnPodMetricsUpdated;
     }
 
     private async void Context_StatusChanged(object? sender, ClusterStatus e)
@@ -360,6 +362,23 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 else
                 {
                     Log.UnhandledSecretEvent(_logger, Name, resourceEvent.ToString());
+                }
+            }
+        });
+    }
+
+    private void OnPodMetricsUpdated(object? sender, EventArgs e)
+    {
+        App.DispatcherQueue.TryEnqueue(() =>
+        {
+            if (_resources.TryGetValue(ResourceType.Pod, out var pods))
+            {
+                foreach (var pod in pods)
+                {
+                    if (pod is PodViewModel podVm)
+                    {
+                        podVm.RefreshMetrics();
+                    }
                 }
             }
         });

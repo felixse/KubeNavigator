@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using k8s.Models;
 using KubeNavigator.Models;
@@ -60,15 +61,32 @@ public partial class PodViewModel : KubernetesResourceViewModel
         );
     }
 
+    [ObservableProperty]
+    public partial string CpuUsage { get; private set; }
+
+    [ObservableProperty]
+    public partial string MemoryUsage { get; private set; }
+
     public V1Pod Pod => (V1Pod)Resource;
 
     public static readonly ImmutableArray<ResourceColumn> PodColumns =
     [
         new("Name", vm => vm.Name, PropertyName: nameof(Name)),
         new("Namespace", vm => vm.Namespace, PropertyName: nameof(Namespace)),
-        new("Containers", vm => ((PodViewModel)vm).ContainerStatuses, ResourceColumnType.ContainerStatuses, nameof(ContainerStatuses)),
+        new(
+            "Containers",
+            vm => ((PodViewModel)vm).ContainerStatuses,
+            ResourceColumnType.ContainerStatuses,
+            nameof(ContainerStatuses)
+        ),
+        new("CPU", vm => ((PodViewModel)vm).CpuUsage, PropertyName: nameof(CpuUsage)),
+        new("Memory", vm => ((PodViewModel)vm).MemoryUsage, PropertyName: nameof(MemoryUsage)),
         new("Restarts", vm => ((PodViewModel)vm).Restarts, PropertyName: nameof(Restarts)),
-        new("Controlled By", vm => ((PodViewModel)vm).ControlledBy, PropertyName: nameof(ControlledBy)),
+        new(
+            "Controlled By",
+            vm => ((PodViewModel)vm).ControlledBy,
+            PropertyName: nameof(ControlledBy)
+        ),
         new("Node", vm => ((PodViewModel)vm).Node, PropertyName: nameof(Node)),
         new("QoS", vm => ((PodViewModel)vm).QoS, PropertyName: nameof(QoS)),
         new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
@@ -91,6 +109,13 @@ public partial class PodViewModel : KubernetesResourceViewModel
 
     public string ControlledBy =>
         Pod.Metadata.OwnerReferences?.FirstOrDefault()?.Name ?? string.Empty;
+
+    public void RefreshMetrics()
+    {
+        var metrics = Cluster.Context.GetPodMetrics(Pod.Namespace(), Pod.Name());
+        CpuUsage = metrics?.Cpu ?? string.Empty;
+        MemoryUsage = metrics?.Memory ?? string.Empty;
+    }
 
     public override async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
@@ -132,10 +157,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
         yield return new HeaderedRow
         {
             Header = "Created",
-            Content = new TextContent
-            {
-                Value = Pod.CreationTimestamp().ToString(),
-            },
+            Content = new TextContent { Value = Pod.CreationTimestamp().ToString() },
         };
 
         yield return new HeaderedRow
@@ -333,16 +355,18 @@ public partial class PodViewModel : KubernetesResourceViewModel
             {
                 IsExpandable = true,
                 Columns = ["Key", "Operator", "Value", "Effect", "Seconds"],
-                Rows = Pod.Spec.Tolerations?.Select(t =>
-                    (IEnumerable<ITableCellContent>)new TextContent[]
-                    {
-                        t.Key,
-                        t.OperatorProperty,
-                        t.Value,
-                        t.Effect,
-                        t.TolerationSeconds?.ToString() ?? string.Empty,
-                    }
-                )
+                Rows =
+                    Pod.Spec.Tolerations?.Select(t =>
+                        (IEnumerable<ITableCellContent>)
+                            new TextContent[]
+                            {
+                                t.Key,
+                                t.OperatorProperty,
+                                t.Value,
+                                t.Effect,
+                                t.TolerationSeconds?.ToString() ?? string.Empty,
+                            }
+                    )
                     ?? [],
             },
         };
@@ -401,10 +425,11 @@ public partial class PodViewModel : KubernetesResourceViewModel
                         .Status.ContainerStatuses.First(s => s.Name == container.Name)
                         .LastState switch
                     {
-                        V1ContainerState { Terminated: V1ContainerStateTerminated } => $"terminated\r\n"
-                            + $"Reason: {status.LastState.Terminated.Reason}\r\n"
-                            + $"Started at: {status.LastState.Terminated.StartedAt}\r\n"
-                            + $"Finished at: {status.LastState.Terminated.FinishedAt}",
+                        V1ContainerState { Terminated: V1ContainerStateTerminated } =>
+                            $"terminated\r\n"
+                                + $"Reason: {status.LastState.Terminated.Reason}\r\n"
+                                + $"Started at: {status.LastState.Terminated.StartedAt}\r\n"
+                                + $"Finished at: {status.LastState.Terminated.FinishedAt}",
                         _ => "Unknown",
                     },
                 },
@@ -661,10 +686,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
             yield return new HeaderedRow
             {
                 Header = "Command",
-                Content = new TextContent
-                {
-                    Value = string.Join(" ", container.Command),
-                },
+                Content = new TextContent { Value = string.Join(" ", container.Command) },
             };
         }
 
@@ -673,10 +695,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
             yield return new HeaderedRow
             {
                 Header = "Args",
-                Content = new TextContent
-                {
-                    Value = string.Join(" ", container.Args),
-                },
+                Content = new TextContent { Value = string.Join(" ", container.Args) },
             };
         }
 
@@ -703,61 +722,231 @@ public partial class PodViewModel : KubernetesResourceViewModel
     {
         if (volume.AwsElasticBlockStore != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "AWS Elastic Block Store" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.AwsElasticBlockStore.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.AwsElasticBlockStore.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Partition", Content = new TextContent { Value = volume.AwsElasticBlockStore.Partition.ToString() } };
-            yield return new HeaderedRow { Header = "Volume ID", Content = new TextContent { Value = volume.AwsElasticBlockStore.VolumeID } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "AWS Elastic Block Store" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.AwsElasticBlockStore.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent
+                {
+                    Value = volume.AwsElasticBlockStore.ReadOnlyProperty.ToString(),
+                },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Partition",
+                Content = new TextContent
+                {
+                    Value = volume.AwsElasticBlockStore.Partition.ToString(),
+                },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Volume ID",
+                Content = new TextContent { Value = volume.AwsElasticBlockStore.VolumeID },
+            };
         }
         else if (volume.AzureDisk != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Azure Disk" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.AzureDisk.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.AzureDisk.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Kind", Content = new TextContent { Value = volume.AzureDisk.Kind } };
-            yield return new HeaderedRow { Header = "Disk Name", Content = new TextContent { Value = volume.AzureDisk.DiskName } };
-            yield return new HeaderedRow { Header = "Disk URI", Content = new TextContent { Value = volume.AzureDisk.DiskURI } };
-            yield return new HeaderedRow { Header = "Caching Mode", Content = new TextContent { Value = volume.AzureDisk.CachingMode } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Azure Disk" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.AzureDisk.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.AzureDisk.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Kind",
+                Content = new TextContent { Value = volume.AzureDisk.Kind },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Disk Name",
+                Content = new TextContent { Value = volume.AzureDisk.DiskName },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Disk URI",
+                Content = new TextContent { Value = volume.AzureDisk.DiskURI },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Caching Mode",
+                Content = new TextContent { Value = volume.AzureDisk.CachingMode },
+            };
         }
         else if (volume.AzureFile != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Azure File" } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.AzureFile.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Share Name", Content = new TextContent { Value = volume.AzureFile.ShareName } };
-            yield return new HeaderedRow { Header = "Secret Name", Content = new TextContent { Value = volume.AzureFile.SecretName } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Azure File" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.AzureFile.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Share Name",
+                Content = new TextContent { Value = volume.AzureFile.ShareName },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Secret Name",
+                Content = new TextContent { Value = volume.AzureFile.SecretName },
+            };
         }
         else if (volume.Cephfs != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "CephFS" } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Cephfs.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Monitors", Content = new TextContent { Value = string.Join(", ", volume.Cephfs.Monitors) } };
-            yield return new HeaderedRow { Header = "Path", Content = new TextContent { Value = volume.Cephfs.Path } };
-            yield return new HeaderedRow { Header = "User", Content = new TextContent { Value = volume.Cephfs.User } };
-            yield return new HeaderedRow { Header = "Secret File", Content = new TextContent { Value = volume.Cephfs.SecretFile } };
-            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Cephfs.SecretRef?.Name } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "CephFS" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.Cephfs.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Monitors",
+                Content = new TextContent { Value = string.Join(", ", volume.Cephfs.Monitors) },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Path",
+                Content = new TextContent { Value = volume.Cephfs.Path },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "User",
+                Content = new TextContent { Value = volume.Cephfs.User },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Secret File",
+                Content = new TextContent { Value = volume.Cephfs.SecretFile },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Secret Ref",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.Secret,
+                    ResourceName = volume.Cephfs.SecretRef?.Name,
+                },
+            };
         }
         else if (volume.Cinder != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Cinder" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.Cinder.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Cinder.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Volume ID", Content = new TextContent { Value = volume.Cinder.VolumeID } };
-            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Cinder.SecretRef?.Name } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Cinder" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.Cinder.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.Cinder.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Volume ID",
+                Content = new TextContent { Value = volume.Cinder.VolumeID },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Secret Ref",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.Secret,
+                    ResourceName = volume.Cinder.SecretRef?.Name,
+                },
+            };
         }
         else if (volume.ConfigMap != null) // todo items
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Config Map" } };
-            yield return new HeaderedRow { Header = "Name", Content = new LinkContent { ResourceType = ResourceType.ConfigMap, ResourceName = volume.ConfigMap.Name } };
-            yield return new HeaderedRow { Header = "Default Mode", Content = new TextContent { Value = volume.ConfigMap.DefaultMode?.ToString() } };
-            yield return new HeaderedRow { Header = "Optional", Content = new TextContent { Value = volume.ConfigMap.Optional?.ToString() } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Config Map" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Name",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.ConfigMap,
+                    ResourceName = volume.ConfigMap.Name,
+                },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Default Mode",
+                Content = new TextContent { Value = volume.ConfigMap.DefaultMode?.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Optional",
+                Content = new TextContent { Value = volume.ConfigMap.Optional?.ToString() },
+            };
         }
         else if (volume.Csi != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "CSI" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.Csi.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Csi.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Driver", Content = new TextContent { Value = volume.Csi.Driver } };
-            yield return new HeaderedRow { Header = "Node Publish Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Csi.NodePublishSecretRef?.Name } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "CSI" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.Csi.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.Csi.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Driver",
+                Content = new TextContent { Value = volume.Csi.Driver },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Node Publish Secret Ref",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.Secret,
+                    ResourceName = volume.Csi.NodePublishSecretRef?.Name,
+                },
+            };
             yield return new HeaderedRow
             {
                 Header = "Volume Attributes",
@@ -777,7 +966,11 @@ public partial class PodViewModel : KubernetesResourceViewModel
         }
         else if (volume.DownwardAPI != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Downward API" } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Downward API" },
+            };
             yield return new HeaderedRow
             {
                 Header = "Default Mode",
@@ -802,53 +995,115 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 {
                     Items =
                     [
-                        .. volume
-                            .DownwardAPI.Items?.Select(i => new TextCollectionElement
-                            {
-                                Value = i.Path,
-                                SecondaryValue =
-                                    i.FieldRef != null ? $"FieldRef: {i.FieldRef.FieldPath}"
-                                    : i.ResourceFieldRef != null
-                                        ? $"ResourceFieldRef: {i.ResourceFieldRef.Resource}"
-                                    : string.Empty,
-                            })
-                            ?? [],
+                        .. volume.DownwardAPI.Items?.Select(i => new TextCollectionElement
+                        {
+                            Value = i.Path,
+                            SecondaryValue =
+                                i.FieldRef != null ? $"FieldRef: {i.FieldRef.FieldPath}"
+                                : i.ResourceFieldRef != null
+                                    ? $"ResourceFieldRef: {i.ResourceFieldRef.Resource}"
+                                : string.Empty,
+                        }) ?? [],
                     ],
                 },
             };
         }
         else if (volume.EmptyDir != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Empty Dir" } };
-            yield return new HeaderedRow { Header = "Medium", Content = new TextContent { Value = volume.EmptyDir.Medium } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Empty Dir" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Medium",
+                Content = new TextContent { Value = volume.EmptyDir.Medium },
+            };
             if (volume.EmptyDir.SizeLimit != null)
             {
-                yield return new HeaderedRow { Header = "Size Limit", Content = new TextContent { Value = volume.EmptyDir.SizeLimit.ToString() } };
+                yield return new HeaderedRow
+                {
+                    Header = "Size Limit",
+                    Content = new TextContent { Value = volume.EmptyDir.SizeLimit.ToString() },
+                };
             }
         }
         else if (volume.Ephemeral != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Ephemeral" } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Ephemeral" },
+            };
             if (volume.Ephemeral.VolumeClaimTemplate != null)
             {
-                yield return new HeaderedRow { Header = "Volume Claim Template", Content = new LinkContent { ResourceType = ResourceType.PersistentVolumeClaim, ResourceName = volume.Ephemeral.VolumeClaimTemplate.Metadata?.Name } };
+                yield return new HeaderedRow
+                {
+                    Header = "Volume Claim Template",
+                    Content = new LinkContent
+                    {
+                        ResourceType = ResourceType.PersistentVolumeClaim,
+                        ResourceName = volume.Ephemeral.VolumeClaimTemplate.Metadata?.Name,
+                    },
+                };
             }
         }
         else if (volume.Fc != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Fibre Channel" } };
-            yield return new HeaderedRow { Header = "FSType", Content = new TextContent { Value = volume.Fc.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Fc.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Target WWNs", Content = new TextContent { Value = string.Join(", ", volume.Fc.TargetWWNs) } };
-            yield return new HeaderedRow { Header = "Lun", Content = new TextContent { Value = volume.Fc.Lun.ToString() } };
-            yield return new HeaderedRow { Header = "Wwids", Content = new TextContent { Value = string.Join(", ", volume.Fc.Wwids) } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Fibre Channel" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FSType",
+                Content = new TextContent { Value = volume.Fc.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.Fc.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Target WWNs",
+                Content = new TextContent { Value = string.Join(", ", volume.Fc.TargetWWNs) },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Lun",
+                Content = new TextContent { Value = volume.Fc.Lun.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Wwids",
+                Content = new TextContent { Value = string.Join(", ", volume.Fc.Wwids) },
+            };
         }
         else if (volume.FlexVolume != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Flex Volume" } };
-            yield return new HeaderedRow { Header = "Driver", Content = new TextContent { Value = volume.FlexVolume.Driver } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.FlexVolume.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.FlexVolume.ReadOnlyProperty.ToString() } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Flex Volume" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Driver",
+                Content = new TextContent { Value = volume.FlexVolume.Driver },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.FlexVolume.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.FlexVolume.ReadOnlyProperty.ToString() },
+            };
             yield return new HeaderedRow
             {
                 Header = "Options",
@@ -865,90 +1120,303 @@ public partial class PodViewModel : KubernetesResourceViewModel
                         ?? [],
                 },
             };
-            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.FlexVolume.SecretRef?.Name } };
+            yield return new HeaderedRow
+            {
+                Header = "Secret Ref",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.Secret,
+                    ResourceName = volume.FlexVolume.SecretRef?.Name,
+                },
+            };
         }
         else if (volume.Flocker != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Flocker" } };
-            yield return new HeaderedRow { Header = "Dataset Name", Content = new TextContent { Value = volume.Flocker.DatasetName } };
-            yield return new HeaderedRow { Header = "Dataset UUID", Content = new TextContent { Value = volume.Flocker.DatasetUUID } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Flocker" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Dataset Name",
+                Content = new TextContent { Value = volume.Flocker.DatasetName },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Dataset UUID",
+                Content = new TextContent { Value = volume.Flocker.DatasetUUID },
+            };
         }
         else if (volume.GcePersistentDisk != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "GCE Persistent Disk" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.GcePersistentDisk.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.GcePersistentDisk.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Partition", Content = new TextContent { Value = volume.GcePersistentDisk.Partition.ToString() } };
-            yield return new HeaderedRow { Header = "PD Name", Content = new TextContent { Value = volume.GcePersistentDisk.PdName } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "GCE Persistent Disk" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.GcePersistentDisk.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent
+                {
+                    Value = volume.GcePersistentDisk.ReadOnlyProperty.ToString(),
+                },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Partition",
+                Content = new TextContent { Value = volume.GcePersistentDisk.Partition.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "PD Name",
+                Content = new TextContent { Value = volume.GcePersistentDisk.PdName },
+            };
         }
         else if (volume.GitRepo != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Git Repo" } };
-            yield return new HeaderedRow { Header = "Repository", Content = new TextContent { Value = volume.GitRepo.Repository } };
-            yield return new HeaderedRow { Header = "Revision", Content = new TextContent { Value = volume.GitRepo.Revision } };
-            yield return new HeaderedRow { Header = "Directory", Content = new TextContent { Value = volume.GitRepo.Directory } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Git Repo" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Repository",
+                Content = new TextContent { Value = volume.GitRepo.Repository },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Revision",
+                Content = new TextContent { Value = volume.GitRepo.Revision },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Directory",
+                Content = new TextContent { Value = volume.GitRepo.Directory },
+            };
         }
         else if (volume.Glusterfs != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "GlusterFS" } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Glusterfs.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Endpoints", Content = new TextContent { Value = volume.Glusterfs.Endpoints } };
-            yield return new HeaderedRow { Header = "Path", Content = new TextContent { Value = volume.Glusterfs.Path } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "GlusterFS" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.Glusterfs.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Endpoints",
+                Content = new TextContent { Value = volume.Glusterfs.Endpoints },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Path",
+                Content = new TextContent { Value = volume.Glusterfs.Path },
+            };
         }
         else if (volume.HostPath != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Host Path" } };
-            yield return new HeaderedRow { Header = "Path", Content = new TextContent { Value = volume.HostPath.Path } };
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = volume.HostPath.Type } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Host Path" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Path",
+                Content = new TextContent { Value = volume.HostPath.Path },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = volume.HostPath.Type },
+            };
         }
         else if (volume.Image != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Image" } };
-            yield return new HeaderedRow { Header = "Reference", Content = new TextContent { Value = volume.Image.Reference } };
-            yield return new HeaderedRow { Header = "Pull Policy", Content = new TextContent { Value = volume.Image.PullPolicy } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Image" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Reference",
+                Content = new TextContent { Value = volume.Image.Reference },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Pull Policy",
+                Content = new TextContent { Value = volume.Image.PullPolicy },
+            };
         }
         else if (volume.Iscsi != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "iSCSI" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.Iscsi.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Iscsi.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Target Portal", Content = new TextContent { Value = volume.Iscsi.TargetPortal } };
-            yield return new HeaderedRow { Header = "IQN", Content = new TextContent { Value = volume.Iscsi.Iqn } };
-            yield return new HeaderedRow { Header = "Lun", Content = new TextContent { Value = volume.Iscsi.Lun.ToString() } };
-            yield return new HeaderedRow { Header = "ISCSI Interface", Content = new TextContent { Value = volume.Iscsi.IscsiInterface } };
-            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Iscsi.SecretRef?.Name } };
-            yield return new HeaderedRow { Header = "Portals", Content = new TextContent { Value = string.Join(", ", volume.Iscsi.Portals) } };
-            yield return new HeaderedRow { Header = "Initiator Name", Content = new TextContent { Value = volume.Iscsi.InitiatorName } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "iSCSI" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.Iscsi.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.Iscsi.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Target Portal",
+                Content = new TextContent { Value = volume.Iscsi.TargetPortal },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "IQN",
+                Content = new TextContent { Value = volume.Iscsi.Iqn },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Lun",
+                Content = new TextContent { Value = volume.Iscsi.Lun.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "ISCSI Interface",
+                Content = new TextContent { Value = volume.Iscsi.IscsiInterface },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Secret Ref",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.Secret,
+                    ResourceName = volume.Iscsi.SecretRef?.Name,
+                },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Portals",
+                Content = new TextContent { Value = string.Join(", ", volume.Iscsi.Portals) },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Initiator Name",
+                Content = new TextContent { Value = volume.Iscsi.InitiatorName },
+            };
         }
         else if (volume.Nfs != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "NFS" } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Nfs.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Server", Content = new TextContent { Value = volume.Nfs.Server } };
-            yield return new HeaderedRow { Header = "Path", Content = new TextContent { Value = volume.Nfs.Path } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "NFS" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.Nfs.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Server",
+                Content = new TextContent { Value = volume.Nfs.Server },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Path",
+                Content = new TextContent { Value = volume.Nfs.Path },
+            };
         }
         else if (volume.PersistentVolumeClaim != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Persistent Volume Claim" } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.PersistentVolumeClaim.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Claim Name", Content = new LinkContent { ResourceType = ResourceType.PersistentVolumeClaim, ResourceName = volume.PersistentVolumeClaim.ClaimName } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Persistent Volume Claim" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent
+                {
+                    Value = volume.PersistentVolumeClaim.ReadOnlyProperty.ToString(),
+                },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Claim Name",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.PersistentVolumeClaim,
+                    ResourceName = volume.PersistentVolumeClaim.ClaimName,
+                },
+            };
         }
         else if (volume.PhotonPersistentDisk != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Photon Persistent Disk" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.PhotonPersistentDisk.FsType } };
-            yield return new HeaderedRow { Header = "PD ID", Content = new TextContent { Value = volume.PhotonPersistentDisk.PdID } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Photon Persistent Disk" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.PhotonPersistentDisk.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "PD ID",
+                Content = new TextContent { Value = volume.PhotonPersistentDisk.PdID },
+            };
         }
         else if (volume.PortworxVolume != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Portworx Volume" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.PortworxVolume.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.PortworxVolume.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Volume ID", Content = new TextContent { Value = volume.PortworxVolume.VolumeID } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Portworx Volume" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.PortworxVolume.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent
+                {
+                    Value = volume.PortworxVolume.ReadOnlyProperty.ToString(),
+                },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Volume ID",
+                Content = new TextContent { Value = volume.PortworxVolume.VolumeID },
+            };
         }
         else if (volume.Projected != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Projected" } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Projected" },
+            };
             yield return new HeaderedRow
             {
                 Header = "Sources", // todo support a link collection
@@ -956,79 +1424,261 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 {
                     Items =
                     [
-                        .. volume
-                            .Projected.Sources?.Select(s => new TextCollectionElement
-                            {
-                                Value =
-                                    s.ConfigMap != null ? $"ConfigMap: {s.ConfigMap.Name}"
-                                    : s.Secret != null ? $"Secret: {s.Secret.Name}"
-                                    : s.ServiceAccountToken != null ? "ServiceAccountToken"
-                                    : "Unknown Source",
-                            })
-                            ?? [],
+                        .. volume.Projected.Sources?.Select(s => new TextCollectionElement
+                        {
+                            Value =
+                                s.ConfigMap != null ? $"ConfigMap: {s.ConfigMap.Name}"
+                                : s.Secret != null ? $"Secret: {s.Secret.Name}"
+                                : s.ServiceAccountToken != null ? "ServiceAccountToken"
+                                : "Unknown Source",
+                        }) ?? [],
                     ],
                 },
             };
         }
         else if (volume.Quobyte != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Quobyte" } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Quobyte.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Registry", Content = new TextContent { Value = volume.Quobyte.Registry } };
-            yield return new HeaderedRow { Header = "Volume", Content = new TextContent { Value = volume.Quobyte.Volume } };
-            yield return new HeaderedRow { Header = "User", Content = new TextContent { Value = volume.Quobyte.User } };
-            yield return new HeaderedRow { Header = "Group", Content = new TextContent { Value = volume.Quobyte.Group } };
-            yield return new HeaderedRow { Header = "Tenant", Content = new TextContent { Value = volume.Quobyte.Tenant } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Quobyte" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.Quobyte.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Registry",
+                Content = new TextContent { Value = volume.Quobyte.Registry },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Volume",
+                Content = new TextContent { Value = volume.Quobyte.Volume },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "User",
+                Content = new TextContent { Value = volume.Quobyte.User },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Group",
+                Content = new TextContent { Value = volume.Quobyte.Group },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Tenant",
+                Content = new TextContent { Value = volume.Quobyte.Tenant },
+            };
         }
         else if (volume.Rbd != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "RBD (RADOS Block Device)" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.Rbd.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Rbd.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Pool", Content = new TextContent { Value = volume.Rbd.Pool } };
-            yield return new HeaderedRow { Header = "Image", Content = new TextContent { Value = volume.Rbd.Image } };
-            yield return new HeaderedRow { Header = "User", Content = new TextContent { Value = volume.Rbd.User } };
-            yield return new HeaderedRow { Header = "Keyring", Content = new TextContent { Value = volume.Rbd.Keyring } };
-            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Rbd.SecretRef?.Name } };
-            yield return new HeaderedRow { Header = "Ceph Monitors", Content = new TextContent { Value = string.Join(", ", volume.Rbd.Monitors) } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "RBD (RADOS Block Device)" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.Rbd.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.Rbd.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Pool",
+                Content = new TextContent { Value = volume.Rbd.Pool },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Image",
+                Content = new TextContent { Value = volume.Rbd.Image },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "User",
+                Content = new TextContent { Value = volume.Rbd.User },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Keyring",
+                Content = new TextContent { Value = volume.Rbd.Keyring },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Secret Ref",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.Secret,
+                    ResourceName = volume.Rbd.SecretRef?.Name,
+                },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Ceph Monitors",
+                Content = new TextContent { Value = string.Join(", ", volume.Rbd.Monitors) },
+            };
         }
         else if (volume.ScaleIO != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "ScaleIO" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.ScaleIO.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.ScaleIO.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Gateway", Content = new TextContent { Value = volume.ScaleIO.Gateway } };
-            yield return new HeaderedRow { Header = "System", Content = new TextContent { Value = volume.ScaleIO.System } };
-            yield return new HeaderedRow { Header = "Volume Name", Content = new TextContent { Value = volume.ScaleIO.VolumeName } };
-            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.ScaleIO.SecretRef?.Name } };
-            yield return new HeaderedRow { Header = "SSLEnabled", Content = new TextContent { Value = volume.ScaleIO.SslEnabled.ToString() } };
-            yield return new HeaderedRow { Header = "Protection Domain", Content = new TextContent { Value = volume.ScaleIO.ProtectionDomain } };
-            yield return new HeaderedRow { Header = "Storage Pool", Content = new TextContent { Value = volume.ScaleIO.StoragePool } };
-            yield return new HeaderedRow { Header = "Storage Mode", Content = new TextContent { Value = volume.ScaleIO.StorageMode } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "ScaleIO" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.ScaleIO.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.ScaleIO.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Gateway",
+                Content = new TextContent { Value = volume.ScaleIO.Gateway },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "System",
+                Content = new TextContent { Value = volume.ScaleIO.System },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Volume Name",
+                Content = new TextContent { Value = volume.ScaleIO.VolumeName },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Secret Ref",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.Secret,
+                    ResourceName = volume.ScaleIO.SecretRef?.Name,
+                },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "SSLEnabled",
+                Content = new TextContent { Value = volume.ScaleIO.SslEnabled.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Protection Domain",
+                Content = new TextContent { Value = volume.ScaleIO.ProtectionDomain },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Storage Pool",
+                Content = new TextContent { Value = volume.ScaleIO.StoragePool },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Storage Mode",
+                Content = new TextContent { Value = volume.ScaleIO.StorageMode },
+            };
         }
         else if (volume.Secret != null) // todo items
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "Secret" } };
-            yield return new HeaderedRow { Header = "Name", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Secret.SecretName } };
-            yield return new HeaderedRow { Header = "Default Mode", Content = new TextContent { Value = volume.Secret.DefaultMode?.ToString() } };
-            yield return new HeaderedRow { Header = "Optional", Content = new TextContent { Value = volume.Secret.Optional?.ToString() } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "Secret" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Name",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.Secret,
+                    ResourceName = volume.Secret.SecretName,
+                },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Default Mode",
+                Content = new TextContent { Value = volume.Secret.DefaultMode?.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Optional",
+                Content = new TextContent { Value = volume.Secret.Optional?.ToString() },
+            };
         }
         else if (volume.Storageos != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "StorageOS" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.Storageos.FsType } };
-            yield return new HeaderedRow { Header = "Read Only", Content = new TextContent { Value = volume.Storageos.ReadOnlyProperty.ToString() } };
-            yield return new HeaderedRow { Header = "Volume Name", Content = new TextContent { Value = volume.Storageos.VolumeName } };
-            yield return new HeaderedRow { Header = "Volume Namespace", Content = new TextContent { Value = volume.Storageos.VolumeNamespace } };
-            yield return new HeaderedRow { Header = "Secret Ref", Content = new LinkContent { ResourceType = ResourceType.Secret, ResourceName = volume.Storageos.SecretRef?.Name } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "StorageOS" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.Storageos.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Read Only",
+                Content = new TextContent { Value = volume.Storageos.ReadOnlyProperty.ToString() },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Volume Name",
+                Content = new TextContent { Value = volume.Storageos.VolumeName },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Volume Namespace",
+                Content = new TextContent { Value = volume.Storageos.VolumeNamespace },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Secret Ref",
+                Content = new LinkContent
+                {
+                    ResourceType = ResourceType.Secret,
+                    ResourceName = volume.Storageos.SecretRef?.Name,
+                },
+            };
         }
         else if (volume.VsphereVolume != null)
         {
-            yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = "vSphere Volume" } };
-            yield return new HeaderedRow { Header = "FS Type", Content = new TextContent { Value = volume.VsphereVolume.FsType } };
-            yield return new HeaderedRow { Header = "Volume Path", Content = new TextContent { Value = volume.VsphereVolume.VolumePath } };
-            yield return new HeaderedRow { Header = "Storage Policy Name", Content = new TextContent { Value = volume.VsphereVolume.StoragePolicyName } };
-            yield return new HeaderedRow { Header = "Storage Policy ID", Content = new TextContent { Value = volume.VsphereVolume.StoragePolicyID } };
+            yield return new HeaderedRow
+            {
+                Header = "Type",
+                Content = new TextContent { Value = "vSphere Volume" },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "FS Type",
+                Content = new TextContent { Value = volume.VsphereVolume.FsType },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Volume Path",
+                Content = new TextContent { Value = volume.VsphereVolume.VolumePath },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Storage Policy Name",
+                Content = new TextContent { Value = volume.VsphereVolume.StoragePolicyName },
+            };
+            yield return new HeaderedRow
+            {
+                Header = "Storage Policy ID",
+                Content = new TextContent { Value = volume.VsphereVolume.StoragePolicyID },
+            };
         }
         else
         {

@@ -40,7 +40,12 @@ public partial class KubernetesContext
     private readonly ILoggerFactory _loggerFactory;
     private readonly Dictionary<ResourceType, IKubernetesResourceRepository> _repositories = [];
 
+    private CancellationTokenSource? _metricsPollingCts;
+    private volatile IReadOnlyDictionary<string, (string Cpu, string Memory)> _podMetrics =
+        new Dictionary<string, (string Cpu, string Memory)>();
+
     public event EventHandler<ClusterStatus>? StatusChanged; // todo change to something that supports async handlers
+    public event EventHandler? PodMetricsUpdated;
 
     public string Name { get; }
 
@@ -84,6 +89,7 @@ public partial class KubernetesContext
             {
                 Log.Connected(_logger, Name);
                 Status = new ClusterStatus { Status = ConnectionStatus.Connected };
+                StartMetricsPolling();
             }
             else
             {
@@ -115,6 +121,7 @@ public partial class KubernetesContext
     public void Disconnect()
     {
         Log.Disconnecting(_logger, Name);
+        StopMetricsPolling();
         _repositories.Clear();
         Status = new ClusterStatus { Status = ConnectionStatus.Disconnected };
     }
@@ -258,6 +265,64 @@ public partial class KubernetesContext
             resourceNamespace,
             cancellationToken
         );
+    }
+
+    public (string Cpu, string Memory)? GetPodMetrics(string podNamespace, string podName)
+    {
+        return _podMetrics.TryGetValue($"{podNamespace}/{podName}", out var metrics)
+            ? metrics
+            : null;
+    }
+
+    private void StartMetricsPolling()
+    {
+        StopMetricsPolling();
+        _metricsPollingCts = new CancellationTokenSource();
+        _ = PollMetricsAsync(_metricsPollingCts.Token);
+    }
+
+    private void StopMetricsPolling()
+    {
+        _metricsPollingCts?.Cancel();
+        _metricsPollingCts?.Dispose();
+        _metricsPollingCts = null;
+        _podMetrics = new Dictionary<string, (string Cpu, string Memory)>();
+    }
+
+    private async Task PollMetricsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var podMetrics = await _kubernetesService.GetPodMetricsAsync(cancellationToken);
+            if (podMetrics == null)
+            {
+                Log.MetricsServerNotAvailable(_logger, Name);
+                return;
+            }
+
+            Log.MetricsPollingStarted(_logger, Name);
+            _podMetrics = podMetrics;
+            PodMetricsUpdated?.Invoke(this, EventArgs.Empty);
+
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                podMetrics = await _kubernetesService.GetPodMetricsAsync(cancellationToken);
+                if (podMetrics != null)
+                {
+                    _podMetrics = podMetrics;
+                    PodMetricsUpdated?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected on disconnect
+        }
+        catch (Exception ex)
+        {
+            Log.MetricsPollingFailed(_logger, Name, ex);
+        }
     }
 
     public async Task StartListenAsync(
@@ -413,5 +478,14 @@ public partial class KubernetesContext
 
         [LoggerMessage(EventId = 5014, Level = LogLevel.Information, Message = "Port forward socket closed for {ResourceName} on target port {TargetPort} in cluster {ContextName}")]
         public static partial void PortForwardSocketClosed(ILogger logger, string resourceName, int targetPort, string contextName);
+
+        [LoggerMessage(EventId = 5016, Level = LogLevel.Information, Message = "Metrics server not available in cluster {ContextName}, metrics polling disabled")]
+        public static partial void MetricsServerNotAvailable(ILogger logger, string contextName);
+
+        [LoggerMessage(EventId = 5017, Level = LogLevel.Information, Message = "Metrics polling started for cluster {ContextName}")]
+        public static partial void MetricsPollingStarted(ILogger logger, string contextName);
+
+        [LoggerMessage(EventId = 5018, Level = LogLevel.Error, Message = "Metrics polling failed for cluster {ContextName}")]
+        public static partial void MetricsPollingFailed(ILogger logger, string contextName, Exception exception);
     }
 }

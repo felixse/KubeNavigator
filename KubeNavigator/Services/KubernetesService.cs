@@ -523,6 +523,139 @@ public partial class KubernetesService
         );
     }
 
+    public async Task<Dictionary<string, (string Cpu, string Memory)>?> GetPodMetricsAsync(
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            Log.FetchingPodMetrics(_logger, _contextName);
+            var podMetricsList = await _kubernetes!.GetKubernetesPodsMetricsAsync();
+
+            var metrics = new Dictionary<string, (string Cpu, string Memory)>();
+            foreach (var podMetric in podMetricsList.Items)
+            {
+                var name = podMetric.Metadata?.Name;
+                var ns = podMetric.Metadata?.NamespaceProperty;
+                if (name == null || ns == null)
+                    continue;
+
+                long totalCpuNanos = 0;
+                long totalMemoryBytes = 0;
+                if (podMetric.Containers != null)
+                {
+                    foreach (var container in podMetric.Containers)
+                    {
+                        if (container.Usage == null)
+                            continue;
+                        if (container.Usage.TryGetValue("cpu", out var cpuQty))
+                            totalCpuNanos += ParseCpuToNanocores(cpuQty.ToString());
+                        if (container.Usage.TryGetValue("memory", out var memQty))
+                            totalMemoryBytes += ParseMemoryToBytes(memQty.ToString());
+                    }
+                }
+
+                metrics[$"{ns}/{name}"] = (FormatCpu(totalCpuNanos), FormatMemory(totalMemoryBytes));
+            }
+
+            Log.PodMetricsFetched(_logger, metrics.Count, _contextName);
+            return metrics;
+        }
+        catch (Exception ex)
+        {
+            Log.GetPodMetricsFailed(_logger, _contextName, ex);
+            return null;
+        }
+    }
+
+    public async Task<Dictionary<string, (string Cpu, string Memory)>?> GetNodeMetricsAsync(
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            Log.FetchingNodeMetrics(_logger, _contextName);
+            var nodeMetricsList = await _kubernetes!.GetKubernetesNodesMetricsAsync();
+
+            var metrics = new Dictionary<string, (string Cpu, string Memory)>();
+            foreach (var nodeMetric in nodeMetricsList.Items)
+            {
+                var name = nodeMetric.Metadata?.Name;
+                if (name == null)
+                    continue;
+
+                long cpuNanos = 0;
+                long memBytes = 0;
+                if (nodeMetric.Usage != null)
+                {
+                    if (nodeMetric.Usage.TryGetValue("cpu", out var cpuQty))
+                        cpuNanos = ParseCpuToNanocores(cpuQty.ToString());
+                    if (nodeMetric.Usage.TryGetValue("memory", out var memQty))
+                        memBytes = ParseMemoryToBytes(memQty.ToString());
+                }
+
+                metrics[name] = (FormatCpu(cpuNanos), FormatMemory(memBytes));
+            }
+
+            Log.NodeMetricsFetched(_logger, metrics.Count, _contextName);
+            return metrics;
+        }
+        catch (Exception ex)
+        {
+            Log.GetNodeMetricsFailed(_logger, _contextName, ex);
+            return null;
+        }
+    }
+
+    internal static long ParseCpuToNanocores(string? cpu)
+    {
+        if (string.IsNullOrEmpty(cpu))
+            return 0;
+        if (cpu.EndsWith('n'))
+            return long.TryParse(cpu.AsSpan(0, cpu.Length - 1), out var n) ? n : 0;
+        if (cpu.EndsWith('u'))
+            return long.TryParse(cpu.AsSpan(0, cpu.Length - 1), out var u) ? u * 1_000 : 0;
+        if (cpu.EndsWith('m'))
+            return long.TryParse(cpu.AsSpan(0, cpu.Length - 1), out var m) ? m * 1_000_000 : 0;
+        return long.TryParse(cpu, out var cores) ? cores * 1_000_000_000 : 0;
+    }
+
+    internal static long ParseMemoryToBytes(string? memory)
+    {
+        if (string.IsNullOrEmpty(memory))
+            return 0;
+        if (memory.EndsWith("Ki"))
+            return long.TryParse(memory.AsSpan(0, memory.Length - 2), out var ki) ? ki * 1024 : 0;
+        if (memory.EndsWith("Mi"))
+            return long.TryParse(memory.AsSpan(0, memory.Length - 2), out var mi)
+                ? mi * 1024 * 1024
+                : 0;
+        if (memory.EndsWith("Gi"))
+            return long.TryParse(memory.AsSpan(0, memory.Length - 2), out var gi)
+                ? gi * 1024 * 1024 * 1024
+                : 0;
+        return long.TryParse(memory, out var bytes) ? bytes : 0;
+    }
+
+    internal static string FormatCpu(long nanocores)
+    {
+        var millicores = nanocores / 1_000_000;
+        if (millicores >= 1000)
+            return $"{millicores / 1000d:0.##}";
+        return $"{millicores}m";
+    }
+
+    internal static string FormatMemory(long bytes)
+    {
+        if (bytes >= 1024L * 1024 * 1024)
+            return $"{bytes / (1024.0 * 1024 * 1024):0.#}Gi";
+        if (bytes >= 1024L * 1024)
+            return $"{bytes / (1024.0 * 1024):0.#}Mi";
+        if (bytes >= 1024)
+            return $"{bytes / 1024.0:0.#}Ki";
+        return $"{bytes}B";
+    }
+
     private string ExtractResourceNameFromYaml(string yaml)
     {
         try
@@ -958,6 +1091,64 @@ public partial class KubernetesService
             Message = "Failed to extract resource namespace from YAML in cluster {ContextName}"
         )]
         public static partial void ExtractResourceNamespaceFailed(
+            ILogger logger,
+            string contextName,
+            Exception exception
+        );
+
+        [LoggerMessage(
+            EventId = 2036,
+            Level = LogLevel.Debug,
+            Message = "Fetching pod metrics in cluster {ContextName}"
+        )]
+        public static partial void FetchingPodMetrics(ILogger logger, string contextName);
+
+        [LoggerMessage(
+            EventId = 2037,
+            Level = LogLevel.Debug,
+            Message = "Fetched metrics for {Count} pods in cluster {ContextName}"
+        )]
+        public static partial void PodMetricsFetched(
+            ILogger logger,
+            int count,
+            string contextName
+        );
+
+        [LoggerMessage(
+            EventId = 2039,
+            Level = LogLevel.Warning,
+            Message = "Failed to get pod metrics in cluster {ContextName}"
+        )]
+        public static partial void GetPodMetricsFailed(
+            ILogger logger,
+            string contextName,
+            Exception exception
+        );
+
+        [LoggerMessage(
+            EventId = 2040,
+            Level = LogLevel.Debug,
+            Message = "Fetching node metrics in cluster {ContextName}"
+        )]
+        public static partial void FetchingNodeMetrics(ILogger logger, string contextName);
+
+        [LoggerMessage(
+            EventId = 2041,
+            Level = LogLevel.Debug,
+            Message = "Fetched metrics for {Count} nodes in cluster {ContextName}"
+        )]
+        public static partial void NodeMetricsFetched(
+            ILogger logger,
+            int count,
+            string contextName
+        );
+
+        [LoggerMessage(
+            EventId = 2042,
+            Level = LogLevel.Warning,
+            Message = "Failed to get node metrics in cluster {ContextName}"
+        )]
+        public static partial void GetNodeMetricsFailed(
             ILogger logger,
             string contextName,
             Exception exception

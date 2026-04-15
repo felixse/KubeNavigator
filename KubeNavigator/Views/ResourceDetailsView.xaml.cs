@@ -1,3 +1,4 @@
+using System;
 using KubeNavigator.ViewModels;
 using KubeNavigator.ViewModels.Details;
 using KubeNavigator.Views.Controls;
@@ -26,16 +27,62 @@ public sealed partial class ResourceDetailsView : UserControl
 
     private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is ResourceDetailsView view)
+        var view = (ResourceDetailsView)d;
+
+        if (e.OldValue is DetailsViewModel oldVm)
         {
-            view.DetailScrollViewer.ChangeView(null, 0, null, disableAnimation: true);
+            oldVm.Navigating -= view.OnNavigating;
+            oldVm.NavigatedBack -= view.OnNavigatedBack;
         }
+
+        if (e.NewValue is DetailsViewModel newVm)
+        {
+            newVm.Navigating += view.OnNavigating;
+            newVm.NavigatedBack += view.OnNavigatedBack;
+        }
+
+        view.DetailScrollViewer.ChangeView(null, 0, null, disableAnimation: true);
     }
 
     public ResourceDetailsView()
     {
         this.InitializeComponent();
         this.PointerPressed += OnPointerPressed;
+    }
+
+    private void OnNavigating(object? sender, EventArgs e)
+    {
+        if (ViewModel?.NavigationStack.Count > 0)
+        {
+            ViewModel.NavigationStack.Peek().ScrollOffset = DetailScrollViewer.VerticalOffset;
+        }
+    }
+
+    private void OnNavigatedBack(object? sender, NavigationEntry entry)
+    {
+        var target = entry.ScrollOffset;
+
+        // Try immediately — works if content is already tall enough
+        DetailScrollViewer.ChangeView(null, target, null, disableAnimation: true);
+
+        if (DetailScrollViewer.ScrollableHeight >= target)
+        {
+            return;
+        }
+
+        // Content isn't tall enough yet — keep retrying as layout progresses
+        DetailScrollViewer.LayoutUpdated += OnLayoutUpdated;
+
+        void OnLayoutUpdated(object? s, object e)
+        {
+            DetailScrollViewer.ChangeView(null, target, null, disableAnimation: true);
+
+            if (DetailScrollViewer.ScrollableHeight >= target
+                || DetailScrollViewer.VerticalOffset >= target - 1)
+            {
+                DetailScrollViewer.LayoutUpdated -= OnLayoutUpdated;
+            }
+        }
     }
 
     private async void OnPointerPressed(object sender, PointerRoutedEventArgs e)

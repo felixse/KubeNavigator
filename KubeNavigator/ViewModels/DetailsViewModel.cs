@@ -17,9 +17,13 @@ public partial class DetailsViewModel : ObservableObject
     [ObservableProperty]
     public partial List<DetailsTypes.IDetailsSection> Details { get; private set; } = [];
 
+    public event EventHandler? Navigating;
+
+    public event EventHandler<NavigationEntry>? NavigatedBack;
+
     public DetailsViewModel(IDetailsSource source, IShelfHost shelfHost, Action? onClose = null)
     {
-        NavigationStack.Push(source);
+        NavigationStack.Push(new NavigationEntry(source));
         Cluster = source.Cluster;
         ShelfHost = shelfHost;
         this.onClose = onClose;
@@ -27,11 +31,11 @@ public partial class DetailsViewModel : ObservableObject
         UpdateDetailsAsync();
     }
 
-    public IDetailsSource SelectedItem => NavigationStack.Peek();
+    public IDetailsSource SelectedItem => NavigationStack.Peek().Source;
 
     public bool CanGoBack => NavigationStack.Count > 1;
 
-    public Stack<IDetailsSource> NavigationStack { get; } = new Stack<IDetailsSource>();
+    public Stack<NavigationEntry> NavigationStack { get; } = new Stack<NavigationEntry>();
     public ClusterViewModel Cluster { get; }
     public IShelfHost ShelfHost { get; }
 
@@ -48,8 +52,9 @@ public partial class DetailsViewModel : ObservableObject
 
         if (resource != null)
         {
+            Navigating?.Invoke(this, EventArgs.Empty);
             UnsubscribeFromDetailsRefresh(SelectedItem);
-            NavigationStack.Push(resource);
+            NavigationStack.Push(new NavigationEntry(resource));
             SubscribeToDetailsRefresh(resource);
             OnPropertyChanged(nameof(SelectedItem));
             OnPropertyChanged(nameof(CanGoBack));
@@ -66,12 +71,15 @@ public partial class DetailsViewModel : ObservableObject
     {
         if (NavigationStack.Count > 1)
         {
+            Navigating?.Invoke(this, EventArgs.Empty);
             UnsubscribeFromDetailsRefresh(SelectedItem);
             NavigationStack.Pop();
-            SubscribeToDetailsRefresh(SelectedItem);
+            var entry = NavigationStack.Peek();
+            SubscribeToDetailsRefresh(entry.Source);
             OnPropertyChanged(nameof(SelectedItem));
             OnPropertyChanged(nameof(CanGoBack));
             await UpdateDetailsAsync();
+            NavigatedBack?.Invoke(this, entry);
         }
     }
 
@@ -99,4 +107,11 @@ public partial class DetailsViewModel : ObservableObject
     {
         onClose?.Invoke();
     }
+}
+
+public class NavigationEntry(IDetailsSource source)
+{
+    public IDetailsSource Source { get; } = source;
+
+    public double ScrollOffset { get; set; }
 }

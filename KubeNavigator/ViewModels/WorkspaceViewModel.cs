@@ -24,6 +24,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
 {
     private ObservableCollection<KubernetesResourceViewModel>? _customResourceDefinitions;
     private readonly ILogger<WorkspaceViewModel> _logger;
+    private (string Title, string Message, Func<Task>? FollowUp)? _pendingInfoDialog;
 
     public event EventHandler? Closed;
 
@@ -391,6 +392,95 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     }
                 }
             }
+        }
+    }
+
+    public void DisconnectCluster()
+    {
+        _customResourceDefinitions?.CollectionChanged -=
+            OnCustomResourceDefinitionsCollectionChanged;
+        _customResourceDefinitions = null;
+
+        NavigationGroups.Clear();
+        Cluster = null;
+        Details = null;
+        HelmReleasesViews = null;
+
+        SelectedItem = FooterItems.First(f => f is ClusterListViewModel);
+    }
+
+    public async Task HandleClusterRemovedAsync(string contextName)
+    {
+        Cluster?.Context.Disconnect();
+        DisconnectCluster();
+
+        var title = "Context Removed";
+        var message = $"The context \"{contextName}\" has been removed from your kubeconfig. The workspace has been disconnected.";
+
+        if (Window.SelectedWorkspace == this)
+        {
+            await Window.ContentDialogService.ShowInfoDialogAsync(title, message);
+        }
+        else
+        {
+            _pendingInfoDialog = (title, message, null);
+        }
+    }
+
+    public async Task ShowPendingDialogAsync()
+    {
+        if (_pendingInfoDialog is var (title, message, followUp))
+        {
+            _pendingInfoDialog = null;
+            await Window.ContentDialogService.ShowInfoDialogAsync(title, message);
+
+            if (followUp is not null)
+            {
+                await followUp();
+            }
+        }
+    }
+
+    public async Task HandleClusterChangedAsync(ClusterViewModel cluster)
+    {
+        cluster.Context.Disconnect();
+
+        var title = "Context Changed";
+        var message = $"The kubeconfig for \"{cluster.Name}\" has been modified. Reconnecting\u2026";
+
+        if (Window.SelectedWorkspace == this)
+        {
+            await Window.ContentDialogService.ShowInfoDialogAsync(title, message);
+            await ReconnectClusterAsync(cluster);
+        }
+        else
+        {
+            _pendingInfoDialog = (title, message, () => ReconnectClusterAsync(cluster));
+        }
+    }
+
+    private async Task ReconnectClusterAsync(ClusterViewModel cluster)
+    {
+        try
+        {
+            var reconnected = await Window.ContentDialogService
+                .ShowConnectingDialogAsync(
+                    cluster.Name,
+                    ct => cluster.Context.ConnectAsync(ct)
+                );
+
+            if (reconnected)
+            {
+                await SetContextAsync(cluster);
+            }
+        }
+        catch (Exception e)
+        {
+            Window.ShowMessage(
+                "Reconnection Failed",
+                $"Failed to reconnect to cluster \"{cluster.Name}\": {e.Message}",
+                NotificationSeverity.Error
+            );
         }
     }
 

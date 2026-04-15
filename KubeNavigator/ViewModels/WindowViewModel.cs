@@ -123,6 +123,11 @@ public partial class WindowViewModel : ObservableObject, IWindow
         });
     }
 
+    async partial void OnSelectedWorkspaceChanged(WorkspaceViewModel value)
+    {
+        await value.ShowPendingDialogAsync();
+    }
+
     public Task<string?> PickFileAsync(IReadOnlyList<string> fileTypes)
     {
         if (FilePickerHandler is null)

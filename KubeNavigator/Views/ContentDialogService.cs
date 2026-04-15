@@ -112,6 +112,21 @@ public class ContentDialogService : IContentDialogService
         return result == ContentDialogResult.Primary;
     }
 
+    public async Task ShowInfoDialogAsync(string title, string message)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = message,
+            CloseButtonText = "OK",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = Page?.XamlRoot,
+            RequestedTheme = GetRequestedTheme(),
+        };
+
+        await dialog.ShowAsync();
+    }
+
     private ElementTheme GetRequestedTheme()
     {
         return _themeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark

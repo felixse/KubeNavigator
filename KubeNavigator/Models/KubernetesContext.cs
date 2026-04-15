@@ -112,6 +112,13 @@ public partial class KubernetesContext
         }
     }
 
+    public void Disconnect()
+    {
+        Log.Disconnecting(_logger, Name);
+        _repositories.Clear();
+        Status = new ClusterStatus { Status = ConnectionStatus.Disconnected };
+    }
+
     public async Task<IKubernetesResourceRepository> GetResourceRepositoryAsync(
         ResourceType resourceType
     )
@@ -367,6 +374,9 @@ public partial class KubernetesContext
 
         [LoggerMessage(EventId = 5002, Level = LogLevel.Information, Message = "Connected to cluster {ContextName}")]
         public static partial void Connected(ILogger logger, string contextName);
+
+        [LoggerMessage(EventId = 5015, Level = LogLevel.Information, Message = "Disconnecting from cluster {ContextName}")]
+        public static partial void Disconnecting(ILogger logger, string contextName);
 
         [LoggerMessage(EventId = 5003, Level = LogLevel.Warning, Message = "Connection test failed for cluster {ContextName}")]
         public static partial void ConnectionTestFailed(ILogger logger, string contextName);

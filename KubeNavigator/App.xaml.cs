@@ -69,6 +69,11 @@ public partial class App : Application, IWindowManager
         Log.StartupPhaseCompleted(_logger, "LoadSettings", sw.ElapsedMilliseconds);
 
         sw.Restart();
+        var contextNames = await KubernetesService.LoadContextNamesAsync();
+        sw.Stop();
+        Log.StartupPhaseCompleted(_logger, "LoadKubeConfig", sw.ElapsedMilliseconds);
+
+        sw.Restart();
         var settings = new SettingsViewModel(_settingsService, this, _loggingService!);
         var app = new AppViewModel(
             () => new ContentDialogService(_themeManager),
@@ -77,7 +82,8 @@ public partial class App : Application, IWindowManager
             dispatcherQueue,
             _themeManager,
             _loggingService!,
-            _settingsService
+            _settingsService,
+            contextNames
         );
         app.DetailWindowViewModels.CollectionChanged += OnDetailWindowsCollectionchanged;
         var mainWindow = new MainWindow(app.MainWindow);
@@ -93,6 +99,13 @@ public partial class App : Application, IWindowManager
         mainWindow.Activate();
         sw.Stop();
         Log.StartupPhaseCompleted(_logger, "ActivateWindow", sw.ElapsedMilliseconds);
+
+        var kubeConfigWatcher = new KubeConfigWatcher(
+            contextNames,
+            _loggingService!.LoggerFactory,
+            dispatcherQueue
+        );
+        app.StartWatchingKubeConfig(kubeConfigWatcher);
 
         //sw.Restart();
         //await CheckCliToolsAsync(mainWindow, app.MainWindow);

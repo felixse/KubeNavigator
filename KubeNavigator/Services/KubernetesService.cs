@@ -8,6 +8,7 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s;
+using k8s.KubeConfigModels;
 using k8s.Models;
 using KubeNavigator.Model;
 using KubeNavigator.Models;
@@ -30,6 +31,15 @@ public partial class KubernetesService
         _contextName = contextName;
         _logger = logger;
         _settingsService = settingsService;
+    }
+
+    public static async Task<IReadOnlyList<string>> LoadContextNamesAsync()
+    {
+        var configContent = await File.ReadAllTextAsync(
+            KubernetesClientConfiguration.KubeConfigDefaultLocation
+        );
+        var config = KubernetesYaml.Deserialize<K8SConfiguration>(configContent);
+        return config.Contexts.Select(c => c.Name).ToList();
     }
 
     public async Task InitializeAsync()

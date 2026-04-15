@@ -334,7 +334,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
                 IsExpandable = true,
                 Columns = ["Key", "Operator", "Value", "Effect", "Seconds"],
                 Rows = Pod.Spec.Tolerations?.Select(t =>
-                    new[]
+                    (IEnumerable<ITableCellContent>)new TextContent[]
                     {
                         t.Key,
                         t.OperatorProperty,

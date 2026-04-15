@@ -1,5 +1,6 @@
 using KubeNavigator.ViewModels;
 using KubeNavigator.ViewModels.Details;
+using KubeNavigator.Views.Controls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WinUIEditor;
@@ -43,6 +44,14 @@ public sealed partial class ResourceDetailsView : UserControl
         )
         {
             await ViewModel.NavigateAsync(linkContent);
+        }
+    }
+
+    private async void SimpleTable_LinkClicked(object sender, LinkContent e)
+    {
+        if (ViewModel != null)
+        {
+            await ViewModel.NavigateAsync(e);
         }
     }
 

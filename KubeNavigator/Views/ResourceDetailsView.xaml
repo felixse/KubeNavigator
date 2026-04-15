@@ -341,6 +341,7 @@
               <customcontrols:SimpleTable
                 Margin="16,0,16,16"
                 Columns="{x:Bind Columns}"
+                LinkClicked="SimpleTable_LinkClicked"
                 Rows="{x:Bind Rows}"
               />
             </ScrollViewer>
@@ -363,6 +364,7 @@
               <customcontrols:SimpleTable
                 Margin="8"
                 Columns="{x:Bind Columns}"
+                LinkClicked="SimpleTable_LinkClicked"
                 Rows="{x:Bind Rows}"
               />
             </ScrollViewer>
@@ -521,6 +523,33 @@
           </Border>
         </DataTemplate>
       </templateselectors:DetailsRowTemplateSelector.GroupRowTemplate>
+      <templateselectors:DetailsRowTemplateSelector.SegmentedRowTemplate>
+        <DataTemplate x:DataType="details:SegmentedRow">
+          <StackPanel Spacing="8">
+            <controls:Segmented
+              ItemsSource="{x:Bind Items}"
+              SelectedItem="{x:Bind SelectedItem, Mode=TwoWay}"
+              Style="{StaticResource PivotSegmentedStyle}"
+            >
+              <controls:Segmented.ItemTemplate>
+                <DataTemplate x:DataType="details:SegmentedRowItem">
+                  <TextBlock Text="{x:Bind Label}" />
+                </DataTemplate>
+              </controls:Segmented.ItemTemplate>
+            </controls:Segmented>
+            <ItemsControl
+              ItemTemplateSelector="{StaticResource DetailsRowTemplateSelector}"
+              ItemsSource="{x:Bind SelectedItem.Rows, Mode=OneWay}"
+            >
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <customcontrols:DetailsPanel />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+            </ItemsControl>
+          </StackPanel>
+        </DataTemplate>
+      </templateselectors:DetailsRowTemplateSelector.SegmentedRowTemplate>
     </templateselectors:DetailsRowTemplateSelector>
     <!-- Section template -->
     <DataTemplate x:Key="DetailsSectionTemplate" x:DataType="details:DetailsSection">

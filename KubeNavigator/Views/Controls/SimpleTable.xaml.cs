@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using KubeNavigator.ViewModels.Details;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -16,10 +18,12 @@ public sealed partial class SimpleTable : UserControl
 
     public static readonly DependencyProperty RowsProperty = DependencyProperty.Register(
         nameof(Rows),
-        typeof(IEnumerable<IEnumerable<string>>),
+        typeof(IEnumerable<IEnumerable<ITableCellContent>>),
         typeof(SimpleTable),
         new PropertyMetadata(null, OnDataChanged)
     );
+
+    public event EventHandler<LinkContent>? LinkClicked;
 
     public IEnumerable<string>? Columns
     {
@@ -27,9 +31,9 @@ public sealed partial class SimpleTable : UserControl
         set => SetValue(ColumnsProperty, value);
     }
 
-    public IEnumerable<IEnumerable<string>>? Rows
+    public IEnumerable<IEnumerable<ITableCellContent>>? Rows
     {
-        get => (IEnumerable<IEnumerable<string>>?)GetValue(RowsProperty);
+        get => (IEnumerable<IEnumerable<ITableCellContent>>?)GetValue(RowsProperty);
         set => SetValue(RowsProperty, value);
     }
 
@@ -95,19 +99,40 @@ public sealed partial class SimpleTable : UserControl
                 var cells = rows[r].ToList();
                 for (var c = 0; c < cells.Count && c < columns.Count; c++)
                 {
-                    var cell = new TextBlock
-                    {
-                        Text = cells[c],
-                        IsTextSelectionEnabled = true,
-                        TextWrapping = TextWrapping.NoWrap,
-                    };
-                    Grid.SetRow(cell, r + 1);
-                    Grid.SetColumn(cell, c);
-                    grid.Children.Add(cell);
+                    var element = CreateCellElement(cells[c]);
+                    Grid.SetRow(element, r + 1);
+                    Grid.SetColumn(element, c);
+                    grid.Children.Add(element);
                 }
             }
         }
 
         Content = grid;
+    }
+
+    private FrameworkElement CreateCellElement(ITableCellContent cellContent)
+    {
+        switch (cellContent)
+        {
+            case LinkContent link:
+                var button = new HyperlinkButton
+                {
+                    Content = link.ResourceName,
+                    Padding = new Thickness(2),
+                };
+                button.Click += (_, _) => LinkClicked?.Invoke(this, link);
+                return button;
+
+            case TextContent text:
+                return new TextBlock
+                {
+                    Text = text.Value ?? string.Empty,
+                    IsTextSelectionEnabled = true,
+                    TextWrapping = TextWrapping.NoWrap,
+                };
+
+            default:
+                return new TextBlock();
+        }
     }
 }

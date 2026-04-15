@@ -7,6 +7,7 @@ using System.Text.Json;
 using k8s.Models;
 using KubeNavigator.Models.Helm;
 using Microsoft.Extensions.Logging;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
 namespace KubeNavigator.Services;
@@ -121,6 +122,52 @@ public partial class HelmService
             .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
             .Build();
         return serializer.Serialize(merged);
+    }
+
+    public record ManifestResource(string Kind, string Name, string? Namespace);
+
+    public List<ManifestResource> ParseManifestResources(HelmRelease release)
+    {
+        var resources = new List<ManifestResource>();
+
+        if (string.IsNullOrWhiteSpace(release.Manifest))
+        {
+            return resources;
+        }
+
+        var deserializer = new DeserializerBuilder().Build();
+        using var reader = new StringReader(release.Manifest);
+        var parser = new YamlDotNet.Core.Parser(reader);
+        parser.Consume<YamlDotNet.Core.Events.StreamStart>();
+
+        while (parser.TryConsume<YamlDotNet.Core.Events.DocumentStart>(out _))
+        {
+            var doc = deserializer.Deserialize<Dictionary<object, object>>(parser);
+            parser.TryConsume<YamlDotNet.Core.Events.DocumentEnd>(out _);
+
+            if (doc is null)
+            {
+                continue;
+            }
+
+            var kind = doc.TryGetValue("kind", out var k) ? k?.ToString() : null;
+            var name = doc.TryGetValue("metadata", out var m)
+                && m is Dictionary<object, object> meta
+                && meta.TryGetValue("name", out var n)
+                    ? n?.ToString()
+                    : null;
+            var ns = m is Dictionary<object, object> meta2
+                && meta2.TryGetValue("namespace", out var nsVal)
+                    ? nsVal?.ToString()
+                    : null;
+
+            if (kind is not null && name is not null)
+            {
+                resources.Add(new ManifestResource(kind, name, ns));
+            }
+        }
+
+        return resources;
     }
 
     private static string JsonElementToYaml(JsonElement? element)

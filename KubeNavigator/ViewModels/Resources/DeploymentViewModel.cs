@@ -187,7 +187,7 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
                 IsExpandable = true,
                 Columns = ["Key", "Operator", "Value", "Effect", "Seconds"],
                 Rows = Deployment.Spec?.Template?.Spec?.Tolerations?.Select(t =>
-                    new[]
+                    (IEnumerable<ITableCellContent>)new TextContent[]
                     {
                         t.Key,
                         t.OperatorProperty,
@@ -212,7 +212,7 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
         };
     }
 
-    private async Task<IEnumerable<IEnumerable<string>>> GetReplicaSetRowsAsync()
+    private async Task<IEnumerable<IEnumerable<ITableCellContent>>> GetReplicaSetRowsAsync()
     {
         var replicaSets = await Cluster.GetResourcesAsync(ResourceType.ReplicaSet);
         return replicaSets
@@ -226,7 +226,7 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             .Select(rs =>
             {
                 var replicaSet = (V1ReplicaSet)rs.Resource;
-                return new[]
+                return (IEnumerable<ITableCellContent>)new TextContent[]
                 {
                     replicaSet.Name(),
                     replicaSet.Namespace(),
@@ -236,7 +236,7 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             });
     }
 
-    private async Task<IEnumerable<IEnumerable<string>>> GetPodRowsAsync()
+    private async Task<IEnumerable<IEnumerable<ITableCellContent>>> GetPodRowsAsync()
     {
         var pods = await Cluster.GetResourcesAsync(ResourceType.Pod);
         var matchLabels = Deployment.Spec?.Selector?.MatchLabels;
@@ -272,7 +272,7 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
                 var status = pod.Metadata.DeletionTimestamp is not null
                     ? "Terminating"
                     : pod.Status?.Phase ?? string.Empty;
-                return new[]
+                return (IEnumerable<ITableCellContent>)new TextContent[]
                 {
                     pod.Name(),
                     pod.Spec?.NodeName ?? string.Empty,

@@ -359,6 +359,36 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                         }
                     }
                 }
+                else if (resourceEvent == KubernetesResourceEvent.Modified)
+                {
+                    var helmRelease = App.HelmService.ParseReleaseFromSecret(secret);
+                    if (helmRelease == null)
+                        return;
+
+                    var existing = HelmReleases.FirstOrDefault(h =>
+                        h.HelmRelease.Name == helmRelease.Name
+                        && h.HelmRelease.Namespace == helmRelease.Namespace
+                    );
+                    if (existing != null)
+                    {
+                        var existingRevision = existing.Revisions.FirstOrDefault(r =>
+                            r.Version == helmRelease.Version
+                        );
+                        if (existingRevision != null)
+                        {
+                            var index = existing.Revisions.IndexOf(existingRevision);
+                            existing.Revisions[index] = helmRelease;
+                        }
+                        else
+                        {
+                            existing.Revisions.Add(helmRelease);
+                        }
+                    }
+                    else
+                    {
+                        HelmReleases.Add(new HelmReleaseViewModel(helmRelease, this));
+                    }
+                }
                 else
                 {
                     Log.UnhandledSecretEvent(_logger, Name, resourceEvent.ToString());

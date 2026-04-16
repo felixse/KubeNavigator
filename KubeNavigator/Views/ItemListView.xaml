@@ -107,13 +107,17 @@
       </StackPanel>
     </Grid>
     <ListView
+      x:Name="ItemsListView"
       Grid.Row="1"
       Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
       BorderBrush="{ThemeResource ControlElevationBorderBrush}"
       BorderThickness="1"
+      ContainerContentChanging="ItemsListView_ContainerContentChanging"
       CornerRadius="4"
       ItemTemplateSelector="{StaticResource TableTemplateSelector}"
       ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
+      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+      ScrollViewer.HorizontalScrollMode="Auto"
       SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=TwoWay}"
     >
       <ListView.Header>
@@ -126,8 +130,10 @@
             <behaviors:StickyHeaderBehavior />
           </interactivity:Interaction.Behaviors>
           <ContentControl
+            x:Name="HeaderContent"
             Content="{x:Bind ViewModel}"
             ContentTemplateSelector="{StaticResource TableHeaderTemplateSelector}"
+            SizeChanged="HeaderContent_SizeChanged"
           />
         </Border>
       </ListView.Header>

@@ -20,7 +20,7 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
-    <TitleBar x:Name="AppTitleBar" Title="KubeNavigator" IsBackButtonVisible="False">
+    <TitleBar x:Name="AppTitleBar" Title="{x:Bind ViewModel.Title, Mode=OneWay}" IsBackButtonVisible="False">
       <TitleBar.IconSource>
         <BitmapIconSource
           ShowAsMonochrome="False"

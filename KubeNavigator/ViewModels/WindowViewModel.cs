@@ -28,6 +28,21 @@ public partial class WindowViewModel : ObservableObject, IWindow
 
     public IShelfHost ShelfHost => SelectedWorkspace;
 
+    public string Title
+    {
+        get
+        {
+            var clusterName = SelectedWorkspace?.Cluster?.Name;
+            var itemTitle = SelectedWorkspace?.SelectedItem?.Title;
+
+            return (clusterName, itemTitle) switch
+            {
+                (not null, not null) => $"{itemTitle} [{clusterName}] - KubeNavigator",
+                _ => "KubeNavigator",
+            };
+        }
+    }
+
     public Func<IReadOnlyList<string>, Task<string?>>? FilePickerHandler { get; set; }
 
     public ObservableCollection<WorkspaceViewModel> Workspaces { get; set; }
@@ -91,9 +106,11 @@ public partial class WindowViewModel : ObservableObject, IWindow
         {
             workspace.SelectedItem = workspace
                 .NavigationGroups.SelectMany(c => c.Items)
-                .SelectMany(item => item is CustomResourceGroupViewModel crg
-                    ? crg.Resources.Cast<INavigationTarget>()
-                    : [item])
+                .SelectMany(item =>
+                    item is CustomResourceGroupViewModel crg
+                        ? crg.Resources.Cast<INavigationTarget>()
+                        : [item]
+                )
                 .FirstOrDefault(r => r.Title == navigationTarget.Title);
         }
     }
@@ -123,9 +140,34 @@ public partial class WindowViewModel : ObservableObject, IWindow
         });
     }
 
-    async partial void OnSelectedWorkspaceChanged(WorkspaceViewModel value)
+    async partial void OnSelectedWorkspaceChanged(
+        WorkspaceViewModel? oldValue,
+        WorkspaceViewModel value
+    )
     {
+        if (oldValue is not null)
+        {
+            oldValue.PropertyChanged -= OnWorkspacePropertyChanged;
+        }
+
+        value.PropertyChanged += OnWorkspacePropertyChanged;
+        OnPropertyChanged(nameof(Title));
         await value.ShowPendingDialogAsync();
+    }
+
+    private void OnWorkspacePropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e
+    )
+    {
+        if (
+            e.PropertyName
+            is nameof(WorkspaceViewModel.Cluster)
+                or nameof(WorkspaceViewModel.SelectedItem)
+        )
+        {
+            OnPropertyChanged(nameof(Title));
+        }
     }
 
     public Task<string?> PickFileAsync(IReadOnlyList<string> fileTypes)

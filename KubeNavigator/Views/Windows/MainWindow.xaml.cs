@@ -22,7 +22,7 @@ public sealed partial class MainWindow : Window
         ViewModel.FilePickerHandler = PickFileAsync;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
-        AppWindow.SetIcon("Assets/Square44x44Logo.targetsize-24.png");
+        AppWindow.SetIcon("WindowIcon.ico");
         AppTitleBar.Loaded += AppTitleBar_Loaded;
         AppTitleBar.ActualThemeChanged += AppTitleBar_ActualThemeChanged;
 

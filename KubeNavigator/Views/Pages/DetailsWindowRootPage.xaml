@@ -3,6 +3,7 @@
   x:Class="KubeNavigator.Pages.DetailsWindowRootPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:controls="using:CommunityToolkit.WinUI.Controls"
   xmlns:converters="using:KubeNavigator.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:local="using:KubeNavigator.Pages"
@@ -16,8 +17,9 @@
   </Page.Resources>
   <Grid>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto" />
-      <ColumnDefinition Width="*" />
+      <ColumnDefinition x:Name="PanelColumn" Width="*" MinWidth="480" />
+      <ColumnDefinition x:Name="SplitterColumn" Width="0" />
+      <ColumnDefinition x:Name="ShelfColumn" Width="0" />
     </Grid.ColumnDefinitions>
     <Grid Grid.Column="0">
       <Grid.RowDefinitions>
@@ -47,10 +49,18 @@
           <StackLayout Orientation="Horizontal" />
         </ItemsRepeater.Layout>
       </ItemsRepeater>
-      <views:ResourceDetailsView Grid.Row="1" Width="500" ViewModel="{x:Bind ViewModel.Details}" />
+      <views:ResourceDetailsView Grid.Row="1" ViewModel="{x:Bind ViewModel.Details}" />
     </Grid>
-    <Grid
+    <controls:GridSplitter
       Grid.Column="1"
+      Width="4"
+      MinWidth="4"
+      Margin="2,0,2,8"
+      CornerRadius="2"
+      Visibility="{x:Bind ViewModel.ShelfItems.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}"
+    />
+    <Grid
+      Grid.Column="2"
       Margin="8"
       Visibility="{x:Bind ViewModel.ShelfItems.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}"
     >
@@ -61,6 +71,7 @@
       <TabView
         IsAddTabButtonVisible="False"
         SelectedItem="{x:Bind ViewModel.SelectedShelfItem, Mode=TwoWay}"
+        TabCloseRequested="Shelf_TabCloseRequested"
         TabItemTemplateSelector="{StaticResource ShelfItemTemplateSelector}"
         TabItemsSource="{x:Bind ViewModel.ShelfItems, Mode=OneWay}"
       />

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Threading.Tasks;
 using CommunityToolkit.WinUI.Helpers;
 using KubeNavigator.Pages;
@@ -11,8 +12,10 @@ using Windows.UI;
 
 namespace KubeNavigator.Windows;
 
-public sealed partial class DetailWindow : Window
+public sealed partial class DetailWindow : WinUIEx.WindowEx
 {
+    private const int ExpandedWidth = 1440;
+
     public DetailWindowViewModel ViewModel { get; }
 
     public DetailWindow(DetailWindowViewModel viewModel)
@@ -23,11 +26,30 @@ public sealed partial class DetailWindow : Window
         this.InitializeComponent();
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
-        AppWindow.SetIcon("Assets/Square44x44Logo.targetsize-24.png");
+        AppWindow.SetIcon("WindowIcon.ico");
         AppTitleBar.Loaded += AppTitleBar_Loaded;
         AppTitleBar.ActualThemeChanged += AppTitleBar_ActualThemeChanged;
 
+        ViewModel.ShelfItems.CollectionChanged += OnShelfItemsChanged;
+
         RootFrame.Navigate(typeof(DetailsWindowRootPage), viewModel);
+    }
+
+    private void OnShelfItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        var size = AppWindow.Size;
+
+        if (ViewModel.ShelfItems.Count > 0 && size.Width < ExpandedWidth)
+        {
+            Width = ExpandedWidth;
+        }
+        else if (ViewModel.ShelfItems.Count == 0)
+        {
+            var page = (RootFrame.Content as DetailsWindowRootPage);
+            var panelWidth = (int)(page?.PanelActualWidth ?? size.Width);
+
+            Width = panelWidth;
+        }
     }
 
     private async Task<string?> PickFileAsync(IReadOnlyList<string> fileTypes)

@@ -82,6 +82,15 @@
           </StackPanel>
         </DataTemplate>
       </templateselectors:DetailsCollectionElementTemplateSelector.TextElementTemplate>
+      <templateselectors:DetailsCollectionElementTemplateSelector.LinkElementTemplate>
+        <DataTemplate x:DataType="details:LinkCollectionElement">
+          <HyperlinkButton
+            Padding="8,4,8,4"
+            Click="HyperlinkButton_Click"
+            Content="{x:Bind ResourceName}"
+          />
+        </DataTemplate>
+      </templateselectors:DetailsCollectionElementTemplateSelector.LinkElementTemplate>
       <templateselectors:DetailsCollectionElementTemplateSelector.ConditionElementTemplate>
         <DataTemplate x:DataType="details:ConditionCollectionElement">
           <controls:SwitchPresenter Value="{x:Bind Status}">

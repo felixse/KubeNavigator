@@ -313,25 +313,17 @@ public partial class PodViewModel : KubernetesResourceViewModel
             Content = new TextContent { Value = Pod.Status.QosClass },
         };
 
-        yield return new HeaderedRow
+        if (Pod.Spec.TerminationGracePeriodSeconds.HasValue)
         {
-            Header = "Conditions",
-            Content = new CollectionContent
+            yield return new HeaderedRow
             {
-                Items =
-                [
-                    .. Pod.Status.Conditions?.Select(c => new ConditionCollectionElement
-                    {
-                        Type = c.Type,
-                        Status = c.Status,
-                        Message = c.Message,
-                        Reason = c.Reason,
-                        LastHeartbeatTime = c.LastProbeTime,
-                        LastTransitionTime = c.LastTransitionTime,
-                    }) ?? [],
-                ],
-            },
-        };
+                Header = "Termination Grace Period",
+                Content = new TextContent
+                {
+                    Value = Pod.Spec.TerminationGracePeriodSeconds.ToString(),
+                },
+            };
+        }
 
         yield return new HeaderedRow
         {
@@ -390,6 +382,77 @@ public partial class PodViewModel : KubernetesResourceViewModel
                     Pod.Spec.Affinity != null
                         ? YamlSerializerFactory.Serializer.Serialize(Pod.Spec.Affinity)
                         : string.Empty,
+            },
+        };
+
+        var secretNames = Pod
+            .Spec.Containers.SelectMany(c =>
+                (c.Env ?? [])
+                    .Select(e => e.ValueFrom?.SecretKeyRef?.Name)
+                    .Concat((c.EnvFrom ?? []).Select(e => e.SecretRef?.Name))
+            )
+            .Concat(
+                (Pod.Spec.Volumes ?? []).SelectMany(v =>
+                {
+                    if (v.Secret != null)
+                    {
+                        return [v.Secret.SecretName];
+                    }
+
+                    if (v.Projected?.Sources != null)
+                    {
+                        return v.Projected.Sources.Select(s => s.Secret?.Name);
+                    }
+
+                    if (v.Csi?.NodePublishSecretRef != null)
+                    {
+                        return [v.Csi.NodePublishSecretRef.Name];
+                    }
+
+                    return [];
+                })
+            )
+            .Where(n => !string.IsNullOrEmpty(n))
+            .Distinct()
+            .Order()
+            .ToList();
+
+        if (secretNames.Count > 0)
+        {
+            yield return new HeaderedRow
+            {
+                Header = "Secrets",
+                Content = new CollectionContent
+                {
+                    Items =
+                    [
+                        .. secretNames.Select(n => new LinkCollectionElement
+                        {
+                            ResourceName = n!,
+                            ResourceType = ResourceType.Secret,
+                        }),
+                    ],
+                },
+            };
+        }
+
+        yield return new HeaderedRow
+        {
+            Header = "Conditions",
+            Content = new CollectionContent
+            {
+                Items =
+                [
+                    .. Pod.Status.Conditions?.Select(c => new ConditionCollectionElement
+                    {
+                        Type = c.Type,
+                        Status = c.Status,
+                        Message = c.Message,
+                        Reason = c.Reason,
+                        LastHeartbeatTime = c.LastProbeTime,
+                        LastTransitionTime = c.LastTransitionTime,
+                    }) ?? [],
+                ],
             },
         };
     }

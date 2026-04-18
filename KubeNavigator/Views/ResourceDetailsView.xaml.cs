@@ -98,11 +98,23 @@ public sealed partial class ResourceDetailsView : UserControl
 
     private async void HyperlinkButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (
-            sender is HyperlinkButton hyperlink
-            && hyperlink.DataContext is LinkContent linkContent
-            && ViewModel != null
-        )
+        if (sender is not HyperlinkButton hyperlink || ViewModel is null)
+        {
+            return;
+        }
+
+        LinkContent? linkContent = hyperlink.DataContext switch
+        {
+            LinkContent lc => lc,
+            LinkCollectionElement lce => new LinkContent
+            {
+                ResourceName = lce.ResourceName,
+                ResourceType = lce.ResourceType,
+            },
+            _ => null,
+        };
+
+        if (linkContent is not null)
         {
             await ViewModel.NavigateAsync(linkContent);
         }

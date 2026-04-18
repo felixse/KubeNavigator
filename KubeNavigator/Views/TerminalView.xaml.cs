@@ -155,7 +155,7 @@ public sealed partial class TerminalView : UserControl
         {
             OnInitialized?.Invoke(this, EventArgs.Empty);
         };
-        WebView.CoreWebView2.OpenDevToolsWindow();
+        //WebView.CoreWebView2.OpenDevToolsWindow();
         WebView.CoreWebView2.Navigate("https://webviews.kubenavigator/Terminal/dist/index.html");
     }
 

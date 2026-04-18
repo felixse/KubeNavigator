@@ -10,11 +10,14 @@ public partial class DetailsCollectionElementTemplateSelector : DataTemplateSele
 
     public DataTemplate? ConditionElementTemplate { get; set; }
 
+    public DataTemplate? LinkElementTemplate { get; set; }
+
     protected override DataTemplate SelectTemplateCore(object item)
     {
         var template = item switch
         {
             ConditionCollectionElement => ConditionElementTemplate,
+            LinkCollectionElement => LinkElementTemplate,
             TextCollectionElement => TextElementTemplate,
             _ => TextElementTemplate,
         };

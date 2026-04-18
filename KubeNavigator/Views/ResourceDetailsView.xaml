@@ -327,29 +327,6 @@
       </templateselectors:DetailsContentTemplateSelector.PortsTemplate>
       <templateselectors:DetailsContentTemplateSelector.TableTemplate>
         <DataTemplate x:DataType="details:TableContent">
-          <Expander
-            MinHeight="24"
-            Padding="0"
-            HorizontalAlignment="Stretch"
-            HorizontalContentAlignment="Stretch"
-            Header="{x:Bind Count}"
-          >
-            <ScrollViewer
-              HorizontalScrollBarVisibility="Auto"
-              VerticalScrollBarVisibility="Disabled"
-            >
-              <customcontrols:SimpleTable
-                Margin="16,0,16,16"
-                Columns="{x:Bind Columns}"
-                LinkClicked="SimpleTable_LinkClicked"
-                Rows="{x:Bind Rows}"
-              />
-            </ScrollViewer>
-          </Expander>
-        </DataTemplate>
-      </templateselectors:DetailsContentTemplateSelector.TableTemplate>
-      <templateselectors:DetailsContentTemplateSelector.TableInlineTemplate>
-        <DataTemplate x:DataType="details:TableContent">
           <Border
             Margin="4"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
@@ -370,7 +347,7 @@
             </ScrollViewer>
           </Border>
         </DataTemplate>
-      </templateselectors:DetailsContentTemplateSelector.TableInlineTemplate>
+      </templateselectors:DetailsContentTemplateSelector.TableTemplate>
       <templateselectors:DetailsContentTemplateSelector.DictionaryTemplate>
         <DataTemplate x:DataType="details:DictionaryContent">
           <Border Background="Transparent">
@@ -424,6 +401,35 @@
         </DataTemplate>
       </templateselectors:DetailsContentTemplateSelector.EditorTemplate>
     </templateselectors:DetailsContentTemplateSelector>
+    <templateselectors:EmbeddedDetailsContentTemplateSelector
+      x:Key="EmbeddedDetailsContentTemplateSelector"
+      FallbackSelector="{StaticResource DetailsContentTemplateSelector}"
+    >
+      <templateselectors:EmbeddedDetailsContentTemplateSelector.EmbeddedTableTemplate>
+        <DataTemplate x:DataType="details:TableContent">
+          <ScrollViewer
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Disabled"
+          >
+            <customcontrols:SimpleTable
+              Margin="16,0,16,16"
+              Columns="{x:Bind Columns}"
+              LinkClicked="SimpleTable_LinkClicked"
+              Rows="{x:Bind Rows}"
+            />
+          </ScrollViewer>
+        </DataTemplate>
+      </templateselectors:EmbeddedDetailsContentTemplateSelector.EmbeddedTableTemplate>
+      <templateselectors:EmbeddedDetailsContentTemplateSelector.EmbeddedEditorTemplate>
+        <DataTemplate x:DataType="details:EditorContent">
+          <editor:CodeEditorControl
+            Height="200"
+            HighlightingLanguage="yaml"
+            Loaded="CodeEditorControl_Loaded"
+          />
+        </DataTemplate>
+      </templateselectors:EmbeddedDetailsContentTemplateSelector.EmbeddedEditorTemplate>
+    </templateselectors:EmbeddedDetailsContentTemplateSelector>
     <!-- Row templates: render layout per IDetailsRow type, delegate content to DetailsContentTemplateSelector -->
     <templateselectors:DetailsRowTemplateSelector x:Key="DetailsRowTemplateSelector">
       <templateselectors:DetailsRowTemplateSelector.HeaderedRowTemplate>
@@ -550,6 +556,35 @@
           </StackPanel>
         </DataTemplate>
       </templateselectors:DetailsRowTemplateSelector.SegmentedRowTemplate>
+      <templateselectors:DetailsRowTemplateSelector.ExpandableRowTemplate>
+        <DataTemplate x:DataType="details:ExpandableRow">
+          <Grid Margin="0,4,0,4" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+              VerticalAlignment="Top"
+              Style="{StaticResource DetailsRowHeaderStyle}"
+              Text="{x:Bind Header}"
+            />
+            <Expander
+              Grid.Column="1"
+              MinHeight="24"
+              Padding="0"
+              HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Stretch"
+              Header="{x:Bind Summary}"
+            >
+              <ContentControl
+                HorizontalContentAlignment="Stretch"
+                Content="{x:Bind Content}"
+                ContentTemplateSelector="{StaticResource EmbeddedDetailsContentTemplateSelector}"
+              />
+            </Expander>
+          </Grid>
+        </DataTemplate>
+      </templateselectors:DetailsRowTemplateSelector.ExpandableRowTemplate>
     </templateselectors:DetailsRowTemplateSelector>
     <!-- Section template -->
     <DataTemplate x:Key="DetailsSectionTemplate" x:DataType="details:DetailsSection">

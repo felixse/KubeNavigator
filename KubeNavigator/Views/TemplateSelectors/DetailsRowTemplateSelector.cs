@@ -14,6 +14,8 @@ public partial class DetailsRowTemplateSelector : DataTemplateSelector
 
     public DataTemplate? SegmentedRowTemplate { get; set; }
 
+    public DataTemplate? ExpandableRowTemplate { get; set; }
+
     protected override DataTemplate SelectTemplateCore(object item)
     {
         var template = item switch
@@ -22,6 +24,7 @@ public partial class DetailsRowTemplateSelector : DataTemplateSelector
             FullWidthRow => FullWidthRowTemplate,
             GroupRow => GroupRowTemplate,
             SegmentedRow => SegmentedRowTemplate,
+            ExpandableRow => ExpandableRowTemplate,
             _ => HeaderedRowTemplate,
         };
 

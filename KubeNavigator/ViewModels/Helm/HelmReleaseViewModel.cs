@@ -99,7 +99,6 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
                     {
                         Columns = columns,
                         Rows = rows,
-                        IsExpandable = false,
                     },
                 };
             })

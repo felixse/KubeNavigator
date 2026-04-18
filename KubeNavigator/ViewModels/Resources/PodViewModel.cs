@@ -9,6 +9,7 @@ using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.Extensions.Logging;
+using YamlDotNet.Serialization;
 
 namespace KubeNavigator.ViewModels.Resources;
 
@@ -348,30 +349,54 @@ public partial class PodViewModel : KubernetesResourceViewModel
             },
         };
 
-        yield return new HeaderedRow
+        var tolerationsTable = new TableContent
         {
-            Header = "Tolerations",
-            Content = new TableContent
-            {
-                IsExpandable = true,
-                Columns = ["Key", "Operator", "Value", "Effect", "Seconds"],
-                Rows =
-                    Pod.Spec.Tolerations?.Select(t =>
-                        (IEnumerable<ITableCellContent>)
-                            new TextContent[]
-                            {
-                                t.Key,
-                                t.OperatorProperty,
-                                t.Value,
-                                t.Effect,
-                                t.TolerationSeconds?.ToString() ?? string.Empty,
-                            }
-                    )
-                    ?? [],
-            },
+            Columns = ["Key", "Operator", "Value", "Effect", "Seconds"],
+            Rows =
+                Pod.Spec.Tolerations?.Select(t =>
+                    (IEnumerable<ITableCellContent>)
+                        new TextContent[]
+                        {
+                            t.Key,
+                            t.OperatorProperty,
+                            t.Value,
+                            t.Effect,
+                            t.TolerationSeconds?.ToString() ?? string.Empty,
+                        }
+                )
+                ?? [],
         };
 
-        // todo affinities?
+        yield return new ExpandableRow
+        {
+            Header = "Tolerations",
+            Summary = tolerationsTable.Count.ToString(),
+            Content = tolerationsTable,
+        };
+
+        var serializer = new SerializerBuilder()
+            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+            .Build();
+
+        yield return new ExpandableRow
+        {
+            Header = "Affinities",
+            Summary = new object?[]
+            {
+                Pod.Spec.Affinity?.PodAffinity,
+                Pod.Spec.Affinity?.NodeAffinity,
+                Pod.Spec.Affinity?.PodAntiAffinity,
+            }
+                .Count(a => a != null)
+                .ToString(),
+            Content = new EditorContent
+            {
+                Value =
+                    Pod.Spec.Affinity != null
+                        ? serializer.Serialize(Pod.Spec.Affinity)
+                        : string.Empty,
+            },
+        };
     }
 
     private IEnumerable<IDetailsRow> GetContainerRows(V1Container container)

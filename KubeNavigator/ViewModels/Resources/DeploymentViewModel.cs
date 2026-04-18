@@ -75,7 +75,6 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
                     {
                         Content = new TableContent
                         {
-                            IsExpandable = false,
                             Columns = ["Name", "Namespace", "Pods", "Age"],
                             Rows = revisionRows,
                         },
@@ -95,7 +94,6 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
                     {
                         Content = new TableContent
                         {
-                            IsExpandable = false,
                             Columns =
                             [
                                 "Name",
@@ -237,27 +235,29 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             },
         };
 
-        yield return new HeaderedRow
+        var tolerationsTable = new TableContent
+        {
+            Columns = ["Key", "Operator", "Value", "Effect", "Seconds"],
+            Rows =
+                Deployment.Spec?.Template?.Spec?.Tolerations?.Select(t =>
+                    (IEnumerable<ITableCellContent>)
+                        new TextContent[]
+                        {
+                            t.Key,
+                            t.OperatorProperty,
+                            t.Value,
+                            t.Effect,
+                            t.TolerationSeconds?.ToString() ?? string.Empty,
+                        }
+                )
+                ?? [],
+        };
+
+        yield return new ExpandableRow
         {
             Header = "Tolerations",
-            Content = new TableContent
-            {
-                IsExpandable = true,
-                Columns = ["Key", "Operator", "Value", "Effect", "Seconds"],
-                Rows =
-                    Deployment.Spec?.Template?.Spec?.Tolerations?.Select(t =>
-                        (IEnumerable<ITableCellContent>)
-                            new TextContent[]
-                            {
-                                t.Key,
-                                t.OperatorProperty,
-                                t.Value,
-                                t.Effect,
-                                t.TolerationSeconds?.ToString() ?? string.Empty,
-                            }
-                    )
-                    ?? [],
-            },
+            Summary = tolerationsTable.Count.ToString(),
+            Content = tolerationsTable,
         };
 
         var affinityYaml =

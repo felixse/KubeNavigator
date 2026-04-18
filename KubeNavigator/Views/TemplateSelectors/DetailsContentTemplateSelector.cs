@@ -18,8 +18,6 @@ public partial class DetailsContentTemplateSelector : DataTemplateSelector
 
     public DataTemplate? TableTemplate { get; set; }
 
-    public DataTemplate? TableInlineTemplate { get; set; }
-
     public DataTemplate? DictionaryTemplate { get; set; }
 
     public DataTemplate? MarkdownTemplate { get; set; }
@@ -34,7 +32,6 @@ public partial class DetailsContentTemplateSelector : DataTemplateSelector
             CollectionContent { Layout: CollectionLayout.Wrap } => CollectionWrapTemplate,
             CollectionContent => CollectionStackTemplate,
             PortsContent => PortsTemplate,
-            TableContent { IsExpandable: false } => TableInlineTemplate,
             TableContent => TableTemplate,
             DictionaryContent => DictionaryTemplate,
             MarkdownContent => MarkdownTemplate,

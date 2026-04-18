@@ -14,7 +14,13 @@ public sealed partial class ApplicationLogView : UserControl, IShelfItemView
     {
         ViewModel = viewModel;
         this.InitializeComponent();
-        _helper = new LogViewHelper(Terminal, ViewModel.ThemeManager, ViewModel, () => ViewModel.SearchText, ViewModel.LoadExistingLogs);
+        _helper = new LogViewHelper(
+            Terminal,
+            ViewModel.ThemeManager,
+            ViewModel,
+            () => ViewModel.SearchText,
+            ViewModel.LoadExistingLogs
+        );
         ViewModel.LogReceived += ViewModel_LogReceived;
         ViewModel.Closed += ViewModel_Closed;
     }

@@ -16,7 +16,6 @@ using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.Extensions.Logging;
-using Windows.UI.WebUI;
 
 namespace KubeNavigator.ViewModels;
 
@@ -81,7 +80,11 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         Window = window;
         _logger = window.App.LoggingService.LoggerFactory.CreateLogger<WorkspaceViewModel>();
 
-        Pinned = new NavigationGroupViewModel("Pinned", new SymbolNavigationGroupIcon("\uE840"), []);
+        Pinned = new NavigationGroupViewModel(
+            "Pinned",
+            new SymbolNavigationGroupIcon("\uE840"),
+            []
+        );
         // todo load pinned from settings
 
         var portForwards = new PortForwardsViewModel(this, window.App.ForwardedPorts);
@@ -168,7 +171,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     (x) => new PodViewModel((V1Pod)x, Cluster),
                     PodViewModel.PodColumns
                 ),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Deployment, columns: DeploymentViewModel.DeploymentColumns),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.Deployment,
+                    columns: DeploymentViewModel.DeploymentColumns
+                ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.DaemonSet),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.StatefulSet),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ReplicaSet),
@@ -262,7 +270,9 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         );
         var helm = new NavigationGroupViewModel(
             "Helm",
-            new PathNavigationGroupIcon("M1.5,8 A6.5,6.5,0,1,1,14.5,8 A6.5,6.5,0,1,1,1.5,8 Z M2.7,8 A5.3,5.3,0,1,0,13.3,8 A5.3,5.3,0,1,0,2.7,8 Z M6.2,8 A1.8,1.8,0,1,1,9.8,8 A1.8,1.8,0,1,1,6.2,8 Z M7.45,5.8 L8.55,5.8 L8.55,3.1 L7.45,3.1 Z M7.45,1.2 L8.55,1.2 L8.55,0.2 L7.45,0.2 Z M9.63,6.42 L10.18,7.38 L12.52,6.03 L11.97,5.07 Z M13.61,4.12 L14.16,5.08 L15.03,4.58 L14.48,3.62 Z M10.18,8.62 L9.63,9.58 L11.97,10.93 L12.52,9.97 Z M14.16,10.92 L13.61,11.88 L14.48,12.38 L15.03,11.42 Z M8.55,10.2 L7.45,10.2 L7.45,12.9 L8.55,12.9 Z M8.55,14.8 L7.45,14.8 L7.45,15.8 L8.55,15.8 Z M6.37,9.58 L5.82,8.62 L3.48,9.97 L4.03,10.93 Z M2.39,11.88 L1.84,10.92 L0.97,11.42 L1.52,12.38 Z M5.82,7.38 L6.37,6.42 L4.03,5.07 L3.48,6.03 Z M1.84,5.08 L2.39,4.12 L1.52,3.62 L0.97,4.58 Z"),
+            new PathNavigationGroupIcon(
+                "M1.5,8 A6.5,6.5,0,1,1,14.5,8 A6.5,6.5,0,1,1,1.5,8 Z M2.7,8 A5.3,5.3,0,1,0,13.3,8 A5.3,5.3,0,1,0,2.7,8 Z M6.2,8 A1.8,1.8,0,1,1,9.8,8 A1.8,1.8,0,1,1,6.2,8 Z M7.45,5.8 L8.55,5.8 L8.55,3.1 L7.45,3.1 Z M7.45,1.2 L8.55,1.2 L8.55,0.2 L7.45,0.2 Z M9.63,6.42 L10.18,7.38 L12.52,6.03 L11.97,5.07 Z M13.61,4.12 L14.16,5.08 L15.03,4.58 L14.48,3.62 Z M10.18,8.62 L9.63,9.58 L11.97,10.93 L12.52,9.97 Z M14.16,10.92 L13.61,11.88 L14.48,12.38 L15.03,11.42 Z M8.55,10.2 L7.45,10.2 L7.45,12.9 L8.55,12.9 Z M8.55,14.8 L7.45,14.8 L7.45,15.8 L8.55,15.8 Z M6.37,9.58 L5.82,8.62 L3.48,9.97 L4.03,10.93 Z M2.39,11.88 L1.84,10.92 L0.97,11.42 L1.52,12.38 Z M5.82,7.38 L6.37,6.42 L4.03,5.07 L3.48,6.03 Z M1.84,5.08 L2.39,4.12 L1.52,3.62 L0.97,4.58 Z"
+            ),
             [new HelmReleasesViewModel(this, cluster)]
         );
         var accessControl = new NavigationGroupViewModel(
@@ -303,13 +313,17 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         NavigationGroups.Add(CustomResourcesNavigationGroup);
 
         AppCommands.Clear();
-        foreach (var command in NavigationGroups
-            .SelectMany(x => x.Items)
-            .SelectMany(item => item is CustomResourceGroupViewModel crg
-                ? crg.Resources.Cast<INavigationTarget>()
-                : [item])
-            .OfType<KubernetesResourceTypeListViewModel>()
-            .Select(x => new ViewResourceAppCommand(x.ResourceType, this)))
+        foreach (
+            var command in NavigationGroups
+                .SelectMany(x => x.Items)
+                .SelectMany(item =>
+                    item is CustomResourceGroupViewModel crg
+                        ? crg.Resources.Cast<INavigationTarget>()
+                        : [item]
+                )
+                .OfType<KubernetesResourceTypeListViewModel>()
+                .Select(x => new ViewResourceAppCommand(x.ResourceType, this))
+        )
         {
             AppCommands.Add(command);
         }
@@ -378,7 +392,8 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     {
                         group.Resources.Remove(viewModel);
 
-                        var command = AppCommands.OfType<ViewResourceAppCommand>()
+                        var command = AppCommands
+                            .OfType<ViewResourceAppCommand>()
                             .FirstOrDefault(c => c.ResourceType == viewModel.ResourceType);
                         if (command != null)
                         {
@@ -415,7 +430,8 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         DisconnectCluster();
 
         var title = "Context Removed";
-        var message = $"The context \"{contextName}\" has been removed from your kubeconfig. The workspace has been disconnected.";
+        var message =
+            $"The context \"{contextName}\" has been removed from your kubeconfig. The workspace has been disconnected.";
 
         if (Window.SelectedWorkspace == this)
         {
@@ -446,7 +462,8 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         cluster.Context.Disconnect();
 
         var title = "Context Changed";
-        var message = $"The kubeconfig for \"{cluster.Name}\" has been modified. Reconnecting\u2026";
+        var message =
+            $"The kubeconfig for \"{cluster.Name}\" has been modified. Reconnecting\u2026";
 
         if (Window.SelectedWorkspace == this)
         {
@@ -463,11 +480,10 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     {
         try
         {
-            var reconnected = await Window.ContentDialogService
-                .ShowConnectingDialogAsync(
-                    cluster.Name,
-                    ct => cluster.Context.ConnectAsync(ct)
-                );
+            var reconnected = await Window.ContentDialogService.ShowConnectingDialogAsync(
+                cluster.Name,
+                ct => cluster.Context.ConnectAsync(ct)
+            );
 
             if (reconnected)
             {
@@ -708,7 +724,6 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
 
         if (newValue is KubernetesResourceTypeListViewModel resourceType)
         {
-            resourceType.Loaded = true;
             var category = NavigationGroups.FirstOrDefault(c => c.Items.Contains(resourceType));
             if (category != null)
             {
@@ -744,10 +759,18 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
 
     private static partial class Log
     {
-        [LoggerMessage(EventId = 11001, Level = LogLevel.Error, Message = "CustomResourcesNavigationGroup is null, cannot process CRD changes")]
+        [LoggerMessage(
+            EventId = 11001,
+            Level = LogLevel.Error,
+            Message = "CustomResourcesNavigationGroup is null, cannot process CRD changes"
+        )]
         public static partial void CustomResourcesNavigationGroupNull(ILogger logger);
 
-        [LoggerMessage(EventId = 11002, Level = LogLevel.Error, Message = "Cluster is null in AddCustomResourceDefinitionToNavigation")]
+        [LoggerMessage(
+            EventId = 11002,
+            Level = LogLevel.Error,
+            Message = "Cluster is null in AddCustomResourceDefinitionToNavigation"
+        )]
         public static partial void ClusterNullInAddCrd(ILogger logger);
     }
 }

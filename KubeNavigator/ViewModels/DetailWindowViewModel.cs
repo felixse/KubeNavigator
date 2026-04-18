@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
-using KubeNavigator.ViewModels.Resources;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.Extensions.Logging;
 

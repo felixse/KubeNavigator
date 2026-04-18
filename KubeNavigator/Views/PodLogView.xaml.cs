@@ -14,7 +14,13 @@ public sealed partial class PodLogView : UserControl, IShelfItemView
     {
         ViewModel = viewModel;
         this.InitializeComponent();
-        _helper = new LogViewHelper(Terminal, ViewModel.ThemeManager, ViewModel, () => ViewModel.SearchText, ViewModel.Start);
+        _helper = new LogViewHelper(
+            Terminal,
+            ViewModel.ThemeManager,
+            ViewModel,
+            () => ViewModel.SearchText,
+            ViewModel.Start
+        );
         ViewModel.LineReceived += ViewModel_LineReceived;
         ViewModel.Closed += ViewModel_Closed;
     }

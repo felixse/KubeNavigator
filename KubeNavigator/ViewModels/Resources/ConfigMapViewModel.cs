@@ -77,9 +77,25 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
 
     private IEnumerable<IDetailsRow> GetConfigMapRows()
     {
-        yield return new HeaderedRow { Header = "Created", Content = new TextContent { Value = ConfigMap.CreationTimestamp().ToString() } };
-        yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = ConfigMap.Name() } };
-        yield return new HeaderedRow { Header = "Namespace", Content = new LinkContent { ResourceName = Resource.Namespace(), ResourceType = ResourceType.Namespace } };
+        yield return new HeaderedRow
+        {
+            Header = "Created",
+            Content = new TextContent { Value = ConfigMap.CreationTimestamp().ToString() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Name",
+            Content = new TextContent { Value = ConfigMap.Name() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Namespace",
+            Content = new LinkContent
+            {
+                ResourceName = Resource.Namespace(),
+                ResourceType = ResourceType.Namespace,
+            },
+        };
     }
 
     private IEnumerable<IDetailsRow> GetDataRows()
@@ -99,7 +115,11 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
 
     private static partial class Log
     {
-        [LoggerMessage(EventId = 12001, Level = LogLevel.Error, Message = "Data section is null when saving ConfigMap {ResourceName}")]
+        [LoggerMessage(
+            EventId = 12001,
+            Level = LogLevel.Error,
+            Message = "Data section is null when saving ConfigMap {ResourceName}"
+        )]
         public static partial void DataSectionNullOnSave(ILogger logger, string resourceName);
     }
 }

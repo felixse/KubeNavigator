@@ -49,7 +49,11 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
 
     public IReadOnlyList<AppTheme> AvailableThemes { get; } = Enum.GetValues<AppTheme>();
 
-    public SettingsViewModel(ISettingsService settingsService, IWindowManager windowManager, LoggingService loggingService)
+    public SettingsViewModel(
+        ISettingsService settingsService,
+        IWindowManager windowManager,
+        LoggingService loggingService
+    )
     {
         _settingsService = settingsService;
         _windowManager = windowManager;

@@ -39,7 +39,9 @@ public partial class App : Application, IWindowManager
         UnhandledException += App_UnhandledException;
 
         _loggingService = new LoggingService();
-        _settingsService = new SettingsService(_loggingService.LoggerFactory.CreateLogger<SettingsService>());
+        _settingsService = new SettingsService(
+            _loggingService.LoggerFactory.CreateLogger<SettingsService>()
+        );
     }
 
     private void App_UnhandledException(
@@ -183,18 +185,6 @@ public partial class App : Application, IWindowManager
             RegisterWindowForTheming(window);
             window.Activate();
         }
-
-        // todo do we need this?
-        //foreach (var detail in e.OldItems?.Cast<DetailWindowViewModel>() ?? [])
-        //{
-        //    var window = _windows.FirstOrDefault(w => w is DetailWindow detailWindow && detailWindow.ViewModel == detail);
-        //    if (window != null)
-        //    {
-        //        window.Closed -= OnWindowClosed;
-        //        window.Activated -= OnWindowActivated;
-        //        _windows.Remove(window);
-        //    }
-        //}
     }
 
     private void OnWindowActivated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
@@ -248,7 +238,11 @@ public partial class App : Application, IWindowManager
             Level = LogLevel.Debug,
             Message = "Startup phase '{Phase}' completed in {ElapsedMs}ms"
         )]
-        public static partial void StartupPhaseCompleted(ILogger logger, string phase, long elapsedMs);
+        public static partial void StartupPhaseCompleted(
+            ILogger logger,
+            string phase,
+            long elapsedMs
+        );
 
         [LoggerMessage(
             EventId = 1005,
@@ -262,13 +256,23 @@ public partial class App : Application, IWindowManager
             Level = LogLevel.Debug,
             Message = "CLI tool check for '{Tool}' completed in {ElapsedMs}ms (available: {Available})"
         )]
-        public static partial void CliToolCheckCompleted(ILogger logger, string tool, long elapsedMs, bool available);
+        public static partial void CliToolCheckCompleted(
+            ILogger logger,
+            string tool,
+            long elapsedMs,
+            bool available
+        );
 
         [LoggerMessage(
             EventId = 1007,
             Level = LogLevel.Debug,
             Message = "CLI tool check for '{Tool}' failed after {ElapsedMs}ms"
         )]
-        public static partial void CliToolCheckFailed(ILogger logger, string tool, long elapsedMs, Exception exception);
+        public static partial void CliToolCheckFailed(
+            ILogger logger,
+            string tool,
+            long elapsedMs,
+            Exception exception
+        );
     }
 }

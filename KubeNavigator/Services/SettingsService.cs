@@ -83,25 +83,61 @@ public partial class SettingsService : ISettingsService
 
     private static partial class Log
     {
-        [LoggerMessage(EventId = 7001, Level = LogLevel.Information, Message = "Loading settings from {FilePath}")]
+        [LoggerMessage(
+            EventId = 7001,
+            Level = LogLevel.Information,
+            Message = "Loading settings from {FilePath}"
+        )]
         public static partial void LoadingSettings(ILogger logger, string filePath);
 
-        [LoggerMessage(EventId = 7002, Level = LogLevel.Information, Message = "Settings loaded from {FilePath}")]
+        [LoggerMessage(
+            EventId = 7002,
+            Level = LogLevel.Information,
+            Message = "Settings loaded from {FilePath}"
+        )]
         public static partial void SettingsLoaded(ILogger logger, string filePath);
 
-        [LoggerMessage(EventId = 7003, Level = LogLevel.Information, Message = "Settings file not found at {FilePath}, creating defaults")]
+        [LoggerMessage(
+            EventId = 7003,
+            Level = LogLevel.Information,
+            Message = "Settings file not found at {FilePath}, creating defaults"
+        )]
         public static partial void SettingsFileNotFound(ILogger logger, string filePath);
 
-        [LoggerMessage(EventId = 7004, Level = LogLevel.Error, Message = "Failed to load settings from {FilePath}")]
-        public static partial void LoadSettingsFailed(ILogger logger, string filePath, Exception exception);
+        [LoggerMessage(
+            EventId = 7004,
+            Level = LogLevel.Error,
+            Message = "Failed to load settings from {FilePath}"
+        )]
+        public static partial void LoadSettingsFailed(
+            ILogger logger,
+            string filePath,
+            Exception exception
+        );
 
-        [LoggerMessage(EventId = 7005, Level = LogLevel.Debug, Message = "Settings property changed: {PropertyName}")]
+        [LoggerMessage(
+            EventId = 7005,
+            Level = LogLevel.Debug,
+            Message = "Settings property changed: {PropertyName}"
+        )]
         public static partial void SettingsPropertyChanged(ILogger logger, string propertyName);
 
-        [LoggerMessage(EventId = 7006, Level = LogLevel.Debug, Message = "Settings saved to {FilePath}")]
+        [LoggerMessage(
+            EventId = 7006,
+            Level = LogLevel.Debug,
+            Message = "Settings saved to {FilePath}"
+        )]
         public static partial void SettingsSaved(ILogger logger, string filePath);
 
-        [LoggerMessage(EventId = 7007, Level = LogLevel.Error, Message = "Failed to save settings to {FilePath}")]
-        public static partial void SaveSettingsFailed(ILogger logger, string filePath, Exception exception);
+        [LoggerMessage(
+            EventId = 7007,
+            Level = LogLevel.Error,
+            Message = "Failed to save settings to {FilePath}"
+        )]
+        public static partial void SaveSettingsFailed(
+            ILogger logger,
+            string filePath,
+            Exception exception
+        );
     }
 }

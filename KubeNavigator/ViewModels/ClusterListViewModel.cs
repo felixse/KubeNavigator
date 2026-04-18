@@ -23,11 +23,10 @@ public partial class ClusterListViewModel : ObservableObject, INavigationTarget
     {
         try
         {
-            var connected = await Workspace.Window.ContentDialogService
-                .ShowConnectingDialogAsync(
-                    cluster.Name,
-                    ct => cluster.Context.ConnectAsync(ct)
-                );
+            var connected = await Workspace.Window.ContentDialogService.ShowConnectingDialogAsync(
+                cluster.Name,
+                ct => cluster.Context.ConnectAsync(ct)
+            );
 
             if (connected)
             {
@@ -46,11 +45,10 @@ public partial class ClusterListViewModel : ObservableObject, INavigationTarget
 
     public async Task ConnectInNewTabAsync(ClusterViewModel cluster)
     {
-        var connected = await Workspace.Window.ContentDialogService
-            .ShowConnectingDialogAsync(
-                cluster.Name,
-                ct => cluster.Context.ConnectAsync(ct)
-            );
+        var connected = await Workspace.Window.ContentDialogService.ShowConnectingDialogAsync(
+            cluster.Name,
+            ct => cluster.Context.ConnectAsync(ct)
+        );
 
         if (connected)
         {

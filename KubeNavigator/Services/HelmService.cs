@@ -87,15 +87,19 @@ public partial class HelmService
         var userConfig = release.Config;
 
         // If there are no chart defaults, the computed values are just the user config.
-        if (chartValues is not { ValueKind: JsonValueKind.Object }
-            || chartValues.Value.GetRawText() is "{}")
+        if (
+            chartValues is not { ValueKind: JsonValueKind.Object }
+            || chartValues.Value.GetRawText() is "{}"
+        )
         {
             return JsonElementToYaml(userConfig);
         }
 
         // If there is no user config, the computed values are just the chart defaults.
-        if (userConfig is not { ValueKind: JsonValueKind.Object }
-            || userConfig.Value.GetRawText() is "{}")
+        if (
+            userConfig is not { ValueKind: JsonValueKind.Object }
+            || userConfig.Value.GetRawText() is "{}"
+        )
         {
             return JsonElementToYaml(chartValues);
         }
@@ -103,9 +107,11 @@ public partial class HelmService
         // Merge chart defaults with user overrides (user wins).
         var deserializer = new DeserializerBuilder().Build();
         var baseDictionary = deserializer.Deserialize<Dictionary<object, object>>(
-            new StringReader(chartValues.Value.GetRawText()));
+            new StringReader(chartValues.Value.GetRawText())
+        );
         var overrideDictionary = deserializer.Deserialize<Dictionary<object, object>>(
-            new StringReader(userConfig.Value.GetRawText()));
+            new StringReader(userConfig.Value.GetRawText())
+        );
 
         if (baseDictionary is not null && overrideDictionary is not null)
         {
@@ -151,12 +157,14 @@ public partial class HelmService
             }
 
             var kind = doc.TryGetValue("kind", out var k) ? k?.ToString() : null;
-            var name = doc.TryGetValue("metadata", out var m)
+            var name =
+                doc.TryGetValue("metadata", out var m)
                 && m is Dictionary<object, object> meta
                 && meta.TryGetValue("name", out var n)
                     ? n?.ToString()
                     : null;
-            var ns = m is Dictionary<object, object> meta2
+            var ns =
+                m is Dictionary<object, object> meta2
                 && meta2.TryGetValue("namespace", out var nsVal)
                     ? nsVal?.ToString()
                     : null;
@@ -172,8 +180,7 @@ public partial class HelmService
 
     private static string JsonElementToYaml(JsonElement? element)
     {
-        if (element is not { ValueKind: JsonValueKind.Object } json
-            || json.GetRawText() is "{}")
+        if (element is not { ValueKind: JsonValueKind.Object } json || json.GetRawText() is "{}")
         {
             return string.Empty;
         }
@@ -188,13 +195,16 @@ public partial class HelmService
 
     private static void MergeDictionaries(
         Dictionary<object, object> target,
-        Dictionary<object, object> overrides)
+        Dictionary<object, object> overrides
+    )
     {
         foreach (var (key, value) in overrides)
         {
-            if (value is Dictionary<object, object> overrideChild
+            if (
+                value is Dictionary<object, object> overrideChild
                 && target.TryGetValue(key, out var existing)
-                && existing is Dictionary<object, object> existingChild)
+                && existing is Dictionary<object, object> existingChild
+            )
             {
                 MergeDictionaries(existingChild, overrideChild);
             }

@@ -64,11 +64,7 @@ public sealed partial class SimpleTable : UserControl
 
         var headerStyle = (Style)Resources["SimpleTableHeaderStyle"];
 
-        var grid = new Grid
-        {
-            ColumnSpacing = 16,
-            RowSpacing = 4,
-        };
+        var grid = new Grid { ColumnSpacing = 16, RowSpacing = 4 };
 
         for (var c = 0; c < columns.Count; c++)
         {
@@ -80,11 +76,7 @@ public sealed partial class SimpleTable : UserControl
 
         for (var c = 0; c < columns.Count; c++)
         {
-            var header = new TextBlock
-            {
-                Text = columns[c],
-                Style = headerStyle,
-            };
+            var header = new TextBlock { Text = columns[c], Style = headerStyle };
             Grid.SetRow(header, 0);
             Grid.SetColumn(header, c);
             grid.Children.Add(header);

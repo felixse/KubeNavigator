@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KubeNavigator.Models.Helm;
-using KubeNavigator.Properties;
 using KubeNavigator.ViewModels.Details;
-using Microsoft.Extensions.Logging;
 
 namespace KubeNavigator.ViewModels.Helm;
 
@@ -78,9 +76,7 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
             .Select<IGrouping<string, Services.HelmService.ManifestResource>, IDetailsRow>(group =>
             {
                 var hasNamespace = group.Any(r => r.Namespace is not null);
-                var columns = hasNamespace
-                    ? new[] { "Name", "Namespace" }
-                    : new[] { "Name" };
+                var columns = hasNamespace ? new[] { "Name", "Namespace" } : new[] { "Name" };
                 var resourceType = Models.ResourceType.FromKind(group.Key);
                 var rows = group
                     .OrderBy(r => r.Name)
@@ -91,7 +87,8 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
                             : new TextContent { Value = r.Name };
 
                         return hasNamespace
-                            ? (IEnumerable<ITableCellContent>)[nameCell, (TextContent)(r.Namespace ?? "")]
+                            ? (IEnumerable<ITableCellContent>)
+                                [nameCell, (TextContent)(r.Namespace ?? "")]
                             : [nameCell];
                     });
 
@@ -175,11 +172,7 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
                     },
                 ],
             },
-            new DetailsSection
-            {
-                Header = "Resources",
-                Rows = resourceRows,
-            },
+            new DetailsSection { Header = "Resources", Rows = resourceRows },
         ]);
     }
 }

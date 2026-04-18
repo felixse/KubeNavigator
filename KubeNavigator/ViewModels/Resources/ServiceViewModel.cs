@@ -21,10 +21,19 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
         new("Namespace", vm => vm.Namespace, PropertyName: nameof(Namespace)),
         new("Type", vm => ((ServiceViewModel)vm).Type, PropertyName: nameof(Type)),
         new("Cluster IP", vm => ((ServiceViewModel)vm).ClusterIP, PropertyName: nameof(ClusterIP)),
-        new("External IP", vm => ((ServiceViewModel)vm).ExternalIP, PropertyName: nameof(ExternalIP)),
+        new(
+            "External IP",
+            vm => ((ServiceViewModel)vm).ExternalIP,
+            PropertyName: nameof(ExternalIP)
+        ),
         new("Ports", vm => ((ServiceViewModel)vm).Ports, PropertyName: nameof(Ports)),
         new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
-        new("Status", vm => ((ServiceViewModel)vm).Status, ResourceColumnType.Status, nameof(Status)),
+        new(
+            "Status",
+            vm => ((ServiceViewModel)vm).Status,
+            ResourceColumnType.Status,
+            nameof(Status)
+        ),
     ];
 
     public override ImmutableArray<ResourceColumn> Columns => ServiceColumns;
@@ -86,19 +95,14 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
                         new HeaderedRow
                         {
                             Header = "Hostname",
-                            Content = new TextContent
-                            {
-                                Value = Service.Spec.LoadBalancerIP,
-                            },
+                            Content = new TextContent { Value = Service.Spec.LoadBalancerIP },
                         },
                     ],
                 }
             );
         }
 
-        sections.Add(
-            new DetailsSection { Header = "Connection", Rows = [.. GetConnectionRows()] }
-        );
+        sections.Add(new DetailsSection { Header = "Connection", Rows = [.. GetConnectionRows()] });
 
         sections.Add(events);
 
@@ -107,16 +111,38 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
 
     private IEnumerable<IDetailsRow> GetServiceRows()
     {
-        yield return new HeaderedRow { Header = "Created", Content = new TextContent { Value = Service.CreationTimestamp().ToString() } };
-        yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = Service.Name() } };
-        yield return new HeaderedRow { Header = "Namespace", Content = new LinkContent { ResourceName = Resource.Namespace(), ResourceType = ResourceType.Namespace } };
+        yield return new HeaderedRow
+        {
+            Header = "Created",
+            Content = new TextContent { Value = Service.CreationTimestamp().ToString() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Name",
+            Content = new TextContent { Value = Service.Name() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Namespace",
+            Content = new LinkContent
+            {
+                ResourceName = Resource.Namespace(),
+                ResourceType = ResourceType.Namespace,
+            },
+        };
 
         yield return new HeaderedRow
         {
             Header = "Labels",
             Content = new CollectionContent
             {
-                Items = [.. Service.Metadata.Labels?.Select(l => new TextCollectionElement { Value = $"{l.Key}={l.Value}" }) ?? []],
+                Items =
+                [
+                    .. Service.Metadata.Labels?.Select(l => new TextCollectionElement
+                    {
+                        Value = $"{l.Key}={l.Value}",
+                    }) ?? [],
+                ],
             },
         };
 
@@ -127,7 +153,13 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
                 Header = "Annotations",
                 Content = new CollectionContent
                 {
-                    Items = [.. Service.Metadata.Annotations?.Select(l => new TextCollectionElement { Value = $"{l.Key}={l.Value}" }) ?? []],
+                    Items =
+                    [
+                        .. Service.Metadata.Annotations?.Select(l => new TextCollectionElement
+                        {
+                            Value = $"{l.Key}={l.Value}",
+                        }) ?? [],
+                    ],
                 },
             };
         }
@@ -137,30 +169,64 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
             Header = "Selector",
             Content = new CollectionContent
             {
-                Items = [.. Service.Spec.Selector?.Select(s => new TextCollectionElement { Value = $"{s.Key}={s.Value}" }) ?? []],
+                Items =
+                [
+                    .. Service.Spec.Selector?.Select(s => new TextCollectionElement
+                    {
+                        Value = $"{s.Key}={s.Value}",
+                    }) ?? [],
+                ],
             },
         };
 
-        yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = Type } };
-        yield return new HeaderedRow { Header = "Session Affinity", Content = new TextContent { Value = Service.Spec.SessionAffinity } };
-        yield return new HeaderedRow { Header = "Internal Traffic Policy", Content = new TextContent { Value = Service.Spec.InternalTrafficPolicy } };
+        yield return new HeaderedRow
+        {
+            Header = "Type",
+            Content = new TextContent { Value = Type },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Session Affinity",
+            Content = new TextContent { Value = Service.Spec.SessionAffinity },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Internal Traffic Policy",
+            Content = new TextContent { Value = Service.Spec.InternalTrafficPolicy },
+        };
     }
 
     private IEnumerable<IDetailsRow> GetConnectionRows()
     {
-        yield return new HeaderedRow { Header = "Cluster IP", Content = new TextContent { Value = ClusterIP } };
+        yield return new HeaderedRow
+        {
+            Header = "Cluster IP",
+            Content = new TextContent { Value = ClusterIP },
+        };
 
         yield return new HeaderedRow
         {
             Header = "Cluster IPs",
             Content = new CollectionContent
             {
-                Items = [.. Service.Spec.ClusterIPs?.Select(c => new TextCollectionElement { Value = c }) ?? []],
+                Items =
+                [
+                    .. Service.Spec.ClusterIPs?.Select(c => new TextCollectionElement { Value = c })
+                        ?? [],
+                ],
             },
         };
 
-        yield return new HeaderedRow { Header = "IP family policy", Content = new TextContent { Value = Service.Spec.IpFamilyPolicy } };
-        yield return new HeaderedRow { Header = "IP families", Content = new TextContent { Value = string.Join(", ", Service.Spec.IpFamilies ?? []) } };
+        yield return new HeaderedRow
+        {
+            Header = "IP family policy",
+            Content = new TextContent { Value = Service.Spec.IpFamilyPolicy },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "IP families",
+            Content = new TextContent { Value = string.Join(", ", Service.Spec.IpFamilies ?? []) },
+        };
 
         yield return new FullWidthRow
         {

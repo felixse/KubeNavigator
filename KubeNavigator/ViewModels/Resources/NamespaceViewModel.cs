@@ -21,7 +21,12 @@ internal partial class NamespaceViewModel : KubernetesResourceViewModel
         new("Name", vm => vm.Name, PropertyName: nameof(Name)),
         new("Labels", vm => ((NamespaceViewModel)vm).Labels, PropertyName: nameof(Labels)),
         new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
-        new("Status", vm => ((NamespaceViewModel)vm).Status, ResourceColumnType.Status, nameof(Status)),
+        new(
+            "Status",
+            vm => ((NamespaceViewModel)vm).Status,
+            ResourceColumnType.Status,
+            nameof(Status)
+        ),
     ];
 
     public override ImmutableArray<ResourceColumn> Columns => NamespaceColumns;
@@ -45,9 +50,16 @@ internal partial class NamespaceViewModel : KubernetesResourceViewModel
                     new HeaderedRow
                     {
                         Header = "Created",
-                        Content = new TextContent { Value = Resource.CreationTimestamp().ToString() },
+                        Content = new TextContent
+                        {
+                            Value = Resource.CreationTimestamp().ToString(),
+                        },
                     },
-                    new HeaderedRow { Header = "Name", Content = new TextContent { Value = Resource.Name() } },
+                    new HeaderedRow
+                    {
+                        Header = "Name",
+                        Content = new TextContent { Value = Resource.Name() },
+                    },
                     new HeaderedRow
                     {
                         Header = "Labels",
@@ -55,12 +67,10 @@ internal partial class NamespaceViewModel : KubernetesResourceViewModel
                         {
                             Items =
                             [
-                                .. Resource.Metadata.Labels?.Select(
-                                    a => new TextCollectionElement
-                                    {
-                                        Value = $"{a.Key}={a.Value}",
-                                    }
-                                ) ?? [],
+                                .. Resource.Metadata.Labels?.Select(a => new TextCollectionElement
+                                {
+                                    Value = $"{a.Key}={a.Value}",
+                                }) ?? [],
                             ],
                         },
                     },

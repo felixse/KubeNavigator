@@ -146,31 +146,107 @@ public partial class PodShellViewModel : ObservableObject, IShelfItem
 
     private static partial class Log
     {
-        [LoggerMessage(EventId = 8001, Level = LogLevel.Information, Message = "Starting exec session for pod {PodName} in namespace {Namespace}")]
-        public static partial void ExecSessionStarting(ILogger logger, string podName, string? @namespace);
+        [LoggerMessage(
+            EventId = 8001,
+            Level = LogLevel.Information,
+            Message = "Starting exec session for pod {PodName} in namespace {Namespace}"
+        )]
+        public static partial void ExecSessionStarting(
+            ILogger logger,
+            string podName,
+            string? @namespace
+        );
 
-        [LoggerMessage(EventId = 8002, Level = LogLevel.Information, Message = "Exec session opened for pod {PodName} in namespace {Namespace}")]
-        public static partial void ExecSessionOpened(ILogger logger, string podName, string? @namespace);
+        [LoggerMessage(
+            EventId = 8002,
+            Level = LogLevel.Information,
+            Message = "Exec session opened for pod {PodName} in namespace {Namespace}"
+        )]
+        public static partial void ExecSessionOpened(
+            ILogger logger,
+            string podName,
+            string? @namespace
+        );
 
-        [LoggerMessage(EventId = 8003, Level = LogLevel.Information, Message = "Closing exec session for pod {PodName} in namespace {Namespace}")]
-        public static partial void ExecSessionClosing(ILogger logger, string podName, string? @namespace);
+        [LoggerMessage(
+            EventId = 8003,
+            Level = LogLevel.Information,
+            Message = "Closing exec session for pod {PodName} in namespace {Namespace}"
+        )]
+        public static partial void ExecSessionClosing(
+            ILogger logger,
+            string podName,
+            string? @namespace
+        );
 
-        [LoggerMessage(EventId = 8004, Level = LogLevel.Warning, Message = "Exec session closed unexpectedly for pod {PodName} in namespace {Namespace}, last output: {LastLine}")]
-        public static partial void ExecSessionClosedUnexpectedly(ILogger logger, string podName, string? @namespace, string? lastLine);
+        [LoggerMessage(
+            EventId = 8004,
+            Level = LogLevel.Warning,
+            Message = "Exec session closed unexpectedly for pod {PodName} in namespace {Namespace}, last output: {LastLine}"
+        )]
+        public static partial void ExecSessionClosedUnexpectedly(
+            ILogger logger,
+            string podName,
+            string? @namespace,
+            string? lastLine
+        );
 
-        [LoggerMessage(EventId = 8005, Level = LogLevel.Debug, Message = "Exec session closed by user for pod {PodName} in namespace {Namespace}")]
-        public static partial void ExecSessionClosedByUser(ILogger logger, string podName, string? @namespace);
+        [LoggerMessage(
+            EventId = 8005,
+            Level = LogLevel.Debug,
+            Message = "Exec session closed by user for pod {PodName} in namespace {Namespace}"
+        )]
+        public static partial void ExecSessionClosedByUser(
+            ILogger logger,
+            string podName,
+            string? @namespace
+        );
 
-        [LoggerMessage(EventId = 8006, Level = LogLevel.Error, Message = "Exec session read failed for pod {PodName} in namespace {Namespace}")]
-        public static partial void ExecSessionReadFailed(ILogger logger, string podName, string? @namespace, Exception exception);
+        [LoggerMessage(
+            EventId = 8006,
+            Level = LogLevel.Error,
+            Message = "Exec session read failed for pod {PodName} in namespace {Namespace}"
+        )]
+        public static partial void ExecSessionReadFailed(
+            ILogger logger,
+            string podName,
+            string? @namespace,
+            Exception exception
+        );
 
-        [LoggerMessage(EventId = 8007, Level = LogLevel.Debug, Message = "Exec session read loop exited for pod {PodName} in namespace {Namespace}")]
-        public static partial void ExecSessionReadLoopExited(ILogger logger, string podName, string? @namespace);
+        [LoggerMessage(
+            EventId = 8007,
+            Level = LogLevel.Debug,
+            Message = "Exec session read loop exited for pod {PodName} in namespace {Namespace}"
+        )]
+        public static partial void ExecSessionReadLoopExited(
+            ILogger logger,
+            string podName,
+            string? @namespace
+        );
 
-        [LoggerMessage(EventId = 8008, Level = LogLevel.Error, Message = "Exec session write failed for pod {PodName} in namespace {Namespace}")]
-        public static partial void ExecSessionWriteFailed(ILogger logger, string podName, string? @namespace, Exception exception);
+        [LoggerMessage(
+            EventId = 8008,
+            Level = LogLevel.Error,
+            Message = "Exec session write failed for pod {PodName} in namespace {Namespace}"
+        )]
+        public static partial void ExecSessionWriteFailed(
+            ILogger logger,
+            string podName,
+            string? @namespace,
+            Exception exception
+        );
 
-        [LoggerMessage(EventId = 8009, Level = LogLevel.Debug, Message = "Exec session resized for pod {PodName} to {Width}x{Height}")]
-        public static partial void ExecSessionResized(ILogger logger, string podName, int width, int height);
+        [LoggerMessage(
+            EventId = 8009,
+            Level = LogLevel.Debug,
+            Message = "Exec session resized for pod {PodName} to {Width}x{Height}"
+        )]
+        public static partial void ExecSessionResized(
+            ILogger logger,
+            string podName,
+            int width,
+            int height
+        );
     }
 }

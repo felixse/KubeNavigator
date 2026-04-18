@@ -1,10 +1,7 @@
-﻿using System;
-using HtmlAgilityPack;
-using k8s.Models;
+﻿using k8s.Models;
 
 namespace KubeNavigator.Models;
 
-// todo this should be called resourcetypeinfo
 public record ResourceType(
     string Kind,
     string Group,

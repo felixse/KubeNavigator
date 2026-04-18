@@ -26,7 +26,10 @@ namespace KubeNavigator.ViewModels.AppCommands
             }
             else
             {
-                var log = new ApplicationLogViewModel(_workspace.App.LoggingService, _workspace.App.ThemeManager);
+                var log = new ApplicationLogViewModel(
+                    _workspace.App.LoggingService,
+                    _workspace.App.ThemeManager
+                );
                 _workspace.ShelfItems.Add(log);
                 _workspace.SelectedShelfItem = log;
             }

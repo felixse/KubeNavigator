@@ -31,7 +31,9 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
     {
         _kubernetesService = kubernetesService;
         ResourceType = resourceType;
-        _logger = loggerFactory.CreateLogger($"KubeNavigator.Models.KubernetesResourceRepository<{typeof(T).Name}>");
+        _logger = loggerFactory.CreateLogger(
+            $"KubeNavigator.Models.KubernetesResourceRepository<{typeof(T).Name}>"
+        );
         _instance = Random.Shared.Next();
     }
 
@@ -169,7 +171,11 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
                 }
                 else
                 {
-                    Log.UnhandledWatchEventType(_logger, ResourceType.Plural, watchEventType.ToString());
+                    Log.UnhandledWatchEventType(
+                        _logger,
+                        ResourceType.Plural,
+                        watchEventType.ToString()
+                    );
                 }
             },
             (ex) =>
@@ -189,28 +195,76 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
 
     private static partial class Log
     {
-        [LoggerMessage(EventId = 6001, Level = LogLevel.Debug, Message = "Starting initial list for {ResourceType}")]
+        [LoggerMessage(
+            EventId = 6001,
+            Level = LogLevel.Debug,
+            Message = "Starting initial list for {ResourceType}"
+        )]
         public static partial void InitialListStarting(ILogger logger, string resourceType);
 
-        [LoggerMessage(EventId = 6002, Level = LogLevel.Debug, Message = "Initial list completed for {ResourceType} with {Count} items")]
-        public static partial void InitialListCompleted(ILogger logger, string resourceType, int count);
+        [LoggerMessage(
+            EventId = 6002,
+            Level = LogLevel.Debug,
+            Message = "Initial list completed for {ResourceType} with {Count} items"
+        )]
+        public static partial void InitialListCompleted(
+            ILogger logger,
+            string resourceType,
+            int count
+        );
 
-        [LoggerMessage(EventId = 6003, Level = LogLevel.Debug, Message = "Subscriber added for {ResourceType}, total subscribers: {Count}")]
+        [LoggerMessage(
+            EventId = 6003,
+            Level = LogLevel.Debug,
+            Message = "Subscriber added for {ResourceType}, total subscribers: {Count}"
+        )]
         public static partial void SubscriberAdded(ILogger logger, string resourceType, int count);
 
-        [LoggerMessage(EventId = 6004, Level = LogLevel.Debug, Message = "Subscriber removed for {ResourceType}, total subscribers: {Count}")]
-        public static partial void SubscriberRemoved(ILogger logger, string resourceType, int count);
+        [LoggerMessage(
+            EventId = 6004,
+            Level = LogLevel.Debug,
+            Message = "Subscriber removed for {ResourceType}, total subscribers: {Count}"
+        )]
+        public static partial void SubscriberRemoved(
+            ILogger logger,
+            string resourceType,
+            int count
+        );
 
-        [LoggerMessage(EventId = 6005, Level = LogLevel.Information, Message = "Starting watcher for {ResourceType}")]
+        [LoggerMessage(
+            EventId = 6005,
+            Level = LogLevel.Information,
+            Message = "Starting watcher for {ResourceType}"
+        )]
         public static partial void WatcherStarting(ILogger logger, string resourceType);
 
-        [LoggerMessage(EventId = 6006, Level = LogLevel.Information, Message = "Stopping watcher for {ResourceType}")]
+        [LoggerMessage(
+            EventId = 6006,
+            Level = LogLevel.Information,
+            Message = "Stopping watcher for {ResourceType}"
+        )]
         public static partial void WatcherStopping(ILogger logger, string resourceType);
 
-        [LoggerMessage(EventId = 6007, Level = LogLevel.Warning, Message = "Unhandled watch event type {EventType} for {ResourceType}")]
-        public static partial void UnhandledWatchEventType(ILogger logger, string resourceType, string eventType);
+        [LoggerMessage(
+            EventId = 6007,
+            Level = LogLevel.Warning,
+            Message = "Unhandled watch event type {EventType} for {ResourceType}"
+        )]
+        public static partial void UnhandledWatchEventType(
+            ILogger logger,
+            string resourceType,
+            string eventType
+        );
 
-        [LoggerMessage(EventId = 6008, Level = LogLevel.Error, Message = "Watcher error for {ResourceType}")]
-        public static partial void WatcherError(ILogger logger, string resourceType, Exception exception);
+        [LoggerMessage(
+            EventId = 6008,
+            Level = LogLevel.Error,
+            Message = "Watcher error for {ResourceType}"
+        )]
+        public static partial void WatcherError(
+            ILogger logger,
+            string resourceType,
+            Exception exception
+        );
     }
 }

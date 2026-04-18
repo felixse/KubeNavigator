@@ -59,7 +59,11 @@ public partial class KubernetesContext
         }
     }
 
-    public KubernetesContext(string name, ILoggerFactory loggerFactory, ISettingsService settingsService)
+    public KubernetesContext(
+        string name,
+        ILoggerFactory loggerFactory,
+        ISettingsService settingsService
+    )
     {
         Name = name;
         _loggerFactory = loggerFactory;
@@ -137,19 +141,53 @@ public partial class KubernetesContext
             repository = (resourceType.Group, resourceType.Version, resourceType.Plural) switch
             {
                 (V1Pod.KubeGroup, V1Pod.KubeApiVersion, V1Pod.KubePluralName) =>
-                    new KubernetesResourceRepository<V1Pod>(resourceType, _kubernetesService, _loggerFactory),
+                    new KubernetesResourceRepository<V1Pod>(
+                        resourceType,
+                        _kubernetesService,
+                        _loggerFactory
+                    ),
                 (V1Service.KubeGroup, V1Service.KubeApiVersion, V1Service.KubePluralName) =>
-                    new KubernetesResourceRepository<V1Service>(resourceType, _kubernetesService, _loggerFactory),
+                    new KubernetesResourceRepository<V1Service>(
+                        resourceType,
+                        _kubernetesService,
+                        _loggerFactory
+                    ),
                 (V1Secret.KubeGroup, V1Secret.KubeApiVersion, V1Secret.KubePluralName) =>
-                    new KubernetesResourceRepository<V1Secret>(resourceType, _kubernetesService, _loggerFactory),
+                    new KubernetesResourceRepository<V1Secret>(
+                        resourceType,
+                        _kubernetesService,
+                        _loggerFactory
+                    ),
                 (V1Namespace.KubeGroup, V1Namespace.KubeApiVersion, V1Namespace.KubePluralName) =>
-                    new KubernetesResourceRepository<V1Namespace>(resourceType, _kubernetesService, _loggerFactory),
-                (V1Deployment.KubeGroup, V1Deployment.KubeApiVersion, V1Deployment.KubePluralName) =>
-                    new KubernetesResourceRepository<V1Deployment>(resourceType, _kubernetesService, _loggerFactory),
-                (V1ReplicaSet.KubeGroup, V1ReplicaSet.KubeApiVersion, V1ReplicaSet.KubePluralName) =>
-                    new KubernetesResourceRepository<V1ReplicaSet>(resourceType, _kubernetesService, _loggerFactory),
+                    new KubernetesResourceRepository<V1Namespace>(
+                        resourceType,
+                        _kubernetesService,
+                        _loggerFactory
+                    ),
+                (
+                    V1Deployment.KubeGroup,
+                    V1Deployment.KubeApiVersion,
+                    V1Deployment.KubePluralName
+                ) => new KubernetesResourceRepository<V1Deployment>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
+                    V1ReplicaSet.KubeGroup,
+                    V1ReplicaSet.KubeApiVersion,
+                    V1ReplicaSet.KubePluralName
+                ) => new KubernetesResourceRepository<V1ReplicaSet>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
                 (V1ConfigMap.KubeGroup, V1ConfigMap.KubeApiVersion, V1ConfigMap.KubePluralName) =>
-                    new KubernetesResourceRepository<V1ConfigMap>(resourceType, _kubernetesService, _loggerFactory),
+                    new KubernetesResourceRepository<V1ConfigMap>(
+                        resourceType,
+                        _kubernetesService,
+                        _loggerFactory
+                    ),
                 (
                     Eventsv1Event.KubeGroup,
                     Eventsv1Event.KubeApiVersion,
@@ -434,58 +472,183 @@ public partial class KubernetesContext
 
     private static partial class Log
     {
-        [LoggerMessage(EventId = 5001, Level = LogLevel.Information, Message = "Connecting to cluster {ContextName}")]
+        [LoggerMessage(
+            EventId = 5001,
+            Level = LogLevel.Information,
+            Message = "Connecting to cluster {ContextName}"
+        )]
         public static partial void Connecting(ILogger logger, string contextName);
 
-        [LoggerMessage(EventId = 5002, Level = LogLevel.Information, Message = "Connected to cluster {ContextName}")]
+        [LoggerMessage(
+            EventId = 5002,
+            Level = LogLevel.Information,
+            Message = "Connected to cluster {ContextName}"
+        )]
         public static partial void Connected(ILogger logger, string contextName);
 
-        [LoggerMessage(EventId = 5015, Level = LogLevel.Information, Message = "Disconnecting from cluster {ContextName}")]
+        [LoggerMessage(
+            EventId = 5015,
+            Level = LogLevel.Information,
+            Message = "Disconnecting from cluster {ContextName}"
+        )]
         public static partial void Disconnecting(ILogger logger, string contextName);
 
-        [LoggerMessage(EventId = 5003, Level = LogLevel.Warning, Message = "Connection test failed for cluster {ContextName}")]
+        [LoggerMessage(
+            EventId = 5003,
+            Level = LogLevel.Warning,
+            Message = "Connection test failed for cluster {ContextName}"
+        )]
         public static partial void ConnectionTestFailed(ILogger logger, string contextName);
 
-        [LoggerMessage(EventId = 5004, Level = LogLevel.Error, Message = "Failed to connect to cluster {ContextName}")]
-        public static partial void ConnectFailed(ILogger logger, string contextName, Exception exception);
+        [LoggerMessage(
+            EventId = 5004,
+            Level = LogLevel.Error,
+            Message = "Failed to connect to cluster {ContextName}"
+        )]
+        public static partial void ConnectFailed(
+            ILogger logger,
+            string contextName,
+            Exception exception
+        );
 
-        [LoggerMessage(EventId = 5005, Level = LogLevel.Debug, Message = "Connect skipped for cluster {ContextName}, already in state {CurrentStatus}")]
-        public static partial void ConnectSkippedAlreadyConnecting(ILogger logger, string contextName, string currentStatus);
+        [LoggerMessage(
+            EventId = 5005,
+            Level = LogLevel.Debug,
+            Message = "Connect skipped for cluster {ContextName}, already in state {CurrentStatus}"
+        )]
+        public static partial void ConnectSkippedAlreadyConnecting(
+            ILogger logger,
+            string contextName,
+            string currentStatus
+        );
 
-        [LoggerMessage(EventId = 5006, Level = LogLevel.Debug, Message = "Creating resource repository for {ResourceType} in cluster {ContextName}")]
-        public static partial void CreatingResourceRepository(ILogger logger, string resourceType, string contextName);
+        [LoggerMessage(
+            EventId = 5006,
+            Level = LogLevel.Debug,
+            Message = "Creating resource repository for {ResourceType} in cluster {ContextName}"
+        )]
+        public static partial void CreatingResourceRepository(
+            ILogger logger,
+            string resourceType,
+            string contextName
+        );
 
-        [LoggerMessage(EventId = 5007, Level = LogLevel.Debug, Message = "Resource repository created for {ResourceType} in cluster {ContextName}")]
-        public static partial void ResourceRepositoryCreated(ILogger logger, string resourceType, string contextName);
+        [LoggerMessage(
+            EventId = 5007,
+            Level = LogLevel.Debug,
+            Message = "Resource repository created for {ResourceType} in cluster {ContextName}"
+        )]
+        public static partial void ResourceRepositoryCreated(
+            ILogger logger,
+            string resourceType,
+            string contextName
+        );
 
-        [LoggerMessage(EventId = 5008, Level = LogLevel.Warning, Message = "Event repository unavailable for cluster {ContextName}")]
+        [LoggerMessage(
+            EventId = 5008,
+            Level = LogLevel.Warning,
+            Message = "Event repository unavailable for cluster {ContextName}"
+        )]
         public static partial void EventRepositoryUnavailable(ILogger logger, string contextName);
 
-        [LoggerMessage(EventId = 5009, Level = LogLevel.Information, Message = "Port forward listener starting for {ResourceName} on local port {LocalPort} to target port {TargetPort} in cluster {ContextName}")]
-        public static partial void PortForwardListenerStarting(ILogger logger, string resourceName, int localPort, int targetPort, string contextName);
+        [LoggerMessage(
+            EventId = 5009,
+            Level = LogLevel.Information,
+            Message = "Port forward listener starting for {ResourceName} on local port {LocalPort} to target port {TargetPort} in cluster {ContextName}"
+        )]
+        public static partial void PortForwardListenerStarting(
+            ILogger logger,
+            string resourceName,
+            int localPort,
+            int targetPort,
+            string contextName
+        );
 
-        [LoggerMessage(EventId = 5010, Level = LogLevel.Debug, Message = "Port forward socket accepted for {ResourceName} on local port {LocalPort} in cluster {ContextName}")]
-        public static partial void PortForwardSocketAccepted(ILogger logger, string resourceName, int localPort, string contextName);
+        [LoggerMessage(
+            EventId = 5010,
+            Level = LogLevel.Debug,
+            Message = "Port forward socket accepted for {ResourceName} on local port {LocalPort} in cluster {ContextName}"
+        )]
+        public static partial void PortForwardSocketAccepted(
+            ILogger logger,
+            string resourceName,
+            int localPort,
+            string contextName
+        );
 
-        [LoggerMessage(EventId = 5011, Level = LogLevel.Debug, Message = "Port forward socket running for {ResourceName} on target port {TargetPort} in cluster {ContextName}")]
-        public static partial void PortForwardSocketRunning(ILogger logger, string resourceName, int targetPort, string contextName);
+        [LoggerMessage(
+            EventId = 5011,
+            Level = LogLevel.Debug,
+            Message = "Port forward socket running for {ResourceName} on target port {TargetPort} in cluster {ContextName}"
+        )]
+        public static partial void PortForwardSocketRunning(
+            ILogger logger,
+            string resourceName,
+            int targetPort,
+            string contextName
+        );
 
-        [LoggerMessage(EventId = 5012, Level = LogLevel.Error, Message = "Port forward read error for {ResourceName} on target port {TargetPort} in cluster {ContextName}")]
-        public static partial void PortForwardReadError(ILogger logger, string resourceName, int targetPort, string contextName, Exception exception);
+        [LoggerMessage(
+            EventId = 5012,
+            Level = LogLevel.Error,
+            Message = "Port forward read error for {ResourceName} on target port {TargetPort} in cluster {ContextName}"
+        )]
+        public static partial void PortForwardReadError(
+            ILogger logger,
+            string resourceName,
+            int targetPort,
+            string contextName,
+            Exception exception
+        );
 
-        [LoggerMessage(EventId = 5013, Level = LogLevel.Error, Message = "Port forward write error for {ResourceName} on target port {TargetPort} in cluster {ContextName}")]
-        public static partial void PortForwardWriteError(ILogger logger, string resourceName, int targetPort, string contextName, Exception exception);
+        [LoggerMessage(
+            EventId = 5013,
+            Level = LogLevel.Error,
+            Message = "Port forward write error for {ResourceName} on target port {TargetPort} in cluster {ContextName}"
+        )]
+        public static partial void PortForwardWriteError(
+            ILogger logger,
+            string resourceName,
+            int targetPort,
+            string contextName,
+            Exception exception
+        );
 
-        [LoggerMessage(EventId = 5014, Level = LogLevel.Information, Message = "Port forward socket closed for {ResourceName} on target port {TargetPort} in cluster {ContextName}")]
-        public static partial void PortForwardSocketClosed(ILogger logger, string resourceName, int targetPort, string contextName);
+        [LoggerMessage(
+            EventId = 5014,
+            Level = LogLevel.Information,
+            Message = "Port forward socket closed for {ResourceName} on target port {TargetPort} in cluster {ContextName}"
+        )]
+        public static partial void PortForwardSocketClosed(
+            ILogger logger,
+            string resourceName,
+            int targetPort,
+            string contextName
+        );
 
-        [LoggerMessage(EventId = 5016, Level = LogLevel.Information, Message = "Metrics server not available in cluster {ContextName}, metrics polling disabled")]
+        [LoggerMessage(
+            EventId = 5016,
+            Level = LogLevel.Information,
+            Message = "Metrics server not available in cluster {ContextName}, metrics polling disabled"
+        )]
         public static partial void MetricsServerNotAvailable(ILogger logger, string contextName);
 
-        [LoggerMessage(EventId = 5017, Level = LogLevel.Information, Message = "Metrics polling started for cluster {ContextName}")]
+        [LoggerMessage(
+            EventId = 5017,
+            Level = LogLevel.Information,
+            Message = "Metrics polling started for cluster {ContextName}"
+        )]
         public static partial void MetricsPollingStarted(ILogger logger, string contextName);
 
-        [LoggerMessage(EventId = 5018, Level = LogLevel.Error, Message = "Metrics polling failed for cluster {ContextName}")]
-        public static partial void MetricsPollingFailed(ILogger logger, string contextName, Exception exception);
+        [LoggerMessage(
+            EventId = 5018,
+            Level = LogLevel.Error,
+            Message = "Metrics polling failed for cluster {ContextName}"
+        )]
+        public static partial void MetricsPollingFailed(
+            ILogger logger,
+            string contextName,
+            Exception exception
+        );
     }
 }

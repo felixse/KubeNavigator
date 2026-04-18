@@ -416,10 +416,26 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
 
     private static partial class Log
     {
-        [LoggerMessage(EventId = 10001, Level = LogLevel.Warning, Message = "Unhandled namespace event {EventType} for cluster {ClusterName}")]
-        public static partial void UnhandledNamespaceEvent(ILogger logger, string clusterName, string eventType);
+        [LoggerMessage(
+            EventId = 10001,
+            Level = LogLevel.Warning,
+            Message = "Unhandled namespace event {EventType} for cluster {ClusterName}"
+        )]
+        public static partial void UnhandledNamespaceEvent(
+            ILogger logger,
+            string clusterName,
+            string eventType
+        );
 
-        [LoggerMessage(EventId = 10002, Level = LogLevel.Warning, Message = "Unhandled secret event {EventType} for cluster {ClusterName}")]
-        public static partial void UnhandledSecretEvent(ILogger logger, string clusterName, string eventType);
+        [LoggerMessage(
+            EventId = 10002,
+            Level = LogLevel.Warning,
+            Message = "Unhandled secret event {EventType} for cluster {ClusterName}"
+        )]
+        public static partial void UnhandledSecretEvent(
+            ILogger logger,
+            string clusterName,
+            string eventType
+        );
     }
 }

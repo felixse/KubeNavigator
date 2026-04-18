@@ -20,7 +20,8 @@ internal sealed class LogViewHelper
         ThemeManager themeManager,
         INotifyPropertyChanged viewModel,
         Func<string?> getSearchText,
-        Action onTerminalReady)
+        Action onTerminalReady
+    )
     {
         _terminal = terminal;
         _themeManager = themeManager;

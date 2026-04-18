@@ -22,10 +22,7 @@ public sealed partial class DetailsWindowRootPage : Page
         if (e.Parameter is DetailWindowViewModel viewModel)
         {
             ViewModel = viewModel;
-            if (
-                ViewModel.ContentDialogService
-                is ContentDialogService contentDialogService
-            )
+            if (ViewModel.ContentDialogService is ContentDialogService contentDialogService)
             {
                 contentDialogService.Page = this;
             }
@@ -42,7 +39,8 @@ public sealed partial class DetailsWindowRootPage : Page
 
     private void UpdateColumnLayout()
     {
-        if (ViewModel is null) return;
+        if (ViewModel is null)
+            return;
 
         if (ViewModel.ShelfItems.Count > 0)
         {

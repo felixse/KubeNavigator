@@ -15,20 +15,19 @@ namespace KubeNavigator.Views;
 internal static class DynamicResourceTable
 {
     // Improvement 3: shared brush — avoids a per-row allocation.
-    private static readonly SolidColorBrush TransparentBrush =
-        new(Microsoft.UI.Colors.Transparent);
+    private static readonly SolidColorBrush TransparentBrush = new(Microsoft.UI.Colors.Transparent);
 
     private static DataTemplate? _containerStatusTemplate;
 
     private static DataTemplate ContainerStatusTemplate =>
-        _containerStatusTemplate ??=
-            (DataTemplate)Application.Current.Resources["ContainerStatusItemTemplate"];
+        _containerStatusTemplate ??= (DataTemplate)
+            Application.Current.Resources["ContainerStatusItemTemplate"];
 
     private static DataTemplate? _conditionStatusTemplate;
 
     private static DataTemplate ConditionStatusTemplate =>
-        _conditionStatusTemplate ??=
-            (DataTemplate)Application.Current.Resources["ConditionStatusItemTemplate"];
+        _conditionStatusTemplate ??= (DataTemplate)
+            Application.Current.Resources["ConditionStatusItemTemplate"];
 
     public static DataTable BuildHeader(
         KubernetesResourceTypeListViewModel listViewModel,
@@ -154,12 +153,13 @@ internal static class DynamicResourceTable
             return;
         }
 
-        var flyout = converter.Convert(
-            vm,
-            typeof(Microsoft.UI.Xaml.Controls.Primitives.FlyoutBase),
-            null,
-            null
-        ) as Microsoft.UI.Xaml.Controls.Primitives.FlyoutBase;
+        var flyout =
+            converter.Convert(
+                vm,
+                typeof(Microsoft.UI.Xaml.Controls.Primitives.FlyoutBase),
+                null,
+                null
+            ) as Microsoft.UI.Xaml.Controls.Primitives.FlyoutBase;
 
         row.ContextFlyout = flyout;
 
@@ -172,10 +172,7 @@ internal static class DynamicResourceTable
             {
                 flyout.ShowAt(
                     row,
-                    new Microsoft.UI.Xaml.Controls.Primitives.FlyoutShowOptions
-                    {
-                        Position = point,
-                    }
+                    new Microsoft.UI.Xaml.Controls.Primitives.FlyoutShowOptions { Position = point }
                 );
             }
             else
@@ -218,9 +215,11 @@ internal static class DynamicResourceTable
         };
         repeater.ElementPrepared += static (sender, args) =>
         {
-            if (args.Element is ContainerStatusView view
+            if (
+                args.Element is ContainerStatusView view
                 && sender is ItemsRepeater r
-                && args.Index < r.ItemsSourceView.Count)
+                && args.Index < r.ItemsSourceView.Count
+            )
             {
                 view.Status = r.ItemsSourceView.GetAt(args.Index) as k8s.Models.V1ContainerStatus;
             }
@@ -246,9 +245,11 @@ internal static class DynamicResourceTable
         };
         repeater.ElementPrepared += static (sender, args) =>
         {
-            if (args.Element is StatusTextBlock statusBlock
+            if (
+                args.Element is StatusTextBlock statusBlock
                 && sender is ItemsRepeater r
-                && args.Index < r.ItemsSourceView.Count)
+                && args.Index < r.ItemsSourceView.Count
+            )
             {
                 statusBlock.Status = r.ItemsSourceView.GetAt(args.Index)?.ToString();
             }
@@ -368,8 +369,7 @@ internal static class DynamicResourceTable
                     }
                     else
                     {
-                        textBlock.Text =
-                            column.ValueAccessor(vm)?.ToString() ?? string.Empty;
+                        textBlock.Text = column.ValueAccessor(vm)?.ToString() ?? string.Empty;
                     }
                 }
                 break;

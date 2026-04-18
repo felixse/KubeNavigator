@@ -84,11 +84,27 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
 
     private IEnumerable<IDetailsRow> GetSecretRows()
     {
-        yield return new HeaderedRow { Header = "Created", Content = new TextContent { Value = Secret.CreationTimestamp().ToString() } };
+        yield return new HeaderedRow
+        {
+            Header = "Created",
+            Content = new TextContent { Value = Secret.CreationTimestamp().ToString() },
+        };
 
-        yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = Secret.Name() } };
+        yield return new HeaderedRow
+        {
+            Header = "Name",
+            Content = new TextContent { Value = Secret.Name() },
+        };
 
-        yield return new HeaderedRow { Header = "Namespace", Content = new LinkContent { ResourceName = Resource.Namespace(), ResourceType = ResourceType.Namespace } };
+        yield return new HeaderedRow
+        {
+            Header = "Namespace",
+            Content = new LinkContent
+            {
+                ResourceName = Resource.Namespace(),
+                ResourceType = ResourceType.Namespace,
+            },
+        };
 
         yield return new HeaderedRow
         {
@@ -123,7 +139,11 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
             };
         }
 
-        yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = Secret.Type } };
+        yield return new HeaderedRow
+        {
+            Header = "Type",
+            Content = new TextContent { Value = Secret.Type },
+        };
     }
 
     private IEnumerable<IDetailsRow> GetDataRows()
@@ -134,7 +154,11 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
             {
                 yield return new FullWidthRow
                 {
-                    Content = new EditorContent { Title = key, Value = Encoding.UTF8.GetString(value) },
+                    Content = new EditorContent
+                    {
+                        Title = key,
+                        Value = Encoding.UTF8.GetString(value),
+                    },
                 };
             }
         }
@@ -142,7 +166,11 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
 
     private static partial class Log
     {
-        [LoggerMessage(EventId = 12101, Level = LogLevel.Error, Message = "Data section is null when saving Secret {ResourceName}")]
+        [LoggerMessage(
+            EventId = 12101,
+            Level = LogLevel.Error,
+            Message = "Data section is null when saving Secret {ResourceName}"
+        )]
         public static partial void DataSectionNullOnSave(ILogger logger, string resourceName);
     }
 }

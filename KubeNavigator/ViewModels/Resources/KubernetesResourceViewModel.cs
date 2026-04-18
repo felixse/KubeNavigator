@@ -133,10 +133,7 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
                             Items =
                             [
                                 .. Resource.Metadata.Annotations?.Select(
-                                    a => new TextCollectionElement
-                                    {
-                                        Value = $"{a.Key}={a.Value}",
-                                    }
+                                    a => new TextCollectionElement { Value = $"{a.Key}={a.Value}" }
                                 ) ?? [],
                             ],
                         },
@@ -182,28 +179,19 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
         yield return new HeaderedRow
         {
             Header = "Count",
-            Content = new TextContent
-            {
-                Value = @event.DeprecatedCount?.ToString(),
-            },
+            Content = new TextContent { Value = @event.DeprecatedCount?.ToString() },
         };
 
         yield return new HeaderedRow
         {
             Header = "Sub-object",
-            Content = new TextContent
-            {
-                Value = @event.Regarding.FieldPath,
-            },
+            Content = new TextContent { Value = @event.Regarding.FieldPath },
         };
 
         yield return new HeaderedRow
         {
             Header = "Last seen",
-            Content = new TextContent
-            {
-                Value = @event.DeprecatedLastTimestamp?.ToString(),
-            },
+            Content = new TextContent { Value = @event.DeprecatedLastTimestamp?.ToString() },
         };
     }
 }

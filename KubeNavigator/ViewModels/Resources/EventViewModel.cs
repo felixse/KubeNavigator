@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Models;
@@ -22,11 +21,20 @@ internal partial class EventViewModel : KubernetesResourceViewModel
         new("Type", vm => ((EventViewModel)vm).Type, PropertyName: nameof(Type)),
         new("Message", vm => ((EventViewModel)vm).Message, PropertyName: nameof(Message)),
         new("Namespace", vm => vm.Namespace, PropertyName: nameof(Namespace)),
-        new("Involved Object", vm => ((EventViewModel)vm).InvolvedObject, PropertyName: nameof(InvolvedObject)),
+        new(
+            "Involved Object",
+            vm => ((EventViewModel)vm).InvolvedObject,
+            PropertyName: nameof(InvolvedObject)
+        ),
         new("Source", vm => ((EventViewModel)vm).Source, PropertyName: nameof(Source)),
         new("Count", vm => ((EventViewModel)vm).Count, PropertyName: nameof(Count)),
         new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
-        new("Last Seen", vm => ((EventViewModel)vm).LastSeen, ResourceColumnType.Age, nameof(LastSeen)),
+        new(
+            "Last Seen",
+            vm => ((EventViewModel)vm).LastSeen,
+            ResourceColumnType.Age,
+            nameof(LastSeen)
+        ),
     ];
 
     public override ImmutableArray<ResourceColumn> Columns => EventColumns;
@@ -48,26 +56,66 @@ internal partial class EventViewModel : KubernetesResourceViewModel
         return
         [
             new DetailsSection { Rows = [.. GetEventRows()] },
-            new DetailsSection
-            {
-                Header = "Involved object",
-                Rows = [.. GetInvolvedObjectRows()],
-            },
+            new DetailsSection { Header = "Involved object", Rows = [.. GetInvolvedObjectRows()] },
         ];
     }
 
     private IEnumerable<IDetailsRow> GetEventRows()
     {
-        yield return new HeaderedRow { Header = "Created", Content = new TextContent { Value = Event.CreationTimestamp().ToString() } };
-        yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = Event.Name() } };
-        yield return new HeaderedRow { Header = "Namespace", Content = new LinkContent { ResourceName = Resource.Namespace(), ResourceType = ResourceType.Namespace } };
-        yield return new HeaderedRow { Header = "Message", Content = new TextContent { Value = Event.Note } };
-        yield return new HeaderedRow { Header = "Reason", Content = new TextContent { Value = Event.Reason } };
-        yield return new HeaderedRow { Header = "Source", Content = new TextContent { Value = Event.DeprecatedSource?.Component } };
-        yield return new HeaderedRow { Header = "First seen", Content = new TextContent { Value = Event.DeprecatedFirstTimestamp.ToString() } };
-        yield return new HeaderedRow { Header = "Last seen", Content = new TextContent { Value = Event.DeprecatedLastTimestamp.ToString() } };
-        yield return new HeaderedRow { Header = "Count", Content = new TextContent { Value = Event.DeprecatedCount?.ToString() } };
-        yield return new HeaderedRow { Header = "Type", Content = new TextContent { Value = Event.Type } };
+        yield return new HeaderedRow
+        {
+            Header = "Created",
+            Content = new TextContent { Value = Event.CreationTimestamp().ToString() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Name",
+            Content = new TextContent { Value = Event.Name() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Namespace",
+            Content = new LinkContent
+            {
+                ResourceName = Resource.Namespace(),
+                ResourceType = ResourceType.Namespace,
+            },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Message",
+            Content = new TextContent { Value = Event.Note },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Reason",
+            Content = new TextContent { Value = Event.Reason },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Source",
+            Content = new TextContent { Value = Event.DeprecatedSource?.Component },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "First seen",
+            Content = new TextContent { Value = Event.DeprecatedFirstTimestamp.ToString() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Last seen",
+            Content = new TextContent { Value = Event.DeprecatedLastTimestamp.ToString() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Count",
+            Content = new TextContent { Value = Event.DeprecatedCount?.ToString() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Type",
+            Content = new TextContent { Value = Event.Type },
+        };
     }
 
     private IEnumerable<IDetailsRow> GetInvolvedObjectRows()
@@ -91,11 +139,27 @@ internal partial class EventViewModel : KubernetesResourceViewModel
         }
         else
         {
-            yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = Event.Regarding?.Name } };
+            yield return new HeaderedRow
+            {
+                Header = "Name",
+                Content = new TextContent { Value = Event.Regarding?.Name },
+            };
         }
 
-        yield return new HeaderedRow { Header = "Namespace", Content = new TextContent { Value = Event.Namespace() } };
-        yield return new HeaderedRow { Header = "Kind", Content = new TextContent { Value = Event.Regarding.Kind } };
-        yield return new HeaderedRow { Header = "Field Path", Content = new TextContent { Value = Event.Regarding.FieldPath } };
+        yield return new HeaderedRow
+        {
+            Header = "Namespace",
+            Content = new TextContent { Value = Event.Namespace() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Kind",
+            Content = new TextContent { Value = Event.Regarding.Kind },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Field Path",
+            Content = new TextContent { Value = Event.Regarding.FieldPath },
+        };
     }
 }

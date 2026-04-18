@@ -15,14 +15,19 @@ namespace KubeNavigator.ViewModels.AppCommands
 
         public string Context { get; }
 
-        public ViewResourceAppCommand(ResourceType resourceType, WorkspaceViewModel workspace, string? groupName = null)
+        public ViewResourceAppCommand(
+            ResourceType resourceType,
+            WorkspaceViewModel workspace,
+            string? groupName = null
+        )
         {
             ResourceType = resourceType;
             _workspace = workspace;
 
-            Name = groupName != null
-                ? $"View {ResourceType.PluralDisplayName} [{groupName}]"
-                : $"View {ResourceType.PluralDisplayName}";
+            Name =
+                groupName != null
+                    ? $"View {ResourceType.PluralDisplayName} [{groupName}]"
+                    : $"View {ResourceType.PluralDisplayName}";
             Context = _workspace.Cluster.Name;
         }
 
@@ -30,9 +35,11 @@ namespace KubeNavigator.ViewModels.AppCommands
         {
             var target = _workspace
                 .NavigationGroups.SelectMany(x => x.Items)
-                .SelectMany(item => item is CustomResourceGroupViewModel crg
-                    ? crg.Resources.Cast<INavigationTarget>()
-                    : [item])
+                .SelectMany(item =>
+                    item is CustomResourceGroupViewModel crg
+                        ? crg.Resources.Cast<INavigationTarget>()
+                        : [item]
+                )
                 .FirstOrDefault(x =>
                     x is KubernetesResourceTypeListViewModel resourceTypeList
                     && resourceTypeList.ResourceType == ResourceType

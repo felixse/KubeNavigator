@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json.JsonDiffPatch;
+using System.Text.Json.JsonDiffPatch.Diffs.Formatters;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,8 +15,6 @@ using k8s.Models;
 using KubeNavigator.Model;
 using KubeNavigator.Models;
 using Microsoft.Extensions.Logging;
-using System.Text.Json.JsonDiffPatch;
-using System.Text.Json.JsonDiffPatch.Diffs.Formatters;
 using YamlDotNet.Serialization;
 
 namespace KubeNavigator.Services;
@@ -26,7 +26,11 @@ public partial class KubernetesService
     private readonly string _contextName;
     private readonly ISettingsService _settingsService;
 
-    public KubernetesService(string contextName, ILogger<KubernetesService> logger, ISettingsService settingsService)
+    public KubernetesService(
+        string contextName,
+        ILogger<KubernetesService> logger,
+        ISettingsService settingsService
+    )
     {
         _contextName = contextName;
         _logger = logger;
@@ -319,16 +323,14 @@ public partial class KubernetesService
                 ? $"api/{resourceType.Version}"
                 : $"apis/{resourceType.Group}/{resourceType.Version}";
 
-            var path = resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(resourceNamespace)
-                ? $"{basePath}/namespaces/{resourceNamespace}/{resourceType.Plural}/{resourceName}"
-                : $"{basePath}/{resourceType.Plural}/{resourceName}";
+            var path =
+                resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(resourceNamespace)
+                    ? $"{basePath}/namespaces/{resourceNamespace}/{resourceType.Plural}/{resourceName}"
+                    : $"{basePath}/{resourceType.Plural}/{resourceName}";
 
             var k8s = (Kubernetes)_kubernetes!;
             var requestUri = new Uri(k8s.BaseUri, path);
-            var result = await k8s.HttpClient.GetAsync(
-                requestUri,
-                cancellationToken
-            );
+            var result = await k8s.HttpClient.GetAsync(requestUri, cancellationToken);
             result.EnsureSuccessStatusCode();
 
             var json = await result.Content.ReadAsStringAsync(cancellationToken);
@@ -380,9 +382,10 @@ public partial class KubernetesService
                 ? $"api/{resourceType.Version}"
                 : $"apis/{resourceType.Group}/{resourceType.Version}";
 
-            var path = resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(resourceNamespace)
-                ? $"{basePath}/namespaces/{resourceNamespace}/{resourceType.Plural}/{resourceNameFromYaml}"
-                : $"{basePath}/{resourceType.Plural}/{resourceNameFromYaml}";
+            var path =
+                resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(resourceNamespace)
+                    ? $"{basePath}/namespaces/{resourceNamespace}/{resourceType.Plural}/{resourceNameFromYaml}"
+                    : $"{basePath}/{resourceType.Plural}/{resourceNameFromYaml}";
 
             // Convert both YAML versions to JSON
             var deserializer = new DeserializerBuilder().Build();
@@ -394,7 +397,11 @@ public partial class KubernetesService
             var modifiedJson = KubernetesJson.Serialize(modifiedObject);
 
             // Compute RFC 6902 JSON Patch between original and modified
-            var patch = JsonDiffPatcher.Diff(originalJson, modifiedJson, new JsonPatchDeltaFormatter());
+            var patch = JsonDiffPatcher.Diff(
+                originalJson,
+                modifiedJson,
+                new JsonPatchDeltaFormatter()
+            );
 
             if (patch is not JsonArray { Count: > 0 })
             {
@@ -409,15 +416,23 @@ public partial class KubernetesService
             }
 
             var patchJson = patch.ToJsonString();
-            _logger.LogDebug("Sending JSON Patch with {OperationCount} operations to {Path}", patch.AsArray().Count, path);
+            _logger.LogDebug(
+                "Sending JSON Patch with {OperationCount} operations to {Path}",
+                patch.AsArray().Count,
+                path
+            );
 
             var k8s = (Kubernetes)_kubernetes!;
             var requestUri = new Uri(k8s.BaseUri, path);
-            var content = new StringContent(patchJson, Encoding.UTF8, new System.Net.Http.Headers.MediaTypeHeaderValue("application/json-patch+json"));
+            var content = new StringContent(
+                patchJson,
+                Encoding.UTF8,
+                new System.Net.Http.Headers.MediaTypeHeaderValue("application/json-patch+json")
+            );
 
             var request = new HttpRequestMessage(HttpMethod.Patch, requestUri)
             {
-                Content = content
+                Content = content,
             };
 
             var result = await k8s.HttpClient.SendAsync(request, cancellationToken);
@@ -426,7 +441,8 @@ public partial class KubernetesService
             {
                 var responseBody = await result.Content.ReadAsStringAsync(cancellationToken);
                 throw new HttpRequestException(
-                    $"Failed to patch resource ({result.StatusCode}): {responseBody}");
+                    $"Failed to patch resource ({result.StatusCode}): {responseBody}"
+                );
             }
 
             Log.ResourceYamlApplied(
@@ -472,13 +488,18 @@ public partial class KubernetesService
                 ? $"api/{resourceType.Version}"
                 : $"apis/{resourceType.Group}/{resourceType.Version}";
 
-            var path = resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(effectiveNamespace)
-                ? $"{basePath}/namespaces/{effectiveNamespace}/{resourceType.Plural}"
-                : $"{basePath}/{resourceType.Plural}";
+            var path =
+                resourceType.IsNamespaceScoped && !string.IsNullOrEmpty(effectiveNamespace)
+                    ? $"{basePath}/namespaces/{effectiveNamespace}/{resourceType.Plural}"
+                    : $"{basePath}/{resourceType.Plural}";
 
             var k8s = (Kubernetes)_kubernetes!;
             var requestUri = new Uri(k8s.BaseUri, path);
-            var content = new StringContent(json, Encoding.UTF8, new System.Net.Http.Headers.MediaTypeHeaderValue("application/json"));
+            var content = new StringContent(
+                json,
+                Encoding.UTF8,
+                new System.Net.Http.Headers.MediaTypeHeaderValue("application/json")
+            );
 
             var result = await k8s.HttpClient.PostAsync(requestUri, content, cancellationToken);
 
@@ -486,7 +507,8 @@ public partial class KubernetesService
             {
                 var responseBody = await result.Content.ReadAsStringAsync(cancellationToken);
                 throw new HttpRequestException(
-                    $"Failed to create resource ({result.StatusCode}): {responseBody}");
+                    $"Failed to create resource ({result.StatusCode}): {responseBody}"
+                );
             }
 
             var resourceName = ExtractResourceNameFromYaml(yaml);
@@ -555,7 +577,10 @@ public partial class KubernetesService
                     }
                 }
 
-                metrics[$"{ns}/{name}"] = (FormatCpu(totalCpuNanos), FormatMemory(totalMemoryBytes));
+                metrics[$"{ns}/{name}"] = (
+                    FormatCpu(totalCpuNanos),
+                    FormatMemory(totalMemoryBytes)
+                );
             }
 
             Log.PodMetricsFetched(_logger, metrics.Count, _contextName);
@@ -1108,11 +1133,7 @@ public partial class KubernetesService
             Level = LogLevel.Debug,
             Message = "Fetched metrics for {Count} pods in cluster {ContextName}"
         )]
-        public static partial void PodMetricsFetched(
-            ILogger logger,
-            int count,
-            string contextName
-        );
+        public static partial void PodMetricsFetched(ILogger logger, int count, string contextName);
 
         [LoggerMessage(
             EventId = 2039,

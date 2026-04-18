@@ -14,7 +14,8 @@ public partial class CountToVisibilityConverter : IValueConverter
         if (value is int count)
         {
             var meetsThreshold = count >= MinimumCount;
-            if (IsInverted) meetsThreshold = !meetsThreshold;
+            if (IsInverted)
+                meetsThreshold = !meetsThreshold;
             return meetsThreshold ? Visibility.Visible : Visibility.Collapsed;
         }
 

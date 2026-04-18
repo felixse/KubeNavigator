@@ -16,7 +16,8 @@ public partial class PinnedNavigationTargetViewModel : ObservableObject, INaviga
     {
         NavigationTarget = navigationTarget;
         Workspace = workspace;
-        _logger = workspace.App.LoggingService.LoggerFactory.CreateLogger<PinnedNavigationTargetViewModel>();
+        _logger =
+            workspace.App.LoggingService.LoggerFactory.CreateLogger<PinnedNavigationTargetViewModel>();
     }
 
     public string Title => NavigationTarget.Title;
@@ -54,7 +55,11 @@ public partial class PinnedNavigationTargetViewModel : ObservableObject, INaviga
 
     private static partial class Log
     {
-        [LoggerMessage(EventId = 13001, Level = LogLevel.Error, Message = "Cannot open {NavigationTarget} in new tab: Cluster is null")]
+        [LoggerMessage(
+            EventId = 13001,
+            Level = LogLevel.Error,
+            Message = "Cannot open {NavigationTarget} in new tab: Cluster is null"
+        )]
         public static partial void ClusterNullOnOpenNewTab(ILogger logger, string navigationTarget);
     }
 }

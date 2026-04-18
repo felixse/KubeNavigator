@@ -36,13 +36,14 @@ public sealed partial class StatusTextBlock : UserControl
         }
     }
 
-    private static string ToCanonicalCasing(string status) => status.ToLowerInvariant() switch
-    {
-        "running" => "Running",
-        "active" => "Active",
-        "deployed" => "Deployed",
-        "pending" => "Pending",
-        "terminating" => "Terminating",
-        _ => status
-    };
+    private static string ToCanonicalCasing(string status) =>
+        status.ToLowerInvariant() switch
+        {
+            "running" => "Running",
+            "active" => "Active",
+            "deployed" => "Deployed",
+            "pending" => "Pending",
+            "terminating" => "Terminating",
+            _ => status,
+        };
 }

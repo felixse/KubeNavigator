@@ -1,8 +1,6 @@
 using System;
 using KubeNavigator.ViewModels;
 using KubeNavigator.ViewModels.Details;
-using KubeNavigator.Views.Controls;
-using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -77,8 +75,10 @@ public sealed partial class ResourceDetailsView : UserControl
         {
             DetailScrollViewer.ChangeView(null, target, null, disableAnimation: true);
 
-            if (DetailScrollViewer.ScrollableHeight >= target
-                || DetailScrollViewer.VerticalOffset >= target - 1)
+            if (
+                DetailScrollViewer.ScrollableHeight >= target
+                || DetailScrollViewer.VerticalOffset >= target - 1
+            )
             {
                 DetailScrollViewer.LayoutUpdated -= OnLayoutUpdated;
             }

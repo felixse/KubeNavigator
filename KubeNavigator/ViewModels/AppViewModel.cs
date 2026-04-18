@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KubeNavigator.Models;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels.Details;
-using KubeNavigator.ViewModels.Navigation;
-using KubeNavigator.ViewModels.Resources;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 
@@ -122,7 +119,8 @@ public partial class AppViewModel : ObservableObject
 
     private async void OnContextsChanged(IReadOnlyList<string> contextNames)
     {
-        var affectedWorkspaces = new List<(WorkspaceViewModel Workspace, ClusterViewModel Cluster)>();
+        var affectedWorkspaces =
+            new List<(WorkspaceViewModel Workspace, ClusterViewModel Cluster)>();
 
         foreach (var name in contextNames)
         {
@@ -144,7 +142,10 @@ public partial class AppViewModel : ObservableObject
             return;
         }
 
-        var clusterNames = string.Join(", ", affectedWorkspaces.Select(a => a.Cluster.Name).Distinct());
+        var clusterNames = string.Join(
+            ", ",
+            affectedWorkspaces.Select(a => a.Cluster.Name).Distinct()
+        );
         Log.KubeConfigContextModified(_logger, clusterNames);
 
         foreach (var (workspace, cluster) in affectedWorkspaces)

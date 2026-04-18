@@ -12,7 +12,6 @@ using k8s;
 using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Resources;
-using Microsoft.UI.Dispatching;
 
 namespace KubeNavigator.ViewModels;
 
@@ -21,8 +20,6 @@ public partial class KubernetesResourceTypeListViewModel
         IKubernetesResourceEventSubscriber
 {
     public ClusterViewModel Cluster { get; }
-
-    public bool Loaded { get; set; } // todo this is not set if this is a pinned tab, use the activated method instead?
 
     [ObservableProperty]
     public partial bool IsPinned { get; private set; }
@@ -62,18 +59,11 @@ public partial class KubernetesResourceTypeListViewModel
 
     public async Task ActivateAsync()
     {
-        // todo: keep obs collections in clustervm, create collection view in here, use navto/navfrom to let the cluster sub/unsub
-
         await Workspace.Window.App.DispatcherQueue.EnqueueAsync(async () =>
         {
             bool filter(object x)
             {
                 var resource = (KubernetesResourceViewModel)x;
-                //if (resource.DeletionPending)
-                //{
-                //    return false;
-                //}
-
                 if (
                     ResourceType.IsNamespaceScoped
                     && Workspace.SelectedNamespaceFilter is NamespaceFilter filter
@@ -157,7 +147,10 @@ public partial class KubernetesResourceTypeListViewModel
     {
         string? targetNamespace = null;
 
-        if (ResourceType.IsNamespaceScoped && Workspace.SelectedNamespaceFilter is NamespaceFilter nsFilter)
+        if (
+            ResourceType.IsNamespaceScoped
+            && Workspace.SelectedNamespaceFilter is NamespaceFilter nsFilter
+        )
         {
             targetNamespace = nsFilter.Name;
         }

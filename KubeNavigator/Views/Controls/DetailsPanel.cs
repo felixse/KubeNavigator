@@ -34,8 +34,10 @@ public partial class DetailsPanel : Panel
         double maxTitleWidth = 0;
         foreach (var child in Children)
         {
-            if (FindChildGrid(child) is { ColumnDefinitions.Count: >= 2, Children.Count: > 0 } grid
-                && grid.Children[0] is FrameworkElement title)
+            if (
+                FindChildGrid(child) is { ColumnDefinitions.Count: >= 2, Children.Count: > 0 } grid
+                && grid.Children[0] is FrameworkElement title
+            )
             {
                 maxTitleWidth = Math.Max(maxTitleWidth, title.DesiredSize.Width);
             }
@@ -47,8 +49,10 @@ public partial class DetailsPanel : Panel
             var changed = false;
             foreach (var child in Children)
             {
-                if (FindChildGrid(child) is { ColumnDefinitions.Count: >= 2 } grid
-                    && grid.ColumnDefinitions[0].MinWidth != maxTitleWidth)
+                if (
+                    FindChildGrid(child) is { ColumnDefinitions.Count: >= 2 } grid
+                    && grid.ColumnDefinitions[0].MinWidth != maxTitleWidth
+                )
                 {
                     grid.ColumnDefinitions[0].MinWidth = maxTitleWidth;
                     changed = true;
@@ -75,7 +79,8 @@ public partial class DetailsPanel : Panel
 
         return new Size(
             double.IsInfinity(availableSize.Width) ? maxWidth : availableSize.Width,
-            totalHeight);
+            totalHeight
+        );
     }
 
     protected override Size ArrangeOverride(Size finalSize)

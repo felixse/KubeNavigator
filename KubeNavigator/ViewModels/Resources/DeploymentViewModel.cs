@@ -23,9 +23,18 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
         new("Ready", vm => ((DeploymentViewModel)vm).Ready, PropertyName: nameof(Ready)),
         new("Desired", vm => ((DeploymentViewModel)vm).Desired, PropertyName: nameof(Desired)),
         new("Updated", vm => ((DeploymentViewModel)vm).Updated, PropertyName: nameof(Updated)),
-        new("Available", vm => ((DeploymentViewModel)vm).Available, PropertyName: nameof(Available)),
+        new(
+            "Available",
+            vm => ((DeploymentViewModel)vm).Available,
+            PropertyName: nameof(Available)
+        ),
         new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
-        new("Conditions", vm => ((DeploymentViewModel)vm).Conditions, ResourceColumnType.Conditions, nameof(Conditions)),
+        new(
+            "Conditions",
+            vm => ((DeploymentViewModel)vm).Conditions,
+            ResourceColumnType.Conditions,
+            nameof(Conditions)
+        ),
     ];
 
     public override ImmutableArray<ResourceColumn> Columns => DeploymentColumns;
@@ -87,7 +96,16 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
                         Content = new TableContent
                         {
                             IsExpandable = false,
-                            Columns = ["Name", "Node", "Namespace", "Ready", "CPU", "Memory", "Status"],
+                            Columns =
+                            [
+                                "Name",
+                                "Node",
+                                "Namespace",
+                                "Ready",
+                                "CPU",
+                                "Memory",
+                                "Status",
+                            ],
                             Rows = podRows,
                         },
                     },
@@ -102,16 +120,38 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
 
     private IEnumerable<IDetailsRow> GetDeploymentRows()
     {
-        yield return new HeaderedRow { Header = "Created", Content = new TextContent { Value = Deployment.CreationTimestamp().ToString() } };
-        yield return new HeaderedRow { Header = "Name", Content = new TextContent { Value = Deployment.Name() } };
-        yield return new HeaderedRow { Header = "Namespace", Content = new LinkContent { ResourceName = Resource.Namespace(), ResourceType = ResourceType.Namespace } };
+        yield return new HeaderedRow
+        {
+            Header = "Created",
+            Content = new TextContent { Value = Deployment.CreationTimestamp().ToString() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Name",
+            Content = new TextContent { Value = Deployment.Name() },
+        };
+        yield return new HeaderedRow
+        {
+            Header = "Namespace",
+            Content = new LinkContent
+            {
+                ResourceName = Resource.Namespace(),
+                ResourceType = ResourceType.Namespace,
+            },
+        };
 
         yield return new HeaderedRow
         {
             Header = "Labels",
             Content = new CollectionContent
             {
-                Items = [.. Deployment.Metadata.Labels?.Select(l => new TextCollectionElement { Value = $"{l.Key}={l.Value}" }) ?? []],
+                Items =
+                [
+                    .. Deployment.Metadata.Labels?.Select(l => new TextCollectionElement
+                    {
+                        Value = $"{l.Key}={l.Value}",
+                    }) ?? [],
+                ],
             },
         };
 
@@ -122,7 +162,13 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
                 Header = "Annotations",
                 Content = new CollectionContent
                 {
-                    Items = [.. Deployment.Metadata.Annotations?.Select(l => new TextCollectionElement { Value = $"{l.Key}={l.Value}" }) ?? []],
+                    Items =
+                    [
+                        .. Deployment.Metadata.Annotations?.Select(l => new TextCollectionElement
+                        {
+                            Value = $"{l.Key}={l.Value}",
+                        }) ?? [],
+                    ],
                 },
             };
         }
@@ -132,7 +178,8 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             Header = "Replicas",
             Content = new TextContent
             {
-                Value = $"{Deployment.Status?.ReadyReplicas ?? 0} ready / {Deployment.Spec?.Replicas ?? 0} desired",
+                Value =
+                    $"{Deployment.Status?.ReadyReplicas ?? 0} ready / {Deployment.Spec?.Replicas ?? 0} desired",
             },
         };
 
@@ -141,7 +188,13 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             Header = "Selector",
             Content = new CollectionContent
             {
-                Items = [.. Deployment.Spec?.Selector?.MatchLabels?.Select(s => new TextCollectionElement { Value = $"{s.Key}={s.Value}" }) ?? []],
+                Items =
+                [
+                    .. Deployment.Spec?.Selector?.MatchLabels?.Select(s => new TextCollectionElement
+                    {
+                        Value = $"{s.Key}={s.Value}",
+                    }) ?? [],
+                ],
             },
         };
 
@@ -150,7 +203,12 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             Header = "Node Selector",
             Content = new CollectionContent
             {
-                Items = [.. Deployment.Spec?.Template?.Spec?.NodeSelector?.Select(n => new TextCollectionElement { Value = $"{n.Key}: {n.Value}" }) ?? []],
+                Items =
+                [
+                    .. Deployment.Spec?.Template?.Spec?.NodeSelector?.Select(
+                        n => new TextCollectionElement { Value = $"{n.Key}: {n.Value}" }
+                    ) ?? [],
+                ],
             },
         };
 
@@ -186,16 +244,18 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             {
                 IsExpandable = true,
                 Columns = ["Key", "Operator", "Value", "Effect", "Seconds"],
-                Rows = Deployment.Spec?.Template?.Spec?.Tolerations?.Select(t =>
-                    (IEnumerable<ITableCellContent>)new TextContent[]
-                    {
-                        t.Key,
-                        t.OperatorProperty,
-                        t.Value,
-                        t.Effect,
-                        t.TolerationSeconds?.ToString() ?? string.Empty,
-                    }
-                )
+                Rows =
+                    Deployment.Spec?.Template?.Spec?.Tolerations?.Select(t =>
+                        (IEnumerable<ITableCellContent>)
+                            new TextContent[]
+                            {
+                                t.Key,
+                                t.OperatorProperty,
+                                t.Value,
+                                t.Effect,
+                                t.TolerationSeconds?.ToString() ?? string.Empty,
+                            }
+                    )
                     ?? [],
             },
         };
@@ -226,13 +286,14 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             .Select(rs =>
             {
                 var replicaSet = (V1ReplicaSet)rs.Resource;
-                return (IEnumerable<ITableCellContent>)new TextContent[]
-                {
-                    replicaSet.Name(),
-                    replicaSet.Namespace(),
-                    $"{replicaSet.Status?.ReadyReplicas ?? 0}/{replicaSet.Status?.Replicas ?? 0}",
-                    replicaSet.Metadata.CreationTimestamp?.ToString() ?? string.Empty,
-                };
+                return (IEnumerable<ITableCellContent>)
+                    new TextContent[]
+                    {
+                        replicaSet.Name(),
+                        replicaSet.Namespace(),
+                        $"{replicaSet.Status?.ReadyReplicas ?? 0}/{replicaSet.Status?.Replicas ?? 0}",
+                        replicaSet.Metadata.CreationTimestamp?.ToString() ?? string.Empty,
+                    };
             });
     }
 
@@ -272,16 +333,17 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
                 var status = pod.Metadata.DeletionTimestamp is not null
                     ? "Terminating"
                     : pod.Status?.Phase ?? string.Empty;
-                return (IEnumerable<ITableCellContent>)new TextContent[]
-                {
-                    pod.Name(),
-                    pod.Spec?.NodeName ?? string.Empty,
-                    pod.Namespace(),
-                    ready,
-                    cpu,
-                    memory,
-                    status,
-                };
+                return (IEnumerable<ITableCellContent>)
+                    new TextContent[]
+                    {
+                        pod.Name(),
+                        pod.Spec?.NodeName ?? string.Empty,
+                        pod.Namespace(),
+                        ready,
+                        cpu,
+                        memory,
+                        status,
+                    };
             });
     }
 }

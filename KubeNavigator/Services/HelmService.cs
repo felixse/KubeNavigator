@@ -124,10 +124,7 @@ public partial class HelmService
             return string.Empty;
         }
 
-        var serializer = new SerializerBuilder()
-            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
-            .Build();
-        return serializer.Serialize(merged);
+        return YamlSerializerFactory.Serializer.Serialize(merged);
     }
 
     public record ManifestResource(string Kind, string Name, string? Namespace);
@@ -187,10 +184,7 @@ public partial class HelmService
 
         var deserializer = new DeserializerBuilder().Build();
         var values = deserializer.Deserialize(new StringReader(json.GetRawText()));
-        var serializer = new SerializerBuilder()
-            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
-            .Build();
-        return serializer.Serialize(values!);
+        return YamlSerializerFactory.Serializer.Serialize(values!);
     }
 
     private static void MergeDictionaries(

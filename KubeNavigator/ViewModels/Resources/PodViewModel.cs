@@ -9,7 +9,6 @@ using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Shelf;
 using Microsoft.Extensions.Logging;
-using YamlDotNet.Serialization;
 
 namespace KubeNavigator.ViewModels.Resources;
 
@@ -374,10 +373,6 @@ public partial class PodViewModel : KubernetesResourceViewModel
             Content = tolerationsTable,
         };
 
-        var serializer = new SerializerBuilder()
-            .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
-            .Build();
-
         yield return new ExpandableRow
         {
             Header = "Affinities",
@@ -393,7 +388,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
             {
                 Value =
                     Pod.Spec.Affinity != null
-                        ? serializer.Serialize(Pod.Spec.Affinity)
+                        ? YamlSerializerFactory.Serializer.Serialize(Pod.Spec.Affinity)
                         : string.Empty,
             },
         };

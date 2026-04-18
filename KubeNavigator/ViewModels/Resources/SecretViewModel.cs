@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -50,11 +51,17 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
 
         var newData = dataSection
             .Rows.OfType<FullWidthRow>()
-            .Select(r => r.Content)
-            .OfType<EditorContent>()
             .ToDictionary(
-                item => item.Title!,
-                item => Encoding.UTF8.GetBytes(item.TextRetriever?.Invoke() ?? item.Value)
+                item => item.Header!,
+                item =>
+                {
+                    var sensitive = item.Content as SensitiveDataContent;
+                    if (sensitive == null)
+                        return [];
+                    return sensitive.IsBinary
+                        ? Convert.FromBase64String(sensitive.EncodedText)
+                        : Encoding.UTF8.GetBytes(sensitive.PlainText);
+                }
             );
         Secret.Data = newData;
 
@@ -154,11 +161,8 @@ internal partial class SecretViewModel : KubernetesResourceViewModel
             {
                 yield return new FullWidthRow
                 {
-                    Content = new EditorContent
-                    {
-                        Title = key,
-                        Value = Encoding.UTF8.GetString(value),
-                    },
+                    Header = key,
+                    Content = new SensitiveDataContent(value),
                 };
             }
         }

@@ -94,4 +94,10 @@
   <converters:ToStringConverter x:Key="ToStringConverter" />
   <converters:ShelfItemToViewConverter x:Key="ShelfItemToViewConverter" />
   <converters:NotificationSeverityConverter x:Key="NotificationSeverityConverter" />
+  <toolkitConverters:BoolNegationConverter x:Key="NegateBoolConverter" />
+  <toolkitConverters:BoolToVisibilityConverter
+    x:Key="BoolToCollapsedConverter"
+    TrueValue="Collapsed"
+    FalseValue="Visible"
+  />
 </ResourceDictionary>

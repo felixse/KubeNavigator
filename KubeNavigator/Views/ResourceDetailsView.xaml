@@ -166,7 +166,7 @@
         </DataTemplate>
       </templateselectors:DetailsCollectionElementTemplateSelector.ConditionElementTemplate>
     </templateselectors:DetailsCollectionElementTemplateSelector>
-    <!-- Content templates: render IDetailsContent, each with its concrete x:DataType -->
+    <!--  Content templates: render IDetailsContent, each with its concrete x:DataType  -->
     <templateselectors:DetailsContentTemplateSelector x:Key="DetailsContentTemplateSelector">
       <templateselectors:DetailsContentTemplateSelector.TextTemplate>
         <DataTemplate x:DataType="details:TextContent">
@@ -200,10 +200,7 @@
               />
             </controls:Case>
             <controls:Case Value="Default">
-              <TextBlock
-                Style="{StaticResource DetailsValueTextStyle}"
-                Text="{x:Bind Value}"
-              />
+              <TextBlock Style="{StaticResource DetailsValueTextStyle}" Text="{x:Bind Value}" />
             </controls:Case>
           </controls:SwitchPresenter>
         </DataTemplate>
@@ -218,10 +215,7 @@
           >
             <ItemsControl.ItemsPanel>
               <ItemsPanelTemplate>
-                <controls:WrapPanel
-                  HorizontalSpacing="4"
-                  VerticalSpacing="4"
-                />
+                <controls:WrapPanel HorizontalSpacing="4" VerticalSpacing="4" />
               </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
           </ItemsControl>
@@ -409,6 +403,50 @@
           />
         </DataTemplate>
       </templateselectors:DetailsContentTemplateSelector.EditorTemplate>
+      <templateselectors:DetailsContentTemplateSelector.SensitiveDataTemplate>
+        <DataTemplate x:DataType="details:SensitiveDataContent">
+          <Grid ColumnSpacing="4">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox
+              AcceptsReturn="{x:Bind IsRevealed, Mode=OneWay}"
+              IsReadOnly="{x:Bind IsRevealed, Mode=OneWay, Converter={StaticResource NegateBoolConverter}}"
+              MaxHeight="200"
+              ScrollViewer.VerticalScrollBarVisibility="Auto"
+              Text="{x:Bind DisplayText, Mode=OneWay}"
+              TextWrapping="NoWrap"
+            />
+            <Button
+              Grid.Column="1"
+              VerticalAlignment="Center"
+              Background="Transparent"
+              BorderThickness="0"
+              Command="{x:Bind ToggleRevealCommand}"
+            >
+              <controls:SwitchPresenter Value="{x:Bind IsRevealed, Mode=OneWay, Converter={StaticResource ToStringConverter}}">
+                <controls:Case Value="False">
+                  <FontIcon FontSize="14" Glyph="&#xE890;" />
+                </controls:Case>
+                <controls:Case Value="True">
+                  <FontIcon FontSize="14" Glyph="&#xED1A;" />
+                </controls:Case>
+              </controls:SwitchPresenter>
+            </Button>
+            <Button
+              Grid.Column="2"
+              VerticalAlignment="Center"
+              Background="Transparent"
+              BorderThickness="0"
+              Command="{x:Bind CopyToClipboardCommand}"
+            >
+              <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+            </Button>
+          </Grid>
+        </DataTemplate>
+      </templateselectors:DetailsContentTemplateSelector.SensitiveDataTemplate>
     </templateselectors:DetailsContentTemplateSelector>
     <templateselectors:EmbeddedDetailsContentTemplateSelector
       x:Key="EmbeddedDetailsContentTemplateSelector"
@@ -416,10 +454,7 @@
     >
       <templateselectors:EmbeddedDetailsContentTemplateSelector.EmbeddedTableTemplate>
         <DataTemplate x:DataType="details:TableContent">
-          <ScrollViewer
-            HorizontalScrollBarVisibility="Auto"
-            VerticalScrollBarVisibility="Disabled"
-          >
+          <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
             <customcontrols:SimpleTable
               Margin="16,0,16,16"
               Columns="{x:Bind Columns}"
@@ -439,7 +474,7 @@
         </DataTemplate>
       </templateselectors:EmbeddedDetailsContentTemplateSelector.EmbeddedEditorTemplate>
     </templateselectors:EmbeddedDetailsContentTemplateSelector>
-    <!-- Row templates: render layout per IDetailsRow type, delegate content to DetailsContentTemplateSelector -->
+    <!--  Row templates: render layout per IDetailsRow type, delegate content to DetailsContentTemplateSelector  -->
     <templateselectors:DetailsRowTemplateSelector x:Key="DetailsRowTemplateSelector">
       <templateselectors:DetailsRowTemplateSelector.HeaderedRowTemplate>
         <DataTemplate x:DataType="details:HeaderedRow">
@@ -595,7 +630,7 @@
         </DataTemplate>
       </templateselectors:DetailsRowTemplateSelector.ExpandableRowTemplate>
     </templateselectors:DetailsRowTemplateSelector>
-    <!-- Section template -->
+    <!--  Section template  -->
     <DataTemplate x:Key="DetailsSectionTemplate" x:DataType="details:DetailsSection">
       <Grid RowSpacing="8">
         <Grid.RowDefinitions>

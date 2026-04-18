@@ -24,6 +24,8 @@ public partial class DetailsContentTemplateSelector : DataTemplateSelector
 
     public DataTemplate? EditorTemplate { get; set; }
 
+    public DataTemplate? SensitiveDataTemplate { get; set; }
+
     protected override DataTemplate SelectTemplateCore(object item)
     {
         var template = item switch
@@ -36,6 +38,7 @@ public partial class DetailsContentTemplateSelector : DataTemplateSelector
             DictionaryContent => DictionaryTemplate,
             MarkdownContent => MarkdownTemplate,
             EditorContent => EditorTemplate,
+            SensitiveDataContent => SensitiveDataTemplate,
             TextContent => TextTemplate,
             _ => TextTemplate,
         };

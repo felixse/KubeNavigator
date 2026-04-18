@@ -46,9 +46,14 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
 
         var newData = dataSection
             .Rows.OfType<FullWidthRow>()
-            .Select(r => r.Content)
-            .OfType<EditorContent>()
-            .ToDictionary(item => item.Title, item => item.TextRetriever?.Invoke() ?? item.Value);
+            .ToDictionary(
+                item => item.Header!,
+                item =>
+                {
+                    var editor = item.Content as EditorContent;
+                    return editor == null ? null : editor.TextRetriever?.Invoke() ?? editor.Value;
+                }
+            );
         ConfigMap.Data = newData;
 
         await Cluster.Context.SaveConfigMapAsync(ConfigMap);
@@ -107,7 +112,7 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
                 yield return new FullWidthRow
                 {
                     Header = key,
-                    Content = new EditorContent { Title = key, Value = value },
+                    Content = new EditorContent { Value = value },
                 };
             }
         }

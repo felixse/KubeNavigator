@@ -6,6 +6,7 @@
   xmlns:behaviors="using:CommunityToolkit.WinUI.Behaviors"
   xmlns:controls="using:CommunityToolkit.WinUI.Controls"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:filters="using:KubeNavigator.ViewModels.Filters"
   xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:templateselectors="using:KubeNavigator.TemplateSelectors"
@@ -16,12 +17,12 @@
   <UserControl.Resources>
     <templateselectors:NamespaceFilterTemplateSelector x:Key="NamespaceFilterTemplateSelector">
       <templateselectors:NamespaceFilterTemplateSelector.AllNamespacesTemplate>
-        <DataTemplate x:DataType="viewmodels:AllNamespacesFilter">
+        <DataTemplate x:DataType="filters:AllNamespacesFilter">
           <TextBlock Text="All Namespaces" />
         </DataTemplate>
       </templateselectors:NamespaceFilterTemplateSelector.AllNamespacesTemplate>
       <templateselectors:NamespaceFilterTemplateSelector.NamespaceTemplate>
-        <DataTemplate x:DataType="viewmodels:NamespaceFilter">
+        <DataTemplate x:DataType="filters:NamespaceFilter">
           <TextBlock>
             <Run Text="Namespace: " />
             <Run Text="{x:Bind Name}" />
@@ -83,13 +84,33 @@
           Icon="Delete"
           ToolTipService.ToolTip="Delete"
         />
-        <AppBarButton Width="36" Command="{x:Bind ViewModel.AddNewItemCommand}" Icon="Add" ToolTipService.ToolTip="Add" />
+        <AppBarButton
+          Width="36"
+          Command="{x:Bind ViewModel.AddNewItemCommand}"
+          Icon="Add"
+          ToolTipService.ToolTip="Add"
+        />
       </CommandBar>
       <TextBlock Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Run Text="{x:Bind ViewModel.Items.Count, Mode=OneWay}" />
         <Run Text="item(s)" />
       </TextBlock>
       <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
+        <ItemsControl VerticalAlignment="Center" ItemsSource="{x:Bind ViewModel.AdditionalFilters}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="filters:ToggleFilter">
+              <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                <TextBlock VerticalAlignment="Center" Text="{x:Bind Title}" />
+                <ToggleSwitch
+                  MinWidth="0"
+                  IsOn="{x:Bind IsChecked, Mode=TwoWay}"
+                  OffContent=""
+                  OnContent=""
+                />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
         <ComboBox
           MinWidth="240"
           VerticalAlignment="Center"

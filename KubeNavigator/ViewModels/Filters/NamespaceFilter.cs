@@ -1,4 +1,4 @@
-﻿namespace KubeNavigator.ViewModels;
+﻿namespace KubeNavigator.ViewModels.Filters;
 
 public class NamespaceFilter : INamespaceFilter
 {

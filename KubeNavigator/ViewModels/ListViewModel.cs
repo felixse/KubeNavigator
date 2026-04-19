@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.Collections;
+using KubeNavigator.ViewModels.Filters;
 using KubeNavigator.ViewModels.Navigation;
 
 namespace KubeNavigator.ViewModels;
@@ -53,13 +54,16 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
     public WorkspaceViewModel Workspace { get; }
     public bool IsNamespaceScoped { get; }
 
-    public ObservableCollection<INamespaceFilter> NamespaceFilters { get; } // todo should we just pass in generic filters (values + selected) or would this be overengineering?
+    public ObservableCollection<INamespaceFilter> NamespaceFilters { get; }
+
+    public IEnumerable<ToggleFilter> AdditionalFilters { get; }
 
     public ListViewModel(
         WorkspaceViewModel workspace,
         string title,
         bool isNamespaceScoped,
-        ObservableCollection<INamespaceFilter> namespaceFilters
+        ObservableCollection<INamespaceFilter> namespaceFilters,
+        IEnumerable<ToggleFilter> additionalFilters
     )
     {
         Workspace = workspace;
@@ -67,6 +71,12 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
         Title = title;
         IsNamespaceScoped = isNamespaceScoped;
         NamespaceFilters = namespaceFilters;
+        AdditionalFilters = additionalFilters;
+
+        foreach (var filter in AdditionalFilters)
+        {
+            filter.PropertyChanged += OnFilterPropertyChanged;
+        }
     }
 
     private void OnWorkspacePropertyChanged(
@@ -75,6 +85,17 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
     )
     {
         if (e.PropertyName == nameof(WorkspaceViewModel.SelectedNamespaceFilter))
+        {
+            Items?.RefreshFilter();
+        }
+    }
+
+    private void OnFilterPropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e
+    )
+    {
+        if (e.PropertyName == nameof(ToggleFilter.IsChecked))
         {
             Items?.RefreshFilter();
         }

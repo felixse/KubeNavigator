@@ -9,6 +9,7 @@ using CommunityToolkit.WinUI;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Models;
+using KubeNavigator.ViewModels.Filters;
 using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Resources;
 using Microsoft.Extensions.Logging;
@@ -32,6 +33,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
 
     public ObservableCollection<HelmReleaseViewModel> HelmReleases { get; } = [];
 
+    public Dictionary<ResourceType, IEnumerable<ToggleFilter>> AdditionalFilters { get; } = new();
+
     public string Name { get; }
     public AppViewModel App { get; }
 
@@ -44,6 +47,23 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         Context = context;
         _logger = app.LoggingService.LoggerFactory.CreateLogger<ClusterViewModel>();
         NamespaceFilters.Add(new AllNamespacesFilter());
+        AdditionalFilters.Add(
+            ResourceType.Secret,
+            [
+                new ToggleFilter(
+                    "Hide Helm Secrets",
+                    defaultValue: true,
+                    r =>
+                    {
+                        if (r is SecretViewModel secret)
+                        {
+                            return secret.Type != "helm.sh/release.v1";
+                        }
+                        return true;
+                    }
+                ),
+            ]
+        );
 
         context.StatusChanged += Context_StatusChanged;
         context.PodMetricsUpdated += OnPodMetricsUpdated;

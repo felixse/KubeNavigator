@@ -11,6 +11,7 @@ using CommunityToolkit.WinUI.Collections;
 using k8s;
 using k8s.Models;
 using KubeNavigator.Models;
+using KubeNavigator.ViewModels.Filters;
 using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.ViewModels;
@@ -45,7 +46,11 @@ public partial class KubernetesResourceTypeListViewModel
             workspace,
             title: resourceType.PluralDisplayName,
             isNamespaceScoped: resourceType.IsNamespaceScoped,
-            namespaceFilters: cluster.NamespaceFilters
+            namespaceFilters: cluster.NamespaceFilters,
+            additionalFilters: cluster.AdditionalFilters.GetValueOrDefault(
+                resourceType,
+                Enumerable.Empty<ToggleFilter>()
+            )
         )
     {
         Cluster = cluster;
@@ -63,6 +68,14 @@ public partial class KubernetesResourceTypeListViewModel
         {
             bool filter(object x)
             {
+                foreach (var toggleFilter in AdditionalFilters.Where(f => f.IsChecked))
+                {
+                    if (!toggleFilter.Expression.Invoke(x))
+                    {
+                        return false;
+                    }
+                }
+
                 var resource = (KubernetesResourceViewModel)x;
                 if (
                     ResourceType.IsNamespaceScoped
@@ -102,15 +115,11 @@ public partial class KubernetesResourceTypeListViewModel
 
     public override async Task OnNavigatedTo()
     {
-        //var resources = await Cluster.Context.GetResourceRepositoryAsync(ResourceType);
-        //resources.AddSubscriber(this);
         await Cluster.WatchResource(ResourceType);
     }
 
     public override async Task OnNavigatedFrom()
     {
-        //var resources = await Cluster.Context.GetResourceRepositoryAsync(ResourceType);
-        //resources.RemoveSubscriber(this);
         await Cluster.StopWatchResource(ResourceType);
     }
 
@@ -132,14 +141,14 @@ public partial class KubernetesResourceTypeListViewModel
     [RelayCommand]
     public void Pin()
     {
-        this.IsPinned = true;
+        IsPinned = true;
         Workspace.PinResourceType(this);
     }
 
     [RelayCommand]
     public void UnPin()
     {
-        this.IsPinned = false;
+        IsPinned = false;
         Workspace.UnPinResourceType(this);
     }
 

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.WinUI.Collections;
+using KubeNavigator.ViewModels.Filters;
 
 namespace KubeNavigator.ViewModels;
 
@@ -13,7 +15,13 @@ public partial class PortForwardsViewModel : ListViewModel
         WorkspaceViewModel workspace,
         ObservableCollection<ForwardedPortViewModel> forwardedPorts
     )
-        : base(workspace, title: "Port Forwards", isNamespaceScoped: false, namespaceFilters: [])
+        : base(
+            workspace,
+            title: "Port Forwards",
+            isNamespaceScoped: false,
+            namespaceFilters: [],
+            additionalFilters: []
+        )
     {
         ForwardedPorts = forwardedPorts;
         Items = new AdvancedCollectionView(ForwardedPorts);

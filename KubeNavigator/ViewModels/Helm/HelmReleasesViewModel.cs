@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.WinUI;
+using KubeNavigator.ViewModels.Filters;
 using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.ViewModels.Helm;
@@ -11,7 +12,13 @@ namespace KubeNavigator.ViewModels.Helm;
 public partial class HelmReleasesViewModel : ListViewModel
 {
     public HelmReleasesViewModel(WorkspaceViewModel workspace, ClusterViewModel cluster)
-        : base(workspace, title: "Releases", isNamespaceScoped: true, cluster.NamespaceFilters) { }
+        : base(
+            workspace,
+            title: "Releases",
+            isNamespaceScoped: true,
+            cluster.NamespaceFilters,
+            additionalFilters: []
+        ) { }
 
     public async Task ActivateAsync()
     {

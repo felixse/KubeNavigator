@@ -11,6 +11,7 @@ using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.AppCommands;
 using KubeNavigator.ViewModels.Details;
+using KubeNavigator.ViewModels.Filters;
 using KubeNavigator.ViewModels.Helm;
 using KubeNavigator.ViewModels.Navigation;
 using KubeNavigator.ViewModels.Resources;

@@ -1,4 +1,4 @@
-﻿using KubeNavigator.ViewModels;
+﻿using KubeNavigator.ViewModels.Filters;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 

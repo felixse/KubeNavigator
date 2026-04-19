@@ -113,8 +113,8 @@ public partial class PodViewModel : KubernetesResourceViewModel
     public void RefreshMetrics()
     {
         var metrics = Cluster.Context.GetPodMetrics(Pod.Namespace(), Pod.Name());
-        CpuUsage = metrics?.Cpu ?? string.Empty;
-        MemoryUsage = metrics?.Memory ?? string.Empty;
+        CpuUsage = metrics?.Cpu.Format() ?? string.Empty;
+        MemoryUsage = metrics?.Memory.Format() ?? string.Empty;
     }
 
     public override async Task<List<IDetailsSection>> CreateDetailsAsync()

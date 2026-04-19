@@ -64,6 +64,23 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 ),
             ]
         );
+        AdditionalFilters.Add(
+            ResourceType.Event,
+            [
+                new ToggleFilter(
+                    "Warnings only",
+                    defaultValue: true,
+                    r =>
+                    {
+                        if (r is EventViewModel @event)
+                        {
+                            return @event.Event.Type == "Warning";
+                        }
+                        return true;
+                    }
+                ),
+            ]
+        );
 
         context.StatusChanged += Context_StatusChanged;
         context.PodMetricsUpdated += OnPodMetricsUpdated;

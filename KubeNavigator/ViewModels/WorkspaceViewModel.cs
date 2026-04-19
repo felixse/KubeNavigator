@@ -140,10 +140,22 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
 
         SelectedNamespaceFilter = cluster.NamespaceFilters.First(x => x is AllNamespacesFilter);
 
+        var clusterOverview = new ClusterOverviewViewModel(
+            cluster,
+            new KubernetesResourceTypeListViewModel(
+                this,
+                cluster,
+                ResourceType.Event,
+                (x) => new SecretViewModel((Eventsv1Event)x, Cluster),
+                EventViewModel.EventColumns
+            )
+        );
+
         var clusterGroup = new NavigationGroupViewModel(
             "Cluster",
             new SymbolNavigationGroupIcon("\uE968"),
             [
+                clusterOverview,
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Node),
                 new KubernetesResourceTypeListViewModel(
                     this,
@@ -151,13 +163,6 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     ResourceType.Namespace,
                     (x) => new NamespaceViewModel((V1Namespace)x, Cluster),
                     NamespaceViewModel.NamespaceColumns
-                ),
-                new KubernetesResourceTypeListViewModel(
-                    this,
-                    cluster,
-                    ResourceType.Event,
-                    (x) => new SecretViewModel((Eventsv1Event)x, Cluster),
-                    EventViewModel.EventColumns
                 ),
             ]
         );
@@ -353,7 +358,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         _customResourceDefinitions.CollectionChanged +=
             OnCustomResourceDefinitionsCollectionChanged;
 
-        SelectedItem = null;
+        SelectedItem = clusterOverview;
     }
 
     private void OnCustomResourceDefinitionsCollectionChanged(

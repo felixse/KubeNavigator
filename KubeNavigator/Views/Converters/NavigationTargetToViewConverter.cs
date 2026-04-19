@@ -54,6 +54,19 @@ public partial class NavigationTargetToViewConverter : IValueConverter
             helmReleases.OnNavigatedTo();
             return view;
         }
+        else if (value is ClusterOverviewViewModel clusterOverview)
+        {
+            if (!_views.TryGetValue(clusterOverview, out UserControl? view))
+            {
+                Task.Run(async () => await clusterOverview.ActivateAsync());
+                view = new ClusterOverview { ViewModel = clusterOverview };
+                _views.Add(clusterOverview, view);
+            }
+            _current?.OnNavigatedFrom();
+            _current = clusterOverview;
+            clusterOverview.OnNavigatedTo();
+            return view;
+        }
         else if (value is SettingsViewModel settingsViewModel)
         {
             if (!_views.TryGetValue(settingsViewModel, out UserControl? view))

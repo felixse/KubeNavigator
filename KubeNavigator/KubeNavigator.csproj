@@ -23,6 +23,8 @@
     <None Remove="Pages\DetailsWindowRootPage.xaml" />
     <None Remove="RootPage.xaml" />
     <None Remove="Views\ApplicationLogView.xaml" />
+    <None Remove="Views\ClusterMetricsCard.xaml" />
+    <None Remove="Views\ClusterOverview.xaml" />
     <None Remove="Views\MainView.xaml" />
     <None Remove="Views\PodLogView.xaml" />
     <None Remove="Views\PodShellView.xaml" />
@@ -62,33 +64,15 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CliWrap" Version="3.10.1" />
-    <PackageReference
-      Include="CommunityToolkit.Labs.WinUI.Controls.DataTable"
-      Version="0.1.251217-build.2433"
-    />
-    <PackageReference
-      Include="CommunityToolkit.Labs.WinUI.Controls.MarkdownTextBlock"
-      Version="0.1.251217-build.2433"
-    />
+    <PackageReference Include="CommunityToolkit.Labs.WinUI.Controls.DataTable" Version="0.1.251217-build.2433" />
+    <PackageReference Include="CommunityToolkit.Labs.WinUI.Controls.MarkdownTextBlock" Version="0.1.251217-build.2433" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="CommunityToolkit.WinUI.Behaviors" Version="8.3.260402-preview2" />
     <PackageReference Include="CommunityToolkit.WinUI.Collections" Version="8.3.260402-preview2" />
-    <PackageReference
-      Include="CommunityToolkit.WinUI.Controls.HeaderedControls"
-      Version="8.3.260402-preview2"
-    />
-    <PackageReference
-      Include="CommunityToolkit.WinUI.Controls.Primitives"
-      Version="8.3.260402-preview2"
-    />
-    <PackageReference
-      Include="CommunityToolkit.WinUI.Controls.Segmented"
-      Version="8.3.260402-preview2"
-    />
-    <PackageReference
-      Include="CommunityToolkit.WinUI.Controls.SettingsControls"
-      Version="8.3.260402-preview2"
-    />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.HeaderedControls" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
     <PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.3.260402-preview2" />
     <PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.3.260402-preview2" />
     <PackageReference Include="FuseSharp" Version="1.4.0" />
@@ -170,6 +154,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Views\ClusterOverview.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <None Update="Views\ClusterMetricsCard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
     <None Update="Views\Controls\SimpleTable.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>

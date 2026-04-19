@@ -41,11 +41,13 @@ public partial class KubernetesContext
     private readonly Dictionary<ResourceType, IKubernetesResourceRepository> _repositories = [];
 
     private CancellationTokenSource? _metricsPollingCts;
-    private volatile IReadOnlyDictionary<string, (string Cpu, string Memory)> _podMetrics =
-        new Dictionary<string, (string Cpu, string Memory)>();
+    private volatile IReadOnlyDictionary<string, ResourceUsage> _podMetrics =
+        new Dictionary<string, ResourceUsage>();
+    private Services.NodeMetrics? _nodeMetrics;
 
     public event EventHandler<ClusterStatus>? StatusChanged; // todo change to something that supports async handlers
     public event EventHandler? PodMetricsUpdated;
+    public event EventHandler<Services.NodeMetrics>? NodeMetricsUpdated;
 
     public string Name { get; }
 
@@ -305,7 +307,7 @@ public partial class KubernetesContext
         );
     }
 
-    public (string Cpu, string Memory)? GetPodMetrics(string podNamespace, string podName)
+    public ResourceUsage? GetPodMetrics(string podNamespace, string podName)
     {
         return _podMetrics.TryGetValue($"{podNamespace}/{podName}", out var metrics)
             ? metrics
@@ -324,7 +326,7 @@ public partial class KubernetesContext
         _metricsPollingCts?.Cancel();
         _metricsPollingCts?.Dispose();
         _metricsPollingCts = null;
-        _podMetrics = new Dictionary<string, (string Cpu, string Memory)>();
+        _podMetrics = new Dictionary<string, ResourceUsage>();
     }
 
     private async Task PollMetricsAsync(CancellationToken cancellationToken)
@@ -332,6 +334,7 @@ public partial class KubernetesContext
         try
         {
             var podMetrics = await _kubernetesService.GetPodMetricsAsync(cancellationToken);
+            var nodeMetrics = await _kubernetesService.GetNodeMetricsAsync(cancellationToken);
             if (podMetrics == null)
             {
                 Log.MetricsServerNotAvailable(_logger, Name);
@@ -342,6 +345,12 @@ public partial class KubernetesContext
             _podMetrics = podMetrics;
             PodMetricsUpdated?.Invoke(this, EventArgs.Empty);
 
+            if (nodeMetrics != null)
+            {
+                _nodeMetrics = nodeMetrics;
+                NodeMetricsUpdated?.Invoke(this, nodeMetrics);
+            }
+
             using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
@@ -350,6 +359,13 @@ public partial class KubernetesContext
                 {
                     _podMetrics = podMetrics;
                     PodMetricsUpdated?.Invoke(this, EventArgs.Empty);
+                }
+
+                nodeMetrics = await _kubernetesService.GetNodeMetricsAsync(cancellationToken);
+                if (nodeMetrics != null)
+                {
+                    _nodeMetrics = nodeMetrics;
+                    NodeMetricsUpdated?.Invoke(this, nodeMetrics);
                 }
             }
         }

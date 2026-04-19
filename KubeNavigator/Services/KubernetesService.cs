@@ -19,6 +19,16 @@ using YamlDotNet.Serialization;
 
 namespace KubeNavigator.Services;
 
+public record NodeMetrics(
+    Dictionary<string, ResourceUsage> NodeUsage,
+    int TotalNodes,
+    int ReadyNodes,
+    int TotalPods,
+    int RequestedPods,
+    CpuQuantity TotalCpu,
+    MemoryQuantity TotalMemory
+);
+
 public partial class KubernetesService
 {
     private readonly ILogger<KubernetesService> _logger;
@@ -545,7 +555,7 @@ public partial class KubernetesService
         );
     }
 
-    public async Task<Dictionary<string, (string Cpu, string Memory)>?> GetPodMetricsAsync(
+    public async Task<Dictionary<string, ResourceUsage>?> GetPodMetricsAsync(
         CancellationToken cancellationToken = default
     )
     {
@@ -554,7 +564,7 @@ public partial class KubernetesService
             Log.FetchingPodMetrics(_logger, _contextName);
             var podMetricsList = await _kubernetes!.GetKubernetesPodsMetricsAsync();
 
-            var metrics = new Dictionary<string, (string Cpu, string Memory)>();
+            var metrics = new Dictionary<string, ResourceUsage>();
             foreach (var podMetric in podMetricsList.Items)
             {
                 var name = podMetric.Metadata?.Name;
@@ -562,8 +572,8 @@ public partial class KubernetesService
                 if (name == null || ns == null)
                     continue;
 
-                long totalCpuNanos = 0;
-                long totalMemoryBytes = 0;
+                var cpu = CpuQuantity.Zero;
+                var memory = MemoryQuantity.Zero;
                 if (podMetric.Containers != null)
                 {
                     foreach (var container in podMetric.Containers)
@@ -571,16 +581,13 @@ public partial class KubernetesService
                         if (container.Usage == null)
                             continue;
                         if (container.Usage.TryGetValue("cpu", out var cpuQty))
-                            totalCpuNanos += ParseCpuToNanocores(cpuQty.ToString());
+                            cpu += CpuQuantity.FromResourceQuantity(cpuQty);
                         if (container.Usage.TryGetValue("memory", out var memQty))
-                            totalMemoryBytes += ParseMemoryToBytes(memQty.ToString());
+                            memory += MemoryQuantity.FromResourceQuantity(memQty);
                     }
                 }
 
-                metrics[$"{ns}/{name}"] = (
-                    FormatCpu(totalCpuNanos),
-                    FormatMemory(totalMemoryBytes)
-                );
+                metrics[$"{ns}/{name}"] = new ResourceUsage(cpu, memory);
             }
 
             Log.PodMetricsFetched(_logger, metrics.Count, _contextName);
@@ -593,7 +600,7 @@ public partial class KubernetesService
         }
     }
 
-    public async Task<Dictionary<string, (string Cpu, string Memory)>?> GetNodeMetricsAsync(
+    public async Task<NodeMetrics?> GetNodeMetricsAsync(
         CancellationToken cancellationToken = default
     )
     {
@@ -602,28 +609,65 @@ public partial class KubernetesService
             Log.FetchingNodeMetrics(_logger, _contextName);
             var nodeMetricsList = await _kubernetes!.GetKubernetesNodesMetricsAsync();
 
-            var metrics = new Dictionary<string, (string Cpu, string Memory)>();
+            var metrics = new Dictionary<string, ResourceUsage>();
             foreach (var nodeMetric in nodeMetricsList.Items)
             {
                 var name = nodeMetric.Metadata?.Name;
                 if (name == null)
                     continue;
 
-                long cpuNanos = 0;
-                long memBytes = 0;
+                var cpu = CpuQuantity.Zero;
+                var memory = MemoryQuantity.Zero;
                 if (nodeMetric.Usage != null)
                 {
                     if (nodeMetric.Usage.TryGetValue("cpu", out var cpuQty))
-                        cpuNanos = ParseCpuToNanocores(cpuQty.ToString());
+                        cpu = CpuQuantity.FromResourceQuantity(cpuQty);
                     if (nodeMetric.Usage.TryGetValue("memory", out var memQty))
-                        memBytes = ParseMemoryToBytes(memQty.ToString());
+                        memory = MemoryQuantity.FromResourceQuantity(memQty);
                 }
 
-                metrics[name] = (FormatCpu(cpuNanos), FormatMemory(memBytes));
+                metrics[name] = new ResourceUsage(cpu, memory);
             }
 
+            var nodes = await _kubernetes.CoreV1.ListNodeAsync(
+                cancellationToken: cancellationToken
+            );
+            var totalNodes = nodes.Items.Count;
+            var readyNodes = nodes.Items.Count(n =>
+                n.Status?.Conditions?.Any(c => c.Type == "Ready" && c.Status == "True") == true
+            );
+
+            var totalCpu = CpuQuantity.Zero;
+            var totalMemory = MemoryQuantity.Zero;
+            foreach (var node in nodes.Items)
+            {
+                if (node.Status?.Capacity != null)
+                {
+                    if (node.Status.Capacity.TryGetValue("cpu", out var cpuQty))
+                        totalCpu += CpuQuantity.FromResourceQuantity(cpuQty);
+                    if (node.Status.Capacity.TryGetValue("memory", out var memQty))
+                        totalMemory += MemoryQuantity.FromResourceQuantity(memQty);
+                }
+            }
+
+            var pods = await _kubernetes.CoreV1.ListPodForAllNamespacesAsync(
+                cancellationToken: cancellationToken
+            );
+            var totalPods = pods.Items.Count;
+            var requestedPods = pods.Items.Count(p =>
+                p.Status?.Phase is not ("Succeeded" or "Failed")
+            );
+
             Log.NodeMetricsFetched(_logger, metrics.Count, _contextName);
-            return metrics;
+            return new NodeMetrics(
+                metrics,
+                totalNodes,
+                readyNodes,
+                totalPods,
+                requestedPods,
+                totalCpu,
+                totalMemory
+            );
         }
         catch (Exception ex)
         {
@@ -632,54 +676,7 @@ public partial class KubernetesService
         }
     }
 
-    internal static long ParseCpuToNanocores(string? cpu)
-    {
-        if (string.IsNullOrEmpty(cpu))
-            return 0;
-        if (cpu.EndsWith('n'))
-            return long.TryParse(cpu.AsSpan(0, cpu.Length - 1), out var n) ? n : 0;
-        if (cpu.EndsWith('u'))
-            return long.TryParse(cpu.AsSpan(0, cpu.Length - 1), out var u) ? u * 1_000 : 0;
-        if (cpu.EndsWith('m'))
-            return long.TryParse(cpu.AsSpan(0, cpu.Length - 1), out var m) ? m * 1_000_000 : 0;
-        return long.TryParse(cpu, out var cores) ? cores * 1_000_000_000 : 0;
-    }
 
-    internal static long ParseMemoryToBytes(string? memory)
-    {
-        if (string.IsNullOrEmpty(memory))
-            return 0;
-        if (memory.EndsWith("Ki"))
-            return long.TryParse(memory.AsSpan(0, memory.Length - 2), out var ki) ? ki * 1024 : 0;
-        if (memory.EndsWith("Mi"))
-            return long.TryParse(memory.AsSpan(0, memory.Length - 2), out var mi)
-                ? mi * 1024 * 1024
-                : 0;
-        if (memory.EndsWith("Gi"))
-            return long.TryParse(memory.AsSpan(0, memory.Length - 2), out var gi)
-                ? gi * 1024 * 1024 * 1024
-                : 0;
-        return long.TryParse(memory, out var bytes) ? bytes : 0;
-    }
-
-    internal static string FormatCpu(long nanocores)
-    {
-        var millicores = nanocores / 1_000_000;
-        if (millicores >= 1000)
-            return $"{millicores / 1000d:0.##}";
-        return $"{millicores}m";
-    }
-
-    internal static string FormatMemory(long bytes)
-    {
-        if (bytes >= 1024L * 1024 * 1024)
-            return $"{bytes / (1024.0 * 1024 * 1024):0.#}Gi";
-        if (bytes >= 1024L * 1024)
-            return $"{bytes / (1024.0 * 1024):0.#}Mi";
-        if (bytes >= 1024)
-            return $"{bytes / 1024.0:0.#}Ki";
-        return $"{bytes}B";
-    }
 
     private string ExtractResourceNameFromYaml(string yaml)
     {

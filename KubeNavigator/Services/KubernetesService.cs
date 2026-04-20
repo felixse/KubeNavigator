@@ -36,6 +36,20 @@ public partial class KubernetesService
     private readonly string _contextName;
     private readonly ISettingsService _settingsService;
 
+    private async Task<HttpResponseMessage> SendAuthenticatedAsync(
+        Kubernetes k8s,
+        HttpRequestMessage request,
+        CancellationToken cancellationToken
+    )
+    {
+        if (k8s.Credentials is not null)
+        {
+            await k8s.Credentials.ProcessHttpRequestAsync(request, cancellationToken);
+        }
+
+        return await k8s.HttpClient.SendAsync(request, cancellationToken);
+    }
+
     public KubernetesService(
         string contextName,
         ILogger<KubernetesService> logger,
@@ -340,7 +354,8 @@ public partial class KubernetesService
 
             var k8s = (Kubernetes)_kubernetes!;
             var requestUri = new Uri(k8s.BaseUri, path);
-            var result = await k8s.HttpClient.GetAsync(requestUri, cancellationToken);
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            var result = await SendAuthenticatedAsync(k8s, request, cancellationToken);
             result.EnsureSuccessStatusCode();
 
             var json = await result.Content.ReadAsStringAsync(cancellationToken);
@@ -445,7 +460,7 @@ public partial class KubernetesService
                 Content = content,
             };
 
-            var result = await k8s.HttpClient.SendAsync(request, cancellationToken);
+            var result = await SendAuthenticatedAsync(k8s, request, cancellationToken);
 
             if (!result.IsSuccessStatusCode)
             {
@@ -511,7 +526,11 @@ public partial class KubernetesService
                 new System.Net.Http.Headers.MediaTypeHeaderValue("application/json")
             );
 
-            var result = await k8s.HttpClient.PostAsync(requestUri, content, cancellationToken);
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
+            {
+                Content = content,
+            };
+            var result = await SendAuthenticatedAsync(k8s, request, cancellationToken);
 
             if (!result.IsSuccessStatusCode)
             {

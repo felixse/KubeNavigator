@@ -333,8 +333,11 @@ public partial class KubernetesContext
     {
         try
         {
-            var podMetrics = await _kubernetesService.GetPodMetricsAsync(cancellationToken);
-            var nodeMetrics = await _kubernetesService.GetNodeMetricsAsync(cancellationToken);
+            var podMetricsTask = _kubernetesService.GetPodMetricsAsync(cancellationToken);
+            var nodeMetricsTask = _kubernetesService.GetNodeMetricsAsync(cancellationToken);
+            await Task.WhenAll(podMetricsTask, nodeMetricsTask);
+            var podMetrics = podMetricsTask.Result;
+            var nodeMetrics = nodeMetricsTask.Result;
             if (podMetrics == null)
             {
                 Log.MetricsServerNotAvailable(_logger, Name);
@@ -354,14 +357,18 @@ public partial class KubernetesContext
             using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
-                podMetrics = await _kubernetesService.GetPodMetricsAsync(cancellationToken);
+                var podMetricsUpdate = _kubernetesService.GetPodMetricsAsync(cancellationToken);
+                var nodeMetricsUpdate = _kubernetesService.GetNodeMetricsAsync(cancellationToken);
+                await Task.WhenAll(podMetricsUpdate, nodeMetricsUpdate);
+
+                podMetrics = podMetricsUpdate.Result;
                 if (podMetrics != null)
                 {
                     _podMetrics = podMetrics;
                     PodMetricsUpdated?.Invoke(this, EventArgs.Empty);
                 }
 
-                nodeMetrics = await _kubernetesService.GetNodeMetricsAsync(cancellationToken);
+                nodeMetrics = nodeMetricsUpdate.Result;
                 if (nodeMetrics != null)
                 {
                     _nodeMetrics = nodeMetrics;

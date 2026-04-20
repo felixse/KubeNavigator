@@ -626,8 +626,16 @@ public partial class KubernetesService
         try
         {
             Log.FetchingNodeMetrics(_logger, _contextName);
-            var nodeMetricsList = await _kubernetes!.GetKubernetesNodesMetricsAsync();
+            var nodeMetricsListTask = _kubernetes!.GetKubernetesNodesMetricsAsync();
+            var nodesTask = _kubernetes.CoreV1.ListNodeAsync(
+                cancellationToken: cancellationToken
+            );
+            var podsTask = _kubernetes.CoreV1.ListPodForAllNamespacesAsync(
+                cancellationToken: cancellationToken
+            );
+            await Task.WhenAll(nodeMetricsListTask, nodesTask, podsTask);
 
+            var nodeMetricsList = nodeMetricsListTask.Result;
             var metrics = new Dictionary<string, ResourceUsage>();
             foreach (var nodeMetric in nodeMetricsList.Items)
             {
@@ -648,9 +656,7 @@ public partial class KubernetesService
                 metrics[name] = new ResourceUsage(cpu, memory);
             }
 
-            var nodes = await _kubernetes.CoreV1.ListNodeAsync(
-                cancellationToken: cancellationToken
-            );
+            var nodes = nodesTask.Result;
             var totalNodes = nodes.Items.Count;
             var readyNodes = nodes.Items.Count(n =>
                 n.Status?.Conditions?.Any(c => c.Type == "Ready" && c.Status == "True") == true
@@ -669,9 +675,7 @@ public partial class KubernetesService
                 }
             }
 
-            var pods = await _kubernetes.CoreV1.ListPodForAllNamespacesAsync(
-                cancellationToken: cancellationToken
-            );
+            var pods = podsTask.Result;
             var totalPods = pods.Items.Count;
             var requestedPods = pods.Items.Count(p =>
                 p.Status?.Phase is not ("Succeeded" or "Failed")

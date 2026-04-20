@@ -339,26 +339,39 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         }
         AppCommands.Add(new OpenApplicationLogCommand(this));
 
-        _customResourceDefinitions = await cluster.GetResourcesAsync(
-            ResourceType.CustomResourceDefinition
-        );
-
-        // Start watching CRDs immediately so new definitions added to the
-        // cluster are picked up without the user navigating to the CRD list first.
-        await cluster.WatchResource(ResourceType.CustomResourceDefinition);
-
-        foreach (var item in _customResourceDefinitions)
-        {
-            if (item.Resource is V1CustomResourceDefinition crd)
-            {
-                AddCustomResourceDefinitionToNavigation(crd);
-            }
-        }
-
-        _customResourceDefinitions.CollectionChanged +=
-            OnCustomResourceDefinitionsCollectionChanged;
-
         SelectedItem = clusterOverview;
+
+        // Load CRDs in the background so the overview appears immediately.
+        _ = LoadCustomResourceDefinitionsAsync(cluster);
+    }
+
+    private async Task LoadCustomResourceDefinitionsAsync(ClusterViewModel cluster)
+    {
+        try
+        {
+            _customResourceDefinitions = await cluster.GetResourcesAsync(
+                ResourceType.CustomResourceDefinition
+            );
+
+            // Start watching CRDs immediately so new definitions added to the
+            // cluster are picked up without the user navigating to the CRD list first.
+            await cluster.WatchResource(ResourceType.CustomResourceDefinition);
+
+            foreach (var item in _customResourceDefinitions)
+            {
+                if (item.Resource is V1CustomResourceDefinition crd)
+                {
+                    AddCustomResourceDefinitionToNavigation(crd);
+                }
+            }
+
+            _customResourceDefinitions.CollectionChanged +=
+                OnCustomResourceDefinitionsCollectionChanged;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load custom resource definitions");
+        }
     }
 
     private void OnCustomResourceDefinitionsCollectionChanged(

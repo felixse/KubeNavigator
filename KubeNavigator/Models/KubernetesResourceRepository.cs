@@ -62,7 +62,7 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
 
         if (_subscribers.Any())
         {
-            StartWatcher();
+            _ = StartWatcherAsync();
         }
     }
 
@@ -76,7 +76,7 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
         }
     }
 
-    private void StartWatcher()
+    private async Task StartWatcherAsync()
     {
         if (_watcher != null)
         {
@@ -84,6 +84,48 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
         }
 
         Log.WatcherStarting(_logger, ResourceType.Plural);
+
+        var currentItems = await _kubernetesService.ListResourcesAsync<T>(ResourceType);
+        var currentSet = new HashSet<(string? Name, string? Namespace)>(
+            currentItems.Items.Select(i => (i.Metadata.Name, i.Metadata.NamespaceProperty))
+        );
+
+        var staleResources = _resources.Where(r =>
+            !currentSet.Contains((r.Metadata.Name, r.Metadata.NamespaceProperty))
+        ).ToList();
+
+        foreach (var stale in staleResources)
+        {
+            _resources.Remove(stale);
+            foreach (var subscriber in _subscribers)
+            {
+                subscriber.OnResourceEvent(
+                    KubernetesResourceEvent.Deleted,
+                    ResourceType,
+                    stale
+                );
+            }
+        }
+
+        var existingSet = new HashSet<(string? Name, string? Namespace)>(
+            _resources.Select(r => (r.Metadata.Name, r.Metadata.NamespaceProperty))
+        );
+
+        foreach (var item in currentItems.Items)
+        {
+            if (!existingSet.Contains((item.Metadata.Name, item.Metadata.NamespaceProperty)))
+            {
+                _resources.Add(item);
+                foreach (var subscriber in _subscribers)
+                {
+                    subscriber.OnResourceEvent(
+                        KubernetesResourceEvent.Added,
+                        ResourceType,
+                        item
+                    );
+                }
+            }
+        }
 
         _watcher = _kubernetesService.WatchResources<T>(
             ResourceType,
@@ -93,6 +135,7 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
                 {
                     var index = _resources.FindIndex(r =>
                         r.Metadata.Name == resource.Metadata.Name
+                        && r.Metadata.NamespaceProperty == resource.Metadata.NamespaceProperty
                     );
                     if (index != -1)
                     {
@@ -130,6 +173,7 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
                 {
                     var index = _resources.FindIndex(r =>
                         r.Metadata.Name == resource.Metadata.Name
+                        && r.Metadata.NamespaceProperty == resource.Metadata.NamespaceProperty
                     );
                     if (index != -1)
                     {
@@ -154,6 +198,7 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
                 {
                     var existing = _resources.FirstOrDefault(r =>
                         r.Metadata.Name == resource.Metadata.Name
+                        && r.Metadata.NamespaceProperty == resource.Metadata.NamespaceProperty
                     );
                     if (existing != null)
                     {

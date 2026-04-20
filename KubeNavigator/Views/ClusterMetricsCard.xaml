@@ -39,6 +39,7 @@
         <TextBlock
           HorizontalAlignment="Center"
           VerticalAlignment="Center"
+          FontWeight="SemiBold"
           Text="{x:Bind ViewModel.PercentageText, Mode=OneWay}"
         />
       </Grid>

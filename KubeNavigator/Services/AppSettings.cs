@@ -9,6 +9,9 @@ public partial class AppSettings : ObservableObject
 
     [ObservableProperty]
     public partial string HelmPath { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool HideManagedFields { get; set; } = true;
 }
 
 public enum AppTheme

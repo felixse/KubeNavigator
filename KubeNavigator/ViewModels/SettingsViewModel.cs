@@ -47,6 +47,19 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
         }
     }
 
+    public bool HideManagedFields
+    {
+        get => _settingsService.Settings.HideManagedFields;
+        set
+        {
+            if (_settingsService.Settings.HideManagedFields != value)
+            {
+                _settingsService.Settings.HideManagedFields = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public IReadOnlyList<AppTheme> AvailableThemes { get; } = Enum.GetValues<AppTheme>();
 
     public SettingsViewModel(

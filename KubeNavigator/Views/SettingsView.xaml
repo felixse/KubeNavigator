@@ -54,6 +54,12 @@
           <Button Command="{x:Bind ViewModel.BrowseHelmPathCommand}" Content="Browse..." />
         </StackPanel>
       </controls:SettingsCard>
+      <controls:SettingsCard
+        Description="Hide metadata.managedFields from resource YAML."
+        Header="Hide Managed Fields"
+      >
+        <ToggleSwitch IsOn="{x:Bind ViewModel.HideManagedFields, Mode=TwoWay}" />
+      </controls:SettingsCard>
     </StackPanel>
 
     <!--  About tab content  -->

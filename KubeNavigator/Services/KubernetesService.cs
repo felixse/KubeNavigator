@@ -359,6 +359,14 @@ public partial class KubernetesService
             result.EnsureSuccessStatusCode();
 
             var json = await result.Content.ReadAsStringAsync(cancellationToken);
+
+            if (_settingsService.Settings.HideManagedFields)
+            {
+                var jsonNode = System.Text.Json.Nodes.JsonNode.Parse(json);
+                jsonNode?["metadata"]?.AsObject().Remove("managedFields");
+                json = jsonNode?.ToJsonString() ?? json;
+            }
+
             var deserializer = new DeserializerBuilder().Build();
             var resource = deserializer.Deserialize(new StringReader(json));
             var serializer = new SerializerBuilder()

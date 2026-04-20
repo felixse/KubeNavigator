@@ -104,7 +104,10 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
 
         sections.Add(new DetailsSection { Header = "Connection", Rows = [.. GetConnectionRows()] });
 
-        sections.Add(events);
+        if (events is not null)
+        {
+            sections.Add(events);
+        }
 
         return sections;
     }

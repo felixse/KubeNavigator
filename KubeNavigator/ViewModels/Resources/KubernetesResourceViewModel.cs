@@ -97,8 +97,8 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
     public virtual async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
         var events = await GetEventsSectionAsync();
-        return
-        [
+        var sections = new List<IDetailsSection>
+        {
             new DetailsSection
             {
                 Rows =
@@ -140,13 +140,24 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
                     },
                 ],
             },
-            events,
-        ];
+        };
+
+        if (events is not null)
+        {
+            sections.Add(events);
+        }
+
+        return sections;
     }
 
-    protected async Task<IDetailsSection> GetEventsSectionAsync()
+    protected async Task<IDetailsSection?> GetEventsSectionAsync()
     {
-        var events = await Cluster.Context.GetEventsForResourceAsync(Resource);
+        var events = (await Cluster.Context.GetEventsForResourceAsync(Resource)).ToList();
+        if (events.Count == 0)
+        {
+            return null;
+        }
+
         return new DetailsSection
         {
             Header = "Events",

@@ -111,7 +111,10 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             }
         );
 
-        sections.Add(events);
+        if (events is not null)
+        {
+            sections.Add(events);
+        }
 
         return sections;
     }

@@ -41,8 +41,8 @@ internal partial class NamespaceViewModel : KubernetesResourceViewModel
     public override async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
         var events = await GetEventsSectionAsync();
-        return
-        [
+        var sections = new List<IDetailsSection>
+        {
             new DetailsSection
             {
                 Rows =
@@ -89,7 +89,13 @@ internal partial class NamespaceViewModel : KubernetesResourceViewModel
                     },
                 ],
             },
-            events,
-        ];
+        };
+
+        if (events is not null)
+        {
+            sections.Add(events);
+        }
+
+        return sections;
     }
 }

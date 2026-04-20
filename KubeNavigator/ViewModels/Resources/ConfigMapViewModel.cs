@@ -67,8 +67,8 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
     public override async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
         var events = await GetEventsSectionAsync();
-        return
-        [
+        var sections = new List<IDetailsSection>
+        {
             new DetailsSection { Rows = [.. GetConfigMapRows()] },
             new DetailsSection
             {
@@ -76,8 +76,14 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
                 Rows = [.. GetDataRows()],
                 SaveCommand = SaveCommand,
             },
-            events,
-        ];
+        };
+
+        if (events is not null)
+        {
+            sections.Add(events);
+        }
+
+        return sections;
     }
 
     private IEnumerable<IDetailsRow> GetConfigMapRows()

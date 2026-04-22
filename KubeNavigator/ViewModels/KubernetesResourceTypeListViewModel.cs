@@ -26,6 +26,9 @@ public partial class KubernetesResourceTypeListViewModel
 
     public ImmutableArray<ResourceColumn> Columns { get; }
 
+    private INotifyCollectionChanged? _sourceCollection;
+    private NotifyCollectionChangedEventHandler? _collectionChangedHandler;
+
     public KubernetesResourceTypeListViewModel(
         WorkspaceViewModel workspace,
         ClusterViewModel cluster,
@@ -52,6 +55,8 @@ public partial class KubernetesResourceTypeListViewModel
     {
         await Workspace.Window.App.DispatcherQueue.EnqueueAsync(async () =>
         {
+            DetachFromCollection();
+
             bool filter(object x)
             {
                 foreach (var toggleFilter in AdditionalFilters.Where(f => f.IsChecked))
@@ -84,7 +89,8 @@ public partial class KubernetesResourceTypeListViewModel
                 item.PropertyChanged += ResourceViewModel_PropertyChanged;
             }
 
-            ((INotifyCollectionChanged)Items.SourceCollection).CollectionChanged += (s, e) =>
+            _sourceCollection = (INotifyCollectionChanged)Items.SourceCollection;
+            _collectionChangedHandler = (s, e) =>
             {
                 foreach (var oldItem in e.OldItems?.Cast<KubernetesResourceViewModel>() ?? [])
                 {
@@ -96,17 +102,39 @@ public partial class KubernetesResourceTypeListViewModel
                     newItem.PropertyChanged += ResourceViewModel_PropertyChanged;
                 }
             };
+            _sourceCollection.CollectionChanged += _collectionChangedHandler;
         });
     }
 
     public override async Task OnNavigatedTo()
     {
+        await ActivateAsync();
         await Cluster.WatchResource(ResourceType);
     }
 
     public override async Task OnNavigatedFrom()
     {
         await Cluster.StopWatchResource(ResourceType);
+        DetachFromCollection();
+    }
+
+    private void DetachFromCollection()
+    {
+        if (_sourceCollection != null && _collectionChangedHandler != null)
+        {
+            _sourceCollection.CollectionChanged -= _collectionChangedHandler;
+        }
+        _sourceCollection = null;
+        _collectionChangedHandler = null;
+
+        if (Items != null)
+        {
+            foreach (var item in Items.Cast<KubernetesResourceViewModel>())
+            {
+                item.PropertyChanged -= ResourceViewModel_PropertyChanged;
+            }
+            Items = null;
+        }
     }
 
     private void ResourceViewModel_PropertyChanged(

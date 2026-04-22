@@ -146,7 +146,6 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                 this,
                 cluster,
                 ResourceType.Event,
-                (x) => new SecretViewModel((Eventsv1Event)x, Cluster),
                 EventViewModel.EventColumns
             )
         );
@@ -161,7 +160,6 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     this,
                     cluster,
                     ResourceType.Namespace,
-                    (x) => new NamespaceViewModel((V1Namespace)x, Cluster),
                     NamespaceViewModel.NamespaceColumns
                 ),
             ]
@@ -174,14 +172,13 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     this,
                     cluster,
                     ResourceType.Pod,
-                    (x) => new PodViewModel((V1Pod)x, Cluster),
                     PodViewModel.PodColumns
                 ),
                 new KubernetesResourceTypeListViewModel(
                     this,
                     cluster,
                     ResourceType.Deployment,
-                    columns: DeploymentViewModel.DeploymentColumns
+                    DeploymentViewModel.DeploymentColumns
                 ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.DaemonSet),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.StatefulSet),
@@ -203,14 +200,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     this,
                     cluster,
                     ResourceType.ConfigMap,
-                    (x) => new ConfigMapViewModel((V1ConfigMap)x, Cluster),
                     ConfigMapViewModel.ConfigMapColumns
                 ),
                 new KubernetesResourceTypeListViewModel(
                     this,
                     cluster,
                     ResourceType.Secret,
-                    (x) => new EventViewModel((Eventsv1Event)x, Cluster),
                     SecretViewModel.SecretColumns
                 ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ResourceQuota),
@@ -248,7 +243,6 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     this,
                     cluster,
                     ResourceType.Service,
-                    (x) => new ServiceViewModel((V1Service)x, Cluster),
                     ServiceViewModel.ServiceColumns
                 ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Endpoint),

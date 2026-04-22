@@ -8,8 +8,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI;
 using CommunityToolkit.WinUI.Collections;
-using k8s;
-using k8s.Models;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Filters;
 using KubeNavigator.ViewModels.Resources;
@@ -17,8 +15,7 @@ using KubeNavigator.ViewModels.Resources;
 namespace KubeNavigator.ViewModels;
 
 public partial class KubernetesResourceTypeListViewModel
-    : ListViewModel,
-        IKubernetesResourceEventSubscriber
+    : ListViewModel
 {
     public ClusterViewModel Cluster { get; }
 
@@ -29,17 +26,10 @@ public partial class KubernetesResourceTypeListViewModel
 
     public ImmutableArray<ResourceColumn> Columns { get; }
 
-    private readonly Func<
-        IKubernetesObject<V1ObjectMeta>,
-        KubernetesResourceViewModel
-    > _itemViewModelFactory;
-
     public KubernetesResourceTypeListViewModel(
         WorkspaceViewModel workspace,
         ClusterViewModel cluster,
         ResourceType resourceType,
-        Func<IKubernetesObject<V1ObjectMeta>, KubernetesResourceViewModel>? itemViewModelFactory =
-            null,
         ImmutableArray<ResourceColumn>? columns = null
     )
         : base(
@@ -55,10 +45,6 @@ public partial class KubernetesResourceTypeListViewModel
     {
         Cluster = cluster;
         ResourceType = resourceType;
-
-        _itemViewModelFactory = itemViewModelFactory ??= (x) =>
-            new KubernetesResourceViewModel(x, ResourceType, Cluster);
-
         Columns = columns ?? KubernetesResourceViewModel.GetDefaultColumns();
     }
 
@@ -175,20 +161,5 @@ public partial class KubernetesResourceTypeListViewModel
             ResourceType,
             [.. items.Cast<KubernetesResourceViewModel>()]
         );
-    }
-
-    public Task OnResourceEvent(
-        KubernetesResourceEvent resourceEvent,
-        ResourceType resourceType,
-        IKubernetesObject<V1ObjectMeta> resource
-    )
-    {
-        Workspace.App.DispatcherQueue.EnqueueAsync(() =>
-        {
-            var vm = _itemViewModelFactory(resource);
-            Items.Add(vm);
-        });
-
-        return Task.CompletedTask;
     }
 }

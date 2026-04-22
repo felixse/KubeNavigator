@@ -14,6 +14,7 @@ public partial class AgeTextBlock : UserControl
     private static DispatcherQueue? _dispatcherQueue;
 
     private DateTime? _timestamp;
+    private string? _lastText;
     private readonly TextBlock _textBlock;
 
     public static readonly DependencyProperty TimestampProperty = DependencyProperty.Register(
@@ -103,7 +104,12 @@ public partial class AgeTextBlock : UserControl
 
     private void UpdateAge()
     {
-        _textBlock.Text = FormatDuration(_timestamp);
+        var text = FormatDuration(_timestamp);
+        if (text != _lastText)
+        {
+            _lastText = text;
+            _textBlock.Text = text;
+        }
     }
 
     private static string FormatDuration(DateTime? timestamp)

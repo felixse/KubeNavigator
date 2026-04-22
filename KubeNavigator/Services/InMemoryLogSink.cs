@@ -7,7 +7,7 @@ namespace KubeNavigator.Services;
 
 public class InMemoryLogSink : ILogEventSink
 {
-    private readonly List<LogEvent> _logEvents = [];
+    private readonly Queue<LogEvent> _logEvents = new();
     private readonly int _maxLogCount;
 
     public event EventHandler<LogEvent>? LogReceived;
@@ -21,11 +21,11 @@ public class InMemoryLogSink : ILogEventSink
     {
         lock (_logEvents)
         {
-            _logEvents.Add(logEvent);
+            _logEvents.Enqueue(logEvent);
 
             if (_logEvents.Count > _maxLogCount)
             {
-                _logEvents.RemoveAt(0);
+                _logEvents.Dequeue();
             }
         }
 

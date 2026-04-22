@@ -367,12 +367,9 @@ public partial class KubernetesService
                 json = jsonNode?.ToJsonString() ?? json;
             }
 
-            var deserializer = new DeserializerBuilder().Build();
+            var deserializer = YamlSerializerFactory.Deserializer;
             var resource = deserializer.Deserialize(new StringReader(json));
-            var serializer = new SerializerBuilder()
-                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
-                .Build();
-            var yaml = serializer.Serialize(resource!);
+            var yaml = YamlSerializerFactory.Serializer.Serialize(resource!);
 
             Log.ResourceYamlRetrieved(
                 _logger,
@@ -421,7 +418,7 @@ public partial class KubernetesService
                     : $"{basePath}/{resourceType.Plural}/{resourceNameFromYaml}";
 
             // Convert both YAML versions to JSON
-            var deserializer = new DeserializerBuilder().Build();
+            var deserializer = YamlSerializerFactory.Deserializer;
 
             var originalObject = deserializer.Deserialize(new StringReader(originalYaml));
             var originalJson = KubernetesJson.Serialize(originalObject);
@@ -504,7 +501,7 @@ public partial class KubernetesService
         {
             Log.CreatingResourceFromYaml(_logger, resourceType.Plural, _contextName);
 
-            var deserializer = new DeserializerBuilder().Build();
+            var deserializer = YamlSerializerFactory.Deserializer;
             var yamlObject = deserializer.Deserialize(new StringReader(yaml));
             var json = KubernetesJson.Serialize(yamlObject);
 
@@ -582,7 +579,7 @@ public partial class KubernetesService
         );
     }
 
-    public async Task<Dictionary<string, ResourceUsage>?> GetPodMetricsAsync(
+    public async Task<Dictionary<(string Namespace, string Name), ResourceUsage>?> GetPodMetricsAsync(
         CancellationToken cancellationToken = default
     )
     {
@@ -591,7 +588,7 @@ public partial class KubernetesService
             Log.FetchingPodMetrics(_logger, _contextName);
             var podMetricsList = await _kubernetes!.GetKubernetesPodsMetricsAsync();
 
-            var metrics = new Dictionary<string, ResourceUsage>();
+            var metrics = new Dictionary<(string Namespace, string Name), ResourceUsage>();
             foreach (var podMetric in podMetricsList.Items)
             {
                 var name = podMetric.Metadata?.Name;
@@ -614,7 +611,7 @@ public partial class KubernetesService
                     }
                 }
 
-                metrics[$"{ns}/{name}"] = new ResourceUsage(cpu, memory);
+                metrics[(ns, name)] = new ResourceUsage(cpu, memory);
             }
 
             Log.PodMetricsFetched(_logger, metrics.Count, _contextName);

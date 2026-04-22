@@ -23,6 +23,11 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         ObservableCollection<KubernetesResourceViewModel>
     > _resources = [];
 
+    private readonly Dictionary<
+        ResourceType,
+        Dictionary<(string Name, string? Namespace), KubernetesResourceViewModel>
+    > _resourceIndex = [];
+
     private readonly ILogger<ClusterViewModel> _logger;
 
     [ObservableProperty]
@@ -32,6 +37,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
     public ObservableCollection<INamespaceFilter> NamespaceFilters { get; } = [];
 
     public ObservableCollection<HelmReleaseViewModel> HelmReleases { get; } = [];
+
+    private readonly Dictionary<(string Name, string Namespace), HelmReleaseViewModel> _helmIndex = [];
 
     public Dictionary<ResourceType, IEnumerable<ToggleFilter>> AdditionalFilters { get; } = new();
 
@@ -113,17 +120,16 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 if (helmRelease == null)
                     continue;
 
-                var existing = HelmReleases.FirstOrDefault(h =>
-                    h.HelmRelease.Name == helmRelease.Name
-                    && h.HelmRelease.Namespace == helmRelease.Namespace
-                );
-                if (existing == null)
+                var helmKey = (helmRelease.Name, helmRelease.Namespace);
+                if (_helmIndex.TryGetValue(helmKey, out var existing))
                 {
-                    HelmReleases.Add(new HelmReleaseViewModel(helmRelease, this));
+                    existing.Revisions.Add(helmRelease);
                 }
                 else
                 {
-                    existing.Revisions.Add(helmRelease);
+                    var vm = new HelmReleaseViewModel(helmRelease, this);
+                    HelmReleases.Add(vm);
+                    _helmIndex[helmKey] = vm;
                 }
             }
         }
@@ -198,6 +204,13 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
             );
             value = collection;
             _resources.Add(resourceType, value);
+
+            var index = new Dictionary<(string Name, string? Namespace), KubernetesResourceViewModel>();
+            foreach (var vm in value)
+            {
+                index[(vm.Name, vm.Resource.Namespace())] = vm;
+            }
+            _resourceIndex[resourceType] = index;
         }
         return value;
     }
@@ -266,9 +279,18 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         string name
     )
     {
-        var resources = await GetResourcesAsync(resourceType);
+        await GetResourcesAsync(resourceType);
 
-        return resources.FirstOrDefault(r => r.Name == name);
+        if (_resourceIndex.TryGetValue(resourceType, out var index))
+        {
+            foreach (var kvp in index)
+            {
+                if (kvp.Key.Name == name)
+                    return kvp.Value;
+            }
+        }
+
+        return null;
     }
 
     public async Task DeleteResourcesAsync(
@@ -298,26 +320,35 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
     {
         var collection = await GetResourcesAsync(resourceType);
 
+        if (!_resourceIndex.TryGetValue(resourceType, out var index))
+        {
+            index = [];
+            _resourceIndex[resourceType] = index;
+        }
+
         await App.DispatcherQueue.EnqueueAsync(() =>
         {
+            var key = (resource.Name(), resource.Namespace());
+
             if (resourceEvent == KubernetesResourceEvent.Added)
             {
-                collection.Add(CreateResourceViewModel(resource, resourceType));
+                var vm = CreateResourceViewModel(resource, resourceType);
+                collection.Add(vm);
+                index[key] = vm;
             }
             else if (resourceEvent == KubernetesResourceEvent.Modified)
             {
-                var existing = collection.FirstOrDefault(r => r.Name == resource.Name());
-                if (existing != null)
+                if (index.TryGetValue(key, out var existing))
                 {
                     existing.Resource = resource;
                 }
             }
             else if (resourceEvent == KubernetesResourceEvent.Deleted)
             {
-                var existing = collection.FirstOrDefault(r => r.Name == resource.Name());
-                if (existing != null)
+                if (index.TryGetValue(key, out var existing))
                 {
                     collection.Remove(existing);
+                    index.Remove(key);
                 }
             }
 
@@ -354,17 +385,16 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                     if (helmRelease == null)
                         return;
 
-                    var existing = HelmReleases.FirstOrDefault(h =>
-                        h.HelmRelease.Name == helmRelease.Name
-                        && h.HelmRelease.Namespace == helmRelease.Namespace
-                    );
-                    if (existing == null)
+                    var helmKey = (helmRelease.Name, helmRelease.Namespace);
+                    if (_helmIndex.TryGetValue(helmKey, out var existing))
                     {
-                        HelmReleases.Add(new HelmReleaseViewModel(helmRelease, this));
+                        existing.Revisions.Add(helmRelease);
                     }
                     else
                     {
-                        existing.Revisions.Add(helmRelease);
+                        var vm = new HelmReleaseViewModel(helmRelease, this);
+                        HelmReleases.Add(vm);
+                        _helmIndex[helmKey] = vm;
                     }
                 }
                 else if (resourceEvent == KubernetesResourceEvent.Deleted)
@@ -373,12 +403,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                     if (helmRelease == null)
                         return;
 
-                    var existingHelmRelease = HelmReleases.FirstOrDefault(h =>
-                        h.HelmRelease.Name == helmRelease.Name
-                        && h.HelmRelease.Namespace == helmRelease.Namespace
-                    );
-
-                    if (existingHelmRelease != null)
+                    var helmKey = (helmRelease.Name, helmRelease.Namespace);
+                    if (_helmIndex.TryGetValue(helmKey, out var existingHelmRelease))
                     {
                         var existingRevision = existingHelmRelease.Revisions.FirstOrDefault(r =>
                             r.Version == helmRelease.Version
@@ -388,6 +414,7 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                             if (existingHelmRelease.Revisions.Count == 1)
                             {
                                 HelmReleases.Remove(existingHelmRelease);
+                                _helmIndex.Remove(helmKey);
                             }
                             else
                             {
@@ -402,19 +429,16 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                     if (helmRelease == null)
                         return;
 
-                    var existing = HelmReleases.FirstOrDefault(h =>
-                        h.HelmRelease.Name == helmRelease.Name
-                        && h.HelmRelease.Namespace == helmRelease.Namespace
-                    );
-                    if (existing != null)
+                    var helmKey = (helmRelease.Name, helmRelease.Namespace);
+                    if (_helmIndex.TryGetValue(helmKey, out var existing))
                     {
                         var existingRevision = existing.Revisions.FirstOrDefault(r =>
                             r.Version == helmRelease.Version
                         );
                         if (existingRevision != null)
                         {
-                            var index = existing.Revisions.IndexOf(existingRevision);
-                            existing.Revisions[index] = helmRelease;
+                            var revIndex = existing.Revisions.IndexOf(existingRevision);
+                            existing.Revisions[revIndex] = helmRelease;
                         }
                         else
                         {
@@ -423,7 +447,9 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                     }
                     else
                     {
-                        HelmReleases.Add(new HelmReleaseViewModel(helmRelease, this));
+                        var vm = new HelmReleaseViewModel(helmRelease, this);
+                        HelmReleases.Add(vm);
+                        _helmIndex[helmKey] = vm;
                     }
                 }
                 else

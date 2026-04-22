@@ -15,7 +15,7 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
     private readonly ILogger _logger;
     private readonly HashSet<IKubernetesResourceEventSubscriber> _subscribers = [];
     private readonly KubernetesService _kubernetesService;
-    private readonly List<T> _resources = [];
+    private readonly Dictionary<(string?, string?), T> _resources = [];
 
     private Watcher<T>? _watcher;
 
@@ -37,10 +37,18 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
         _instance = Random.Shared.Next();
     }
 
+    private static (string?, string?) ResourceKey(IKubernetesObject<V1ObjectMeta> r) =>
+        (r.Metadata.Name, r.Metadata.NamespaceProperty);
+
     public IReadOnlyCollection<TItem> GetItems<TItem>()
         where TItem : IKubernetesObject<V1ObjectMeta>
     {
-        return [.. _resources.Cast<TItem>()];
+        if (typeof(T) == typeof(TItem))
+        {
+            return (IReadOnlyCollection<TItem>)(IReadOnlyCollection<T>)_resources.Values;
+        }
+
+        return [.. _resources.Values.Cast<TItem>()];
     }
 
     public async Task StartAsync()
@@ -50,7 +58,7 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
 
         foreach (var item in items.Items)
         {
-            _resources.Add(item);
+            _resources[ResourceKey(item)] = item;
         }
         Log.InitialListCompleted(_logger, ResourceType.Plural, items.Items.Count);
     }
@@ -86,17 +94,16 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
         Log.WatcherStarting(_logger, ResourceType.Plural);
 
         var currentItems = await _kubernetesService.ListResourcesAsync<T>(ResourceType);
-        var currentSet = new HashSet<(string? Name, string? Namespace)>(
-            currentItems.Items.Select(i => (i.Metadata.Name, i.Metadata.NamespaceProperty))
+        var currentSet = new HashSet<(string?, string?)>(
+            currentItems.Items.Select(i => ResourceKey(i))
         );
 
-        var staleResources = _resources.Where(r =>
-            !currentSet.Contains((r.Metadata.Name, r.Metadata.NamespaceProperty))
-        ).ToList();
+        var staleKeys = _resources.Keys.Where(k => !currentSet.Contains(k)).ToList();
 
-        foreach (var stale in staleResources)
+        foreach (var key in staleKeys)
         {
-            _resources.Remove(stale);
+            var stale = _resources[key];
+            _resources.Remove(key);
             foreach (var subscriber in _subscribers)
             {
                 subscriber.OnResourceEvent(
@@ -107,15 +114,12 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
             }
         }
 
-        var existingSet = new HashSet<(string? Name, string? Namespace)>(
-            _resources.Select(r => (r.Metadata.Name, r.Metadata.NamespaceProperty))
-        );
-
         foreach (var item in currentItems.Items)
         {
-            if (!existingSet.Contains((item.Metadata.Name, item.Metadata.NamespaceProperty)))
+            var key = ResourceKey(item);
+            if (!_resources.ContainsKey(key))
             {
-                _resources.Add(item);
+                _resources[key] = item;
                 foreach (var subscriber in _subscribers)
                 {
                     subscriber.OnResourceEvent(
@@ -131,19 +135,16 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
             ResourceType,
             (watchEventType, resource) =>
             {
+                var key = ResourceKey(resource);
                 if (watchEventType == WatchEventType.Added)
                 {
-                    var index = _resources.FindIndex(r =>
-                        r.Metadata.Name == resource.Metadata.Name
-                        && r.Metadata.NamespaceProperty == resource.Metadata.NamespaceProperty
-                    );
-                    if (index != -1)
+                    if (_resources.TryGetValue(key, out var existing))
                     {
-                        var currentVersion = int.Parse(_resources[index].Metadata.ResourceVersion);
+                        var currentVersion = int.Parse(existing.Metadata.ResourceVersion);
                         var receivedVersion = int.Parse(resource.Metadata.ResourceVersion);
                         if (receivedVersion > currentVersion)
                         {
-                            _resources[index] = resource;
+                            _resources[key] = resource;
 
                             foreach (var subscriber in _subscribers)
                             {
@@ -157,7 +158,7 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
                     }
                     else
                     {
-                        _resources.Add(resource);
+                        _resources[key] = resource;
 
                         foreach (var subscriber in _subscribers)
                         {
@@ -171,17 +172,13 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
                 }
                 else if (watchEventType == WatchEventType.Modified)
                 {
-                    var index = _resources.FindIndex(r =>
-                        r.Metadata.Name == resource.Metadata.Name
-                        && r.Metadata.NamespaceProperty == resource.Metadata.NamespaceProperty
-                    );
-                    if (index != -1)
+                    if (_resources.TryGetValue(key, out var existing))
                     {
-                        var currentVersion = int.Parse(_resources[index].Metadata.ResourceVersion);
+                        var currentVersion = int.Parse(existing.Metadata.ResourceVersion);
                         var receivedVersion = int.Parse(resource.Metadata.ResourceVersion);
                         if (receivedVersion > currentVersion)
                         {
-                            _resources[index] = resource;
+                            _resources[key] = resource;
 
                             foreach (var subscriber in _subscribers)
                             {
@@ -196,14 +193,7 @@ public partial class KubernetesResourceRepository<T> : IKubernetesResourceReposi
                 }
                 else if (watchEventType == WatchEventType.Deleted)
                 {
-                    var existing = _resources.FirstOrDefault(r =>
-                        r.Metadata.Name == resource.Metadata.Name
-                        && r.Metadata.NamespaceProperty == resource.Metadata.NamespaceProperty
-                    );
-                    if (existing != null)
-                    {
-                        _resources.Remove(existing);
-                    }
+                    _resources.Remove(key);
 
                     foreach (var subscriber in _subscribers)
                     {

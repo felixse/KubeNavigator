@@ -41,8 +41,8 @@ public partial class KubernetesContext
     private readonly Dictionary<ResourceType, IKubernetesResourceRepository> _repositories = [];
 
     private CancellationTokenSource? _metricsPollingCts;
-    private volatile IReadOnlyDictionary<string, ResourceUsage> _podMetrics =
-        new Dictionary<string, ResourceUsage>();
+    private volatile IReadOnlyDictionary<(string Namespace, string Name), ResourceUsage> _podMetrics =
+        new Dictionary<(string, string), ResourceUsage>();
     private Services.NodeMetrics? _nodeMetrics;
 
     public event EventHandler<ClusterStatus>? StatusChanged; // todo change to something that supports async handlers
@@ -309,7 +309,7 @@ public partial class KubernetesContext
 
     public ResourceUsage? GetPodMetrics(string podNamespace, string podName)
     {
-        return _podMetrics.TryGetValue($"{podNamespace}/{podName}", out var metrics)
+        return _podMetrics.TryGetValue((podNamespace, podName), out var metrics)
             ? metrics
             : null;
     }
@@ -326,7 +326,7 @@ public partial class KubernetesContext
         _metricsPollingCts?.Cancel();
         _metricsPollingCts?.Dispose();
         _metricsPollingCts = null;
-        _podMetrics = new Dictionary<string, ResourceUsage>();
+        _podMetrics = new Dictionary<(string, string), ResourceUsage>();
     }
 
     private async Task PollMetricsAsync(CancellationToken cancellationToken)
@@ -444,19 +444,22 @@ public partial class KubernetesContext
             {
                 while (!cancellationToken.IsCancellationRequested && socket.Connected)
                 {
+                    var buffer = arrayPool.Rent(4096);
                     try
                     {
-                        var buffer = arrayPool.Rent(4096);
                         var bytesRead = await stream.ReadAsync(buffer, cancellationToken);
                         await socket.SendAsync(
                             new ArraySegment<byte>(buffer, 0, bytesRead),
                             SocketFlags.None
                         );
-                        arrayPool.Return(buffer);
                     }
                     catch (Exception e)
                     {
                         Log.PortForwardReadError(_logger, resource.Name(), targetPort, Name, e);
+                    }
+                    finally
+                    {
+                        arrayPool.Return(buffer);
                     }
                 }
             },
@@ -468,19 +471,22 @@ public partial class KubernetesContext
             {
                 while (!cancellationToken.IsCancellationRequested && socket.Connected)
                 {
+                    var buffer = arrayPool.Rent(4096);
                     try
                     {
-                        var buffer = arrayPool.Rent(4096);
                         var bytesRead = await socket.ReceiveAsync(
                             new ArraySegment<byte>(buffer),
                             SocketFlags.None
                         );
                         stream.Write(buffer, 0, bytesRead);
-                        arrayPool.Return(buffer);
                     }
                     catch (Exception e)
                     {
                         Log.PortForwardWriteError(_logger, resource.Name(), targetPort, Name, e);
+                    }
+                    finally
+                    {
+                        arrayPool.Return(buffer);
                     }
                 }
             },

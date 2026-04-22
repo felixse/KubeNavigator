@@ -25,20 +25,20 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
     public bool IsAllSelected
     {
         get =>
-            Items != null && Items.Count != 0 && Items.Cast<ISelectable>().All(r => r.IsSelected);
+            Items != null && Items.Count != 0 && AllSelected();
         set
         {
             _selectingAll = true;
             if (value)
             {
-                foreach (var item in Items?.Cast<ISelectable>() ?? [])
+                foreach (ISelectable item in Items ?? [])
                 {
                     item.IsSelected = true;
                 }
             }
-            else if (Items != null && Items.Cast<ISelectable>().All(r => r.IsSelected))
+            else if (Items != null && AllSelected())
             {
-                foreach (var item in Items.Cast<ISelectable>())
+                foreach (ISelectable item in Items)
                 {
                     item.IsSelected = false;
                 }
@@ -47,6 +47,15 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
             OnPropertyChanged(nameof(IsAllSelected));
             _selectingAll = false;
         }
+    }
+
+    private bool AllSelected()
+    {
+        foreach (ISelectable item in Items!)
+        {
+            if (!item.IsSelected) return false;
+        }
+        return true;
     }
 
     [ObservableProperty]
@@ -103,13 +112,23 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
 
     public bool CanDeleteSelectedItems()
     {
-        return Items != null && Items.Cast<ISelectable>().Any(r => r.IsSelected);
+        if (Items == null) return false;
+        foreach (ISelectable item in Items)
+        {
+            if (item.IsSelected) return true;
+        }
+        return false;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteSelectedItems))]
     public async Task DeleteSelectedItemsAsync()
     {
-        await DeleteItemsAsync([.. Items.Cast<ISelectable>().Where(r => r.IsSelected)]);
+        var selected = new List<ISelectable>();
+        foreach (ISelectable item in Items!)
+        {
+            if (item.IsSelected) selected.Add(item);
+        }
+        await DeleteItemsAsync(selected);
     }
 
     [RelayCommand]

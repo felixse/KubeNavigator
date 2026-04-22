@@ -86,31 +86,32 @@ public partial class HelmService
         var chartValues = release.Chart.Values;
         var userConfig = release.Config;
 
+        var chartRawText = chartValues is { ValueKind: JsonValueKind.Object }
+            ? chartValues.Value.GetRawText()
+            : null;
+        var configRawText = userConfig is { ValueKind: JsonValueKind.Object }
+            ? userConfig.Value.GetRawText()
+            : null;
+
         // If there are no chart defaults, the computed values are just the user config.
-        if (
-            chartValues is not { ValueKind: JsonValueKind.Object }
-            || chartValues.Value.GetRawText() is "{}"
-        )
+        if (chartRawText is null or "{}")
         {
             return JsonElementToYaml(userConfig);
         }
 
         // If there is no user config, the computed values are just the chart defaults.
-        if (
-            userConfig is not { ValueKind: JsonValueKind.Object }
-            || userConfig.Value.GetRawText() is "{}"
-        )
+        if (configRawText is null or "{}")
         {
             return JsonElementToYaml(chartValues);
         }
 
         // Merge chart defaults with user overrides (user wins).
-        var deserializer = new DeserializerBuilder().Build();
+        var deserializer = YamlSerializerFactory.Deserializer;
         var baseDictionary = deserializer.Deserialize<Dictionary<object, object>>(
-            new StringReader(chartValues.Value.GetRawText())
+            new StringReader(chartRawText)
         );
         var overrideDictionary = deserializer.Deserialize<Dictionary<object, object>>(
-            new StringReader(userConfig.Value.GetRawText())
+            new StringReader(configRawText)
         );
 
         if (baseDictionary is not null && overrideDictionary is not null)
@@ -138,7 +139,7 @@ public partial class HelmService
             return resources;
         }
 
-        var deserializer = new DeserializerBuilder().Build();
+        var deserializer = YamlSerializerFactory.Deserializer;
         using var reader = new StringReader(release.Manifest);
         var parser = new YamlDotNet.Core.Parser(reader);
         parser.Consume<YamlDotNet.Core.Events.StreamStart>();
@@ -182,8 +183,7 @@ public partial class HelmService
             return string.Empty;
         }
 
-        var deserializer = new DeserializerBuilder().Build();
-        var values = deserializer.Deserialize(new StringReader(json.GetRawText()));
+        var values = YamlSerializerFactory.Deserializer.Deserialize(new StringReader(json.GetRawText()));
         return YamlSerializerFactory.Serializer.Serialize(values!);
     }
 

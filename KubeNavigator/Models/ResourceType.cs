@@ -12,7 +12,7 @@ public record ResourceType(
     string SingularDisplayName
 )
 {
-    public static ResourceType Node =>
+    public static ResourceType Node { get; } =
         new(
             V1Node.KubeKind,
             V1Node.KubeGroup,
@@ -22,7 +22,7 @@ public record ResourceType(
             PluralDisplayName: "Nodes",
             SingularDisplayName: "Node"
         );
-    public static ResourceType Namespace =>
+    public static ResourceType Namespace { get; } =
         new(
             V1Namespace.KubeKind,
             V1Namespace.KubeGroup,
@@ -32,7 +32,7 @@ public record ResourceType(
             PluralDisplayName: "Namespaces",
             SingularDisplayName: "Namespace"
         );
-    public static ResourceType Pod =>
+    public static ResourceType Pod { get; } =
         new(
             V1Pod.KubeKind,
             V1Pod.KubeGroup,
@@ -42,7 +42,7 @@ public record ResourceType(
             PluralDisplayName: "Pods",
             SingularDisplayName: "Pod"
         );
-    public static ResourceType Deployment =>
+    public static ResourceType Deployment { get; } =
         new(
             V1Deployment.KubeKind,
             V1Deployment.KubeGroup,
@@ -52,7 +52,7 @@ public record ResourceType(
             PluralDisplayName: "Deployments",
             SingularDisplayName: "Deployment"
         );
-    public static ResourceType DaemonSet =>
+    public static ResourceType DaemonSet { get; } =
         new(
             V1DaemonSet.KubeKind,
             V1DaemonSet.KubeGroup,
@@ -63,7 +63,7 @@ public record ResourceType(
             SingularDisplayName: "Daemon Set"
         );
 
-    public static ResourceType Event =>
+    public static ResourceType Event { get; } =
         new(
             Eventsv1Event.KubeKind,
             Eventsv1Event.KubeGroup,
@@ -74,7 +74,7 @@ public record ResourceType(
             SingularDisplayName: "Event"
         );
 
-    public static ResourceType StatefulSet =>
+    public static ResourceType StatefulSet { get; } =
         new(
             V1StatefulSet.KubeKind,
             V1StatefulSet.KubeGroup,
@@ -84,7 +84,7 @@ public record ResourceType(
             PluralDisplayName: "Stateful Sets",
             SingularDisplayName: "Stateful Set"
         );
-    public static ResourceType ReplicaSet =>
+    public static ResourceType ReplicaSet { get; } =
         new(
             V1ReplicaSet.KubeKind,
             V1ReplicaSet.KubeGroup,
@@ -94,7 +94,7 @@ public record ResourceType(
             PluralDisplayName: "Replica Sets",
             SingularDisplayName: "Replica Set"
         );
-    public static ResourceType ReplicationController =>
+    public static ResourceType ReplicationController { get; } =
         new(
             V1ReplicationController.KubeKind,
             V1ReplicationController.KubeGroup,
@@ -104,7 +104,7 @@ public record ResourceType(
             PluralDisplayName: "Replication Controllers",
             SingularDisplayName: "Replication Controller"
         );
-    public static ResourceType Job =>
+    public static ResourceType Job { get; } =
         new(
             V1Job.KubeKind,
             V1Job.KubeGroup,
@@ -114,7 +114,7 @@ public record ResourceType(
             PluralDisplayName: "Jobs",
             SingularDisplayName: "Job"
         );
-    public static ResourceType CronJob =>
+    public static ResourceType CronJob { get; } =
         new(
             V1CronJob.KubeKind,
             V1CronJob.KubeGroup,
@@ -124,7 +124,7 @@ public record ResourceType(
             PluralDisplayName: "Cron Jobs",
             SingularDisplayName: "Cron Job"
         );
-    public static ResourceType ConfigMap =>
+    public static ResourceType ConfigMap { get; } =
         new(
             V1ConfigMap.KubeKind,
             V1ConfigMap.KubeGroup,
@@ -134,7 +134,7 @@ public record ResourceType(
             PluralDisplayName: "Config Maps",
             SingularDisplayName: "Config Map"
         );
-    public static ResourceType Secret =>
+    public static ResourceType Secret { get; } =
         new(
             V1Secret.KubeKind,
             V1Secret.KubeGroup,
@@ -144,7 +144,7 @@ public record ResourceType(
             PluralDisplayName: "Secrets",
             SingularDisplayName: "Secret"
         );
-    public static ResourceType ResourceQuota =>
+    public static ResourceType ResourceQuota { get; } =
         new(
             V1ResourceQuota.KubeKind,
             V1ResourceQuota.KubeGroup,
@@ -154,7 +154,7 @@ public record ResourceType(
             PluralDisplayName: "Resource Quotas",
             SingularDisplayName: "Resource Quota"
         );
-    public static ResourceType LimitRange =>
+    public static ResourceType LimitRange { get; } =
         new(
             V1LimitRange.KubeKind,
             V1LimitRange.KubeGroup,
@@ -164,7 +164,7 @@ public record ResourceType(
             PluralDisplayName: "Limit Ranges",
             SingularDisplayName: "Limit Range"
         );
-    public static ResourceType HorizontalPodAutoscaler =>
+    public static ResourceType HorizontalPodAutoscaler { get; } =
         new(
             V1HorizontalPodAutoscaler.KubeKind,
             V1HorizontalPodAutoscaler.KubeGroup,
@@ -174,7 +174,7 @@ public record ResourceType(
             PluralDisplayName: "Horizontal Pod Autoscalers",
             SingularDisplayName: "Horizontal Pod Autoscaler"
         );
-    public static ResourceType PodDisruptionBudget =>
+    public static ResourceType PodDisruptionBudget { get; } =
         new(
             V1PodDisruptionBudget.KubeKind,
             V1PodDisruptionBudget.KubeGroup,
@@ -184,7 +184,7 @@ public record ResourceType(
             PluralDisplayName: "Pod Disruption Budgets",
             SingularDisplayName: "Pod Disruption Budget"
         );
-    public static ResourceType PriorityClass =>
+    public static ResourceType PriorityClass { get; } =
         new(
             V1PriorityClass.KubeKind,
             V1PriorityClass.KubeGroup,
@@ -194,7 +194,7 @@ public record ResourceType(
             PluralDisplayName: "Priority Classes",
             SingularDisplayName: "Priority Class"
         );
-    public static ResourceType RuntimeClass =>
+    public static ResourceType RuntimeClass { get; } =
         new(
             V1RuntimeClass.KubeKind,
             V1RuntimeClass.KubeGroup,
@@ -204,7 +204,7 @@ public record ResourceType(
             PluralDisplayName: "Runtime Classes",
             SingularDisplayName: "Runtime Class"
         );
-    public static ResourceType Lease =>
+    public static ResourceType Lease { get; } =
         new(
             V1Lease.KubeKind,
             V1Lease.KubeGroup,
@@ -214,7 +214,7 @@ public record ResourceType(
             PluralDisplayName: "Leases",
             SingularDisplayName: "Lease"
         );
-    public static ResourceType MutatingWebhookConfiguration =>
+    public static ResourceType MutatingWebhookConfiguration { get; } =
         new(
             V1MutatingWebhookConfiguration.KubeKind,
             V1MutatingWebhookConfiguration.KubeGroup,
@@ -224,7 +224,7 @@ public record ResourceType(
             PluralDisplayName: "Mutating Webhook Configs",
             SingularDisplayName: "Mutating Webhook Config"
         );
-    public static ResourceType ValidatingWebhookConfiguration =>
+    public static ResourceType ValidatingWebhookConfiguration { get; } =
         new(
             V1ValidatingWebhookConfiguration.KubeKind,
             V1ValidatingWebhookConfiguration.KubeGroup,
@@ -234,7 +234,7 @@ public record ResourceType(
             PluralDisplayName: "Validating Webhook Configs",
             SingularDisplayName: "Validating Webhook Config"
         );
-    public static ResourceType Service =>
+    public static ResourceType Service { get; } =
         new(
             V1Service.KubeKind,
             V1Service.KubeGroup,
@@ -244,7 +244,7 @@ public record ResourceType(
             PluralDisplayName: "Services",
             SingularDisplayName: "Service"
         );
-    public static ResourceType Endpoint =>
+    public static ResourceType Endpoint { get; } =
         new(
             V1Endpoints.KubeKind,
             V1Endpoints.KubeGroup,
@@ -254,7 +254,7 @@ public record ResourceType(
             PluralDisplayName: "Endpoints",
             SingularDisplayName: "Endpoint"
         );
-    public static ResourceType Ingress =>
+    public static ResourceType Ingress { get; } =
         new(
             V1Ingress.KubeKind,
             V1Ingress.KubeGroup,
@@ -264,7 +264,7 @@ public record ResourceType(
             PluralDisplayName: "Ingresses",
             SingularDisplayName: "Ingress"
         );
-    public static ResourceType IngressClass =>
+    public static ResourceType IngressClass { get; } =
         new(
             V1IngressClass.KubeKind,
             V1IngressClass.KubeGroup,
@@ -274,7 +274,7 @@ public record ResourceType(
             PluralDisplayName: "Ingress Classes",
             SingularDisplayName: "Ingress Class"
         );
-    public static ResourceType NetworkPolicy =>
+    public static ResourceType NetworkPolicy { get; } =
         new(
             V1NetworkPolicy.KubeKind,
             V1NetworkPolicy.KubeGroup,
@@ -284,7 +284,7 @@ public record ResourceType(
             PluralDisplayName: "Network Policies",
             SingularDisplayName: "Network Policy"
         );
-    public static ResourceType PersistentVolumeClaim =>
+    public static ResourceType PersistentVolumeClaim { get; } =
         new(
             V1PersistentVolumeClaim.KubeKind,
             V1PersistentVolumeClaim.KubeGroup,
@@ -294,7 +294,7 @@ public record ResourceType(
             PluralDisplayName: "Persistent Volume Claims",
             SingularDisplayName: "Persistent Volume Claim"
         );
-    public static ResourceType PersistentVolume =>
+    public static ResourceType PersistentVolume { get; } =
         new(
             V1PersistentVolume.KubeKind,
             V1PersistentVolume.KubeGroup,
@@ -304,7 +304,7 @@ public record ResourceType(
             PluralDisplayName: "Persistent Volumes",
             SingularDisplayName: "Persistent Volume"
         );
-    public static ResourceType StorageClass =>
+    public static ResourceType StorageClass { get; } =
         new(
             V1StorageClass.KubeKind,
             V1StorageClass.KubeGroup,
@@ -314,7 +314,7 @@ public record ResourceType(
             PluralDisplayName: "Storage Classes",
             SingularDisplayName: "Storage Class"
         );
-    public static ResourceType ServiceAccount =>
+    public static ResourceType ServiceAccount { get; } =
         new(
             V1ServiceAccount.KubeKind,
             V1ServiceAccount.KubeGroup,
@@ -324,7 +324,7 @@ public record ResourceType(
             PluralDisplayName: "Service Accounts",
             SingularDisplayName: "Service Account"
         );
-    public static ResourceType ClusterRole =>
+    public static ResourceType ClusterRole { get; } =
         new(
             V1ClusterRole.KubeKind,
             V1ClusterRole.KubeGroup,
@@ -334,7 +334,7 @@ public record ResourceType(
             PluralDisplayName: "Cluster Roles",
             SingularDisplayName: "Cluster Role"
         );
-    public static ResourceType Role =>
+    public static ResourceType Role { get; } =
         new(
             V1Role.KubeKind,
             V1Role.KubeGroup,
@@ -344,7 +344,7 @@ public record ResourceType(
             PluralDisplayName: "Roles",
             SingularDisplayName: "Role"
         );
-    public static ResourceType ClusterRoleBinding =>
+    public static ResourceType ClusterRoleBinding { get; } =
         new(
             V1ClusterRoleBinding.KubeKind,
             V1ClusterRoleBinding.KubeGroup,
@@ -354,7 +354,7 @@ public record ResourceType(
             PluralDisplayName: "Cluster Role Bindings",
             SingularDisplayName: "Cluster Role Binding"
         );
-    public static ResourceType RoleBinding =>
+    public static ResourceType RoleBinding { get; } =
         new(
             V1RoleBinding.KubeKind,
             V1RoleBinding.KubeGroup,
@@ -364,7 +364,7 @@ public record ResourceType(
             PluralDisplayName: "Role Bindings",
             SingularDisplayName: "Role Binding"
         );
-    public static ResourceType CustomResourceDefinition =>
+    public static ResourceType CustomResourceDefinition { get; } =
         new(
             V1CustomResourceDefinition.KubeKind,
             V1CustomResourceDefinition.KubeGroup,

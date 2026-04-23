@@ -203,7 +203,10 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 CreateResourceViewModelCollection(repository, resourceType)
             );
             value = collection;
-            _resources.Add(resourceType, value);
+            if (!_resources.TryAdd(resourceType, value))
+            {
+                return _resources[resourceType];
+            }
 
             var index = new Dictionary<(string Name, string? Namespace), KubernetesResourceViewModel>();
             foreach (var vm in value)

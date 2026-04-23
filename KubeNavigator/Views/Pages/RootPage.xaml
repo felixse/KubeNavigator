@@ -283,7 +283,11 @@
       Visibility="{x:Bind ViewModel.WorkspacesCount, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}"
     >
       <TabView.TabStripFooter>
-        <Button Content="&#xE710;" Style="{ThemeResource TabViewButtonStyle}" />
+        <Button
+          Command="{x:Bind ViewModel.AddTabCommand}"
+          Content="&#xE710;"
+          Style="{ThemeResource TabViewButtonStyle}"
+        />
       </TabView.TabStripFooter>
       <TabView.Resources>
         <SolidColorBrush x:Key="TabViewBorderBrush" Color="Transparent" />

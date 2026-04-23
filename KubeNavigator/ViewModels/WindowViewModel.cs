@@ -79,6 +79,14 @@ public partial class WindowViewModel : ObservableObject, IWindow
         IsCommandPanelOpen = true;
     }
 
+    [RelayCommand]
+    public void AddTab()
+    {
+        var workspace = new WorkspaceViewModel(this);
+        Workspaces.Add(workspace);
+        SelectedWorkspace = workspace;
+    }
+
     public void DismissNotification(NotificationViewModel notification)
     {
         Notifications.Remove(notification);

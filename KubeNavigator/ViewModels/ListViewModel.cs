@@ -15,6 +15,9 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
     public string Title { get; }
 
     [ObservableProperty]
+    public partial bool IsPinned { get; private set; }
+
+    [ObservableProperty]
     public partial AdvancedCollectionView? Items { get; protected set; }
 
     [ObservableProperty]
@@ -24,8 +27,7 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
 
     public bool IsAllSelected
     {
-        get =>
-            Items != null && Items.Count != 0 && AllSelected();
+        get => Items != null && Items.Count != 0 && AllSelected();
         set
         {
             _selectingAll = true;
@@ -53,9 +55,24 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
     {
         foreach (ISelectable item in Items!)
         {
-            if (!item.IsSelected) return false;
+            if (!item.IsSelected)
+                return false;
         }
         return true;
+    }
+
+    [RelayCommand]
+    public void Pin()
+    {
+        IsPinned = true;
+        Workspace.PinNavigationTarget(this);
+    }
+
+    [RelayCommand]
+    public void UnPin()
+    {
+        IsPinned = false;
+        Workspace.UnPinNavigationTarget(this);
     }
 
     [ObservableProperty]
@@ -112,10 +129,12 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
 
     public bool CanDeleteSelectedItems()
     {
-        if (Items == null) return false;
+        if (Items == null)
+            return false;
         foreach (ISelectable item in Items)
         {
-            if (item.IsSelected) return true;
+            if (item.IsSelected)
+                return true;
         }
         return false;
     }
@@ -126,7 +145,8 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
         var selected = new List<ISelectable>();
         foreach (ISelectable item in Items!)
         {
-            if (item.IsSelected) selected.Add(item);
+            if (item.IsSelected)
+                selected.Add(item);
         }
         await DeleteItemsAsync(selected);
     }

@@ -133,6 +133,40 @@
             </NavigationViewItem>
           </DataTemplate>
         </templateselectors:NavigationViewMenuItemTemplateSelector.ClusterListTemplate>
+        <templateselectors:NavigationViewMenuItemTemplateSelector.ClusterOverviewTemplate>
+          <DataTemplate x:DataType="viewmodels:ClusterOverviewViewModel">
+            <NavigationViewItem Content="{x:Bind Title}" Tag="{x:Bind}">
+              <NavigationViewItem.ContextFlyout>
+                <MenuFlyout>
+                  <MenuFlyoutItem Command="{x:Bind OpenInNewTabCommand}" Text="Open in new tab">
+                    <MenuFlyoutItem.Icon>
+                      <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8A7;" />
+                    </MenuFlyoutItem.Icon>
+                  </MenuFlyoutItem>
+                  <MenuFlyoutSeparator />
+                  <MenuFlyoutItem
+                    Command="{x:Bind PinCommand}"
+                    Text="Pin"
+                    Visibility="{x:Bind IsPinned, Mode=OneWay, Converter={StaticResource FalseToVisibleConverter}}"
+                  >
+                    <MenuFlyoutItem.Icon>
+                      <SymbolIcon Symbol="Pin" />
+                    </MenuFlyoutItem.Icon>
+                  </MenuFlyoutItem>
+                  <MenuFlyoutItem
+                    Command="{x:Bind UnPinCommand}"
+                    Text="Unpin"
+                    Visibility="{x:Bind IsPinned, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"
+                  >
+                    <MenuFlyoutItem.Icon>
+                      <SymbolIcon Symbol="UnPin" />
+                    </MenuFlyoutItem.Icon>
+                  </MenuFlyoutItem>
+                </MenuFlyout>
+              </NavigationViewItem.ContextFlyout>
+            </NavigationViewItem>
+          </DataTemplate>
+        </templateselectors:NavigationViewMenuItemTemplateSelector.ClusterOverviewTemplate>
       </templateselectors:NavigationViewMenuItemTemplateSelector>
       <converters1:NavigationTargetToViewConverter x:Key="NavigationTargetToViewConverter" />
       <converters1:CountToVisibilityConverter x:Key="CountToVisibilityConverter" MinimumCount="1" />

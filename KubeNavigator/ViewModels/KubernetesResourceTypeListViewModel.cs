@@ -14,13 +14,9 @@ using KubeNavigator.ViewModels.Resources;
 
 namespace KubeNavigator.ViewModels;
 
-public partial class KubernetesResourceTypeListViewModel
-    : ListViewModel
+public partial class KubernetesResourceTypeListViewModel : ListViewModel
 {
     public ClusterViewModel Cluster { get; }
-
-    [ObservableProperty]
-    public partial bool IsPinned { get; private set; }
 
     public ResourceType ResourceType { get; }
 
@@ -40,10 +36,7 @@ public partial class KubernetesResourceTypeListViewModel
             title: resourceType.PluralDisplayName,
             isNamespaceScoped: resourceType.IsNamespaceScoped,
             namespaceFilters: cluster.NamespaceFilters,
-            additionalFilters: cluster.AdditionalFilters.GetValueOrDefault(
-                resourceType,
-                []
-            )
+            additionalFilters: cluster.AdditionalFilters.GetValueOrDefault(resourceType, [])
         )
     {
         Cluster = cluster;
@@ -150,20 +143,6 @@ public partial class KubernetesResourceTypeListViewModel
                 OnPropertyChanged(nameof(IsAllSelected));
             }
         }
-    }
-
-    [RelayCommand]
-    public void Pin()
-    {
-        IsPinned = true;
-        Workspace.PinResourceType(this);
-    }
-
-    [RelayCommand]
-    public void UnPin()
-    {
-        IsPinned = false;
-        Workspace.UnPinResourceType(this);
     }
 
     public override void AddNewItem()

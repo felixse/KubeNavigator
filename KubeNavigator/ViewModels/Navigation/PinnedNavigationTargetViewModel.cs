@@ -40,7 +40,7 @@ public partial class PinnedNavigationTargetViewModel : ObservableObject, INaviga
     [RelayCommand]
     public void UnPin()
     {
-        Workspace.UnPinResourceType(NavigationTarget);
+        Workspace.UnPinNavigationTarget(NavigationTarget);
     }
 
     public Task OnNavigatedTo()

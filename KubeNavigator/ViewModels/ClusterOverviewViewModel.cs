@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels.ClusterMetrics;
 using KubeNavigator.ViewModels.Navigation;
@@ -10,6 +11,7 @@ namespace KubeNavigator.ViewModels
     public partial class ClusterOverviewViewModel : ObservableObject, INavigationTarget
     {
         private readonly ClusterViewModel _cluster;
+        private readonly WorkspaceViewModel _workspace;
 
         public string Title => "Overview";
 
@@ -23,12 +25,17 @@ namespace KubeNavigator.ViewModels
         public ClusterMetricBaseViewModel PodMetric { get; }
         public ClusterMetricBaseViewModel NodeMetric { get; }
 
+        [ObservableProperty]
+        public partial bool IsPinned { get; private set; }
+
         public ClusterOverviewViewModel(
             ClusterViewModel cluster,
+            WorkspaceViewModel workspace,
             KubernetesResourceTypeListViewModel eventListViewModel
         )
         {
             _cluster = cluster;
+            _workspace = workspace;
             EventListViewModel = eventListViewModel;
 
             CpuMetric = new CpuUsageMetricViewModel();
@@ -42,6 +49,26 @@ namespace KubeNavigator.ViewModels
             Metrics.Add(NodeMetric);
 
             _cluster.Context.NodeMetricsUpdated += OnNodeMetricsUpdated;
+        }
+
+        [RelayCommand]
+        public async Task OpenInNewTab()
+        {
+            await _workspace.Window.OpenInNewWorkspaceAsync(this, _workspace.Cluster);
+        }
+
+        [RelayCommand]
+        public void Pin()
+        {
+            IsPinned = true;
+            _workspace.PinNavigationTarget(this);
+        }
+
+        [RelayCommand]
+        public void UnPin()
+        {
+            IsPinned = false;
+            _workspace.UnPinNavigationTarget(this);
         }
 
         private void OnNodeMetricsUpdated(object? sender, NodeMetrics nodeMetrics)

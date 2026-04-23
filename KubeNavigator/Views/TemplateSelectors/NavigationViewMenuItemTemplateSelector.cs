@@ -21,6 +21,8 @@ public partial class NavigationViewMenuItemTemplateSelector : DataTemplateSelect
 
     public DataTemplate? CustomResourceGroupTemplate { get; set; }
 
+    public DataTemplate? ClusterOverviewTemplate { get; set; }
+
     public DataTemplate? GenericTemplate { get; set; }
 
     protected override DataTemplate SelectTemplateCore(object item)
@@ -52,6 +54,10 @@ public partial class NavigationViewMenuItemTemplateSelector : DataTemplateSelect
         else if (item is CustomResourceGroupViewModel && CustomResourceGroupTemplate != null)
         {
             return CustomResourceGroupTemplate;
+        }
+        else if (item is ClusterOverviewViewModel && ClusterOverviewTemplate != null)
+        {
+            return ClusterOverviewTemplate;
         }
         else if (item is INavigationTarget && GenericTemplate != null)
         {

@@ -142,6 +142,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
 
         var clusterOverview = new ClusterOverviewViewModel(
             cluster,
+            this,
             new KubernetesResourceTypeListViewModel(
                 this,
                 cluster,
@@ -698,17 +699,16 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         }
     }
 
-    public void PinResourceType(KubernetesResourceTypeListViewModel resourceType)
+    public void PinNavigationTarget(INavigationTarget navigationTarget)
     {
         if (Pinned != null)
         {
-            Pinned.Items.Add(new PinnedNavigationTargetViewModel(resourceType, this));
+            Pinned.Items.Add(new PinnedNavigationTargetViewModel(navigationTarget, this));
             Pinned.IsExpanded = true;
         }
-        // todo persist
     }
 
-    public void UnPinResourceType(INavigationTarget navigationTarget)
+    public void UnPinNavigationTarget(INavigationTarget navigationTarget)
     {
         if (Pinned != null)
         {
@@ -720,7 +720,6 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                 Pinned.Items.Remove(pinnedItem);
             }
         }
-        // todo persist
     }
 
     partial void OnSelectedItemChanged(

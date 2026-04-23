@@ -533,8 +533,9 @@ public partial class PodViewModel : KubernetesResourceViewModel
 
         if (container.Ports != null)
         {
-            yield return new FullWidthRow
+            yield return new HeaderedRow
             {
+                Header = "Ports",
                 Content = new PortsContent
                 {
                     Ports =

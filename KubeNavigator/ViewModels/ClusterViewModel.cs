@@ -40,7 +40,7 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
 
     private readonly Dictionary<(string Name, string Namespace), HelmReleaseViewModel> _helmIndex = [];
 
-    public Dictionary<ResourceType, IEnumerable<ToggleFilter>> AdditionalFilters { get; } = new();
+    public Dictionary<ResourceType, List<ToggleFilter>> AdditionalFilters { get; } = new();
 
     public string Name { get; }
     public AppViewModel App { get; }

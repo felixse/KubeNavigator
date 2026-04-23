@@ -65,14 +65,14 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
 
     public ObservableCollection<INamespaceFilter> NamespaceFilters { get; }
 
-    public IEnumerable<ToggleFilter> AdditionalFilters { get; }
+    public List<ToggleFilter> AdditionalFilters { get; }
 
     public ListViewModel(
         WorkspaceViewModel workspace,
         string title,
         bool isNamespaceScoped,
         ObservableCollection<INamespaceFilter> namespaceFilters,
-        IEnumerable<ToggleFilter> additionalFilters
+        List<ToggleFilter> additionalFilters
     )
     {
         Workspace = workspace;

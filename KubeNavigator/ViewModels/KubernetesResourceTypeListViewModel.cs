@@ -42,7 +42,7 @@ public partial class KubernetesResourceTypeListViewModel
             namespaceFilters: cluster.NamespaceFilters,
             additionalFilters: cluster.AdditionalFilters.GetValueOrDefault(
                 resourceType,
-                Enumerable.Empty<ToggleFilter>()
+                []
             )
         )
     {

@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels.Resources;
 using Serilog.Events;
+using Windows.System;
 
 namespace KubeNavigator.ViewModels.Shelf;
 
@@ -77,6 +78,12 @@ public partial class ApplicationLogViewModel : ObservableObject, IShelfItem
     private void Clear()
     {
         _loggingService.ClearLogs();
+    }
+
+    [RelayCommand]
+    private async Task OpenLogDirectoryAsync()
+    {
+        await Launcher.LaunchFolderPathAsync(_loggingService.LogDirectory);
     }
 
     public string Title => "Application Logs";

@@ -118,7 +118,7 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
                 yield return new FullWidthRow
                 {
                     Header = key,
-                    Content = new EditorContent { Value = value },
+                    Content = new EditorContent { Value = value, IsReadOnly = false },
                 };
             }
         }

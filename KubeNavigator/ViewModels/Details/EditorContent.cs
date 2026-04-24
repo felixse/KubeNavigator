@@ -6,5 +6,7 @@ public class EditorContent : IDetailsContent
 {
     public required string Value { get; set; }
 
+    public required bool IsReadOnly { get; set; }
+
     public Func<string>? TextRetriever { get; set; }
 }

@@ -271,7 +271,7 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
         yield return new HeaderedRow
         {
             Header = "Affinities",
-            Content = new EditorContent { Value = affinityYaml },
+            Content = new EditorContent { Value = affinityYaml, IsReadOnly = true },
         };
     }
 

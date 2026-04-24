@@ -95,11 +95,7 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
                 return new FullWidthRow
                 {
                     Header = group.Key,
-                    Content = new TableContent
-                    {
-                        Columns = columns,
-                        Rows = rows,
-                    },
+                    Content = new TableContent { Columns = columns, Rows = rows },
                 };
             })
             .ToList();
@@ -147,13 +143,24 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
                         {
                             ["User supplied"] =
                             [
-                                new FullWidthRow { Content = new EditorContent { Value = values } },
+                                new FullWidthRow
+                                {
+                                    Content = new EditorContent
+                                    {
+                                        Value = values,
+                                        IsReadOnly = false,
+                                    },
+                                },
                             ],
                             ["Computed"] =
                             [
                                 new FullWidthRow
                                 {
-                                    Content = new EditorContent { Value = computedValues },
+                                    Content = new EditorContent
+                                    {
+                                        Value = computedValues,
+                                        IsReadOnly = false,
+                                    },
                                 },
                             ],
                         },

@@ -136,7 +136,58 @@ public sealed partial class ResourceDetailsView : UserControl
         )
         {
             codeEditor.Editor.SetText(editorContent.Value);
+            codeEditor.Editor.ReadOnly = editorContent.IsReadOnly;
+            codeEditor.Editor.EndAtLastLine = true;
             editorContent.TextRetriever = () => codeEditor.Editor.GetText(long.MaxValue);
+
+            UpdateEditorHeight(codeEditor);
+
+            codeEditor.Editor.UpdateUI += (s, args) => UpdateEditorHeight(codeEditor);
+        }
+    }
+
+    private static void UpdateEditorHeight(CodeEditorControl codeEditor)
+    {
+        var scaleFactor = codeEditor.XamlRoot.RasterizationScale;
+        var lineHeight = codeEditor.Editor.TextHeight(0) / scaleFactor;
+        var lineCount = codeEditor.Editor.LineCount;
+
+        // Scintilla adds a trailing empty line; exclude it from height calculation
+        if (lineCount > 1 && codeEditor.Editor.LineLength(lineCount - 1) == 0)
+        {
+            lineCount--;
+        }
+
+        var contentHeight = lineHeight * lineCount;
+        var desiredHeight = contentHeight + 36;
+        var newHeight = codeEditor.MaxHeight > 0
+            ? Math.Min(desiredHeight, codeEditor.MaxHeight)
+            : desiredHeight;
+        codeEditor.Height = newHeight;
+
+        // If all content fits, scroll to top so no lines are hidden
+        if (desiredHeight <= newHeight)
+        {
+            codeEditor.Editor.FirstVisibleLine = 0;
+        }
+    }
+
+    private void CodeEditorControl_PointerWheelChanged(
+        object sender,
+        Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e
+    )
+    {
+        if (sender is CodeEditorControl codeEditor)
+        {
+            var delta = e.GetCurrentPoint(codeEditor).Properties.MouseWheelDelta;
+            var firstVisible = codeEditor.Editor.FirstVisibleLine;
+            var linesOnScreen = codeEditor.Editor.LinesOnScreen;
+            var totalLines = codeEditor.Editor.LineCount;
+
+            var canScrollUp = delta > 0 && firstVisible > 0;
+            var canScrollDown = delta < 0 && firstVisible + linesOnScreen < totalLines;
+
+            e.Handled = canScrollUp || canScrollDown;
         }
     }
 }

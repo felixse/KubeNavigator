@@ -45,7 +45,7 @@
       <Setter Property="Foreground" Value="{ThemeResource TextFillColorInverseBrush}" />
     </Style>
     <Style x:Key="CodeEditorStyle" TargetType="editor:CodeEditorControl">
-      <Setter Property="Height" Value="200" />
+      <Setter Property="MaxHeight" Value="600" />
       <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
       <Setter Property="BorderBrush" Value="{ThemeResource ControlElevationBorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
@@ -399,6 +399,7 @@
           <editor:CodeEditorControl
             HighlightingLanguage="yaml"
             Loaded="CodeEditorControl_Loaded"
+            PointerWheelChanged="CodeEditorControl_PointerWheelChanged"
             Style="{StaticResource CodeEditorStyle}"
           />
         </DataTemplate>
@@ -412,9 +413,9 @@
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox
+              MaxHeight="200"
               AcceptsReturn="{x:Bind IsRevealed, Mode=OneWay}"
               IsReadOnly="{x:Bind IsRevealed, Mode=OneWay, Converter={StaticResource NegateBoolConverter}}"
-              MaxHeight="200"
               ScrollViewer.VerticalScrollBarVisibility="Auto"
               Text="{x:Bind DisplayText, Mode=OneWay}"
               TextWrapping="NoWrap"
@@ -467,9 +468,10 @@
       <templateselectors:EmbeddedDetailsContentTemplateSelector.EmbeddedEditorTemplate>
         <DataTemplate x:DataType="details:EditorContent">
           <editor:CodeEditorControl
-            Height="200"
+            MaxHeight="600"
             HighlightingLanguage="yaml"
             Loaded="CodeEditorControl_Loaded"
+            PointerWheelChanged="CodeEditorControl_PointerWheelChanged"
           />
         </DataTemplate>
       </templateselectors:EmbeddedDetailsContentTemplateSelector.EmbeddedEditorTemplate>

@@ -388,6 +388,7 @@ public partial class PodViewModel : KubernetesResourceViewModel
                     Pod.Spec.Affinity != null
                         ? YamlSerializerFactory.Serializer.Serialize(Pod.Spec.Affinity)
                         : string.Empty,
+                IsReadOnly = true,
             },
         };
 

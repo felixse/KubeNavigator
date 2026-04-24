@@ -14,6 +14,7 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
     private readonly ISettingsService _settingsService;
     private readonly IWindowManager _windowManager;
     private readonly LoggingService _loggingService;
+    private readonly ViewStateService _viewStateService;
 
     public string Title => "Settings";
 
@@ -65,12 +66,14 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
     public SettingsViewModel(
         ISettingsService settingsService,
         IWindowManager windowManager,
-        LoggingService loggingService
+        LoggingService loggingService,
+        ViewStateService viewStateService
     )
     {
         _settingsService = settingsService;
         _windowManager = windowManager;
         _loggingService = loggingService;
+        _viewStateService = viewStateService;
     }
 
     [RelayCommand]
@@ -87,6 +90,12 @@ public partial class SettingsViewModel : ObservableObject, INavigationTarget
         {
             HelmPath = path;
         }
+    }
+
+    [RelayCommand]
+    private async Task ResetViewStateAsync()
+    {
+        await _viewStateService.ResetAsync();
     }
 
     public Task OnNavigatedTo()

@@ -9,6 +9,7 @@ namespace KubeNavigator;
 
 [JsonSerializable(typeof(DetailsDictionaryEntry))]
 [JsonSerializable(typeof(AppSettings))]
+[JsonSerializable(typeof(ViewState))]
 [JsonSerializable(typeof(HelmRelease))]
 [JsonSerializable(typeof(IncomingMessage))]
 [JsonSerializable(typeof(OutgoingMessage))]

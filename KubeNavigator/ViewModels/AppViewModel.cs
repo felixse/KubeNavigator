@@ -36,6 +36,8 @@ public partial class AppViewModel : ObservableObject
 
     public LoggingService LoggingService { get; }
 
+    public ViewStateService ViewStateService { get; }
+
     public HelmService HelmService { get; }
 
     public AppViewModel(
@@ -46,6 +48,7 @@ public partial class AppViewModel : ObservableObject
         ThemeManager themeManager,
         LoggingService loggingService,
         ISettingsService settingsService,
+        ViewStateService viewStateService,
         IReadOnlyList<string> contextNames
     )
     {
@@ -57,6 +60,7 @@ public partial class AppViewModel : ObservableObject
         ThemeManager = themeManager;
         LoggingService = loggingService;
         _settingsService = settingsService;
+        ViewStateService = viewStateService;
         HelmService = new HelmService(
             LoggerFactoryExtensions.CreateLogger<HelmService>(loggingService.LoggerFactory)
         );

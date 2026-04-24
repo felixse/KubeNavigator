@@ -70,12 +70,26 @@
         </templateselectors:NavigationViewMenuItemTemplateSelector.ResourceTypeTemplate>
         <templateselectors:NavigationViewMenuItemTemplateSelector.PinnedResourceTypeTemplate>
           <DataTemplate x:DataType="navigationViewModels:PinnedNavigationTargetViewModel">
-            <NavigationViewItem Content="{x:Bind NavigationTarget.Title}" Tag="{x:Bind}">
+            <NavigationViewItem
+              Content="{x:Bind NavigationTarget.Title}"
+              Tag="{x:Bind}"
+            >
               <NavigationViewItem.ContextFlyout>
                 <MenuFlyout>
                   <MenuFlyoutItem Command="{x:Bind OpenInNewTabCommand}" Text="Open in new tab">
                     <MenuFlyoutItem.Icon>
                       <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8A7;" />
+                    </MenuFlyoutItem.Icon>
+                  </MenuFlyoutItem>
+                  <MenuFlyoutSeparator />
+                  <MenuFlyoutItem Command="{x:Bind MoveUpCommand}" Text="Move up">
+                    <MenuFlyoutItem.Icon>
+                      <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74A;" />
+                    </MenuFlyoutItem.Icon>
+                  </MenuFlyoutItem>
+                  <MenuFlyoutItem Command="{x:Bind MoveDownCommand}" Text="Move down">
+                    <MenuFlyoutItem.Icon>
+                      <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74B;" />
                     </MenuFlyoutItem.Icon>
                   </MenuFlyoutItem>
                   <MenuFlyoutSeparator />

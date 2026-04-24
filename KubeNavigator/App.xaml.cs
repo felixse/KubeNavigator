@@ -76,7 +76,12 @@ public partial class App : Application, IWindowManager
         Log.StartupPhaseCompleted(_logger, "LoadKubeConfig", sw.ElapsedMilliseconds);
 
         sw.Restart();
-        var settings = new SettingsViewModel(_settingsService, this, _loggingService!);
+        var viewStateService = new ViewStateService(
+            _loggingService!.LoggerFactory.CreateLogger<ViewStateService>()
+        );
+        await viewStateService.LoadAsync();
+
+        var settings = new SettingsViewModel(_settingsService, this, _loggingService!, viewStateService);
         var app = new AppViewModel(
             () => new ContentDialogService(_themeManager),
             this,
@@ -85,6 +90,7 @@ public partial class App : Application, IWindowManager
             _themeManager,
             _loggingService!,
             _settingsService,
+            viewStateService,
             contextNames
         );
         app.DetailWindowViewModels.CollectionChanged += OnDetailWindowsCollectionchanged;

@@ -1,3 +1,4 @@
+using System;
 using KubeNavigator.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -24,5 +25,23 @@ public sealed partial class SettingsView : UserControl
         var isGeneral = sender.SelectedItem == GeneralTab;
         GeneralPanel.Visibility = isGeneral ? Visibility.Visible : Visibility.Collapsed;
         AboutPanel.Visibility = isGeneral ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private async void ResetViewState_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = "Reset View State",
+            Content = "This will reset all pinned items, expanded groups, and saved namespace filters. This cannot be undone.",
+            PrimaryButtonText = "Reset",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = this.XamlRoot,
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            ViewModel?.ResetViewStateCommand.Execute(null);
+        }
     }
 }

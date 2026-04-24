@@ -43,6 +43,36 @@ public partial class PinnedNavigationTargetViewModel : ObservableObject, INaviga
         Workspace.UnPinNavigationTarget(NavigationTarget);
     }
 
+    private bool CanMoveUp() => Workspace.Pinned.Items.IndexOf(this) > 0;
+
+    private bool CanMoveDown()
+    {
+        var index = Workspace.Pinned.Items.IndexOf(this);
+        return index >= 0 && index < Workspace.Pinned.Items.Count - 1;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMoveUp))]
+    public void MoveUp()
+    {
+        var index = Workspace.Pinned.Items.IndexOf(this);
+        Workspace.MovePinnedItem(this, index - 1);
+        NotifyMoveCommandsChanged();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMoveDown))]
+    public void MoveDown()
+    {
+        var index = Workspace.Pinned.Items.IndexOf(this);
+        Workspace.MovePinnedItem(this, index + 1);
+        NotifyMoveCommandsChanged();
+    }
+
+    public void NotifyMoveCommandsChanged()
+    {
+        MoveUpCommand.NotifyCanExecuteChanged();
+        MoveDownCommand.NotifyCanExecuteChanged();
+    }
+
     public Task OnNavigatedTo()
     {
         return Task.CompletedTask;

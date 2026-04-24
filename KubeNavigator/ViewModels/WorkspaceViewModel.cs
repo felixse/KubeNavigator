@@ -9,6 +9,7 @@ using CommunityToolkit.WinUI.Collections;
 using FuseSharp;
 using k8s.Models;
 using KubeNavigator.Models;
+using KubeNavigator.Services;
 using KubeNavigator.ViewModels.AppCommands;
 using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Filters;
@@ -25,6 +26,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     private ObservableCollection<KubernetesResourceViewModel>? _customResourceDefinitions;
     private readonly ILogger<WorkspaceViewModel> _logger;
     private (string Title, string Message, Func<Task>? FollowUp)? _pendingInfoDialog;
+    private string? _pendingNamespaceFilter;
 
     public event EventHandler? Closed;
 
@@ -137,6 +139,15 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         );
 
         NavigationGroups.Clear();
+
+        // Check for a saved namespace filter before setting the default,
+        // so the initial assignment doesn't overwrite the persisted value.
+        var viewState = App.ViewStateService.State;
+        if (viewState.ClusterStates.TryGetValue(cluster.Name, out var clusterState)
+            && clusterState.LastNamespaceFilter != null)
+        {
+            _pendingNamespaceFilter = clusterState.LastNamespaceFilter;
+        }
 
         SelectedNamespaceFilter = cluster.NamespaceFilters.First(x => x is AllNamespacesFilter);
 
@@ -312,6 +323,63 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         NavigationGroups.Add(helm);
         NavigationGroups.Add(accessControl);
         NavigationGroups.Add(CustomResourcesNavigationGroup);
+
+        // Restore expanded groups from view state
+        foreach (var group in NavigationGroups)
+        {
+            group.IsExpanded = viewState.ExpandedGroups.Contains(group.Name);
+            group.PropertyChanged += OnNavigationGroupPropertyChanged;
+        }
+
+        // Restore pinned items from view state
+        var allNavigationTargets = NavigationGroups
+            .SelectMany(g => g.Items)
+            .SelectMany(item =>
+                item is CustomResourceGroupViewModel crg
+                    ? crg.Resources.Cast<INavigationTarget>()
+                    : [item]
+            )
+            .ToList();
+
+        foreach (var pin in viewState.PinnedItems)
+        {
+            INavigationTarget? target = pin switch
+            {
+                PinnedClusterOverviewState => allNavigationTargets.OfType<ClusterOverviewViewModel>().FirstOrDefault(),
+                PinnedHelmReleasesState => allNavigationTargets.OfType<Helm.HelmReleasesViewModel>().FirstOrDefault(),
+                PinnedResourceTypeState rt => allNavigationTargets.OfType<KubernetesResourceTypeListViewModel>()
+                    .FirstOrDefault(r =>
+                        r.ResourceType.Kind == rt.Kind
+                        && r.ResourceType.Group == rt.Group
+                        && r.ResourceType.Version == rt.Version
+                        && r.ResourceType.Plural == rt.Plural),
+                _ => null,
+            };
+            if (target != null)
+            {
+                Pinned.Items.Add(new PinnedNavigationTargetViewModel(target, this));
+            }
+        }
+        if (Pinned.Items.Any())
+        {
+            Pinned.IsExpanded = true;
+        }
+
+        // Restore namespace filter from cluster view state
+        if (_pendingNamespaceFilter != null)
+        {
+            var nsFilter = cluster.NamespaceFilters.FirstOrDefault(f =>
+                f is NamespaceFilter nf && nf.Name == _pendingNamespaceFilter);
+            if (nsFilter != null)
+            {
+                _pendingNamespaceFilter = null;
+                SelectedNamespaceFilter = nsFilter;
+            }
+            else
+            {
+                cluster.NamespaceFilters.CollectionChanged += OnNamespaceFiltersCollectionChanged;
+            }
+        }
 
         AppCommands.Clear();
         foreach (
@@ -705,6 +773,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         {
             Pinned.Items.Add(new PinnedNavigationTargetViewModel(navigationTarget, this));
             Pinned.IsExpanded = true;
+            SavePinnedState();
         }
     }
 
@@ -718,7 +787,44 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             if (pinnedItem != null)
             {
                 Pinned.Items.Remove(pinnedItem);
+                SavePinnedState();
             }
+        }
+    }
+
+    public void MovePinnedItem(PinnedNavigationTargetViewModel item, int newIndex)
+    {
+        if (Pinned == null)
+            return;
+
+        var oldIndex = Pinned.Items.IndexOf(item);
+        if (oldIndex < 0 || oldIndex == newIndex)
+            return;
+
+        // Use Remove+Insert instead of Move to avoid NavigationView
+        // container tracking issues that corrupt selection state.
+        var wasSelected = SelectedItem == item;
+        if (wasSelected)
+        {
+            SelectedItem = null;
+        }
+
+        Pinned.Items.RemoveAt(oldIndex);
+        if (newIndex > oldIndex)
+        {
+            newIndex--;
+        }
+        Pinned.Items.Insert(newIndex, item);
+        SavePinnedState();
+
+        foreach (var pinnedItem in Pinned.Items.OfType<PinnedNavigationTargetViewModel>())
+        {
+            pinnedItem.NotifyMoveCommandsChanged();
+        }
+
+        if (wasSelected)
+        {
+            App.DispatcherQueue.TryEnqueue(() => SelectedItem = item);
         }
     }
 
@@ -767,6 +873,91 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     )
     {
         HelmReleasesViews?.RefreshFilter(); // todo this should be done in the viewmodel
+        if (_pendingNamespaceFilter == null)
+        {
+            SaveNamespaceFilterState();
+        }
+    }
+
+    private void OnNamespaceFiltersCollectionChanged(
+        object? sender,
+        NotifyCollectionChangedEventArgs e
+    )
+    {
+        if (_pendingNamespaceFilter == null || Cluster == null)
+            return;
+
+        foreach (var item in e.NewItems?.Cast<INamespaceFilter>() ?? [])
+        {
+            if (item is NamespaceFilter nf && nf.Name == _pendingNamespaceFilter)
+            {
+                SelectedNamespaceFilter = item;
+                _pendingNamespaceFilter = null;
+                Cluster.NamespaceFilters.CollectionChanged -= OnNamespaceFiltersCollectionChanged;
+                return;
+            }
+        }
+    }
+
+    private void OnNavigationGroupPropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e
+    )
+    {
+        if (e.PropertyName == nameof(NavigationGroupViewModel.IsExpanded))
+        {
+            SaveExpandedGroupsState();
+        }
+    }
+
+    private void SavePinnedState()
+    {
+        var viewState = App.ViewStateService.State;
+        viewState.PinnedItems = Pinned.Items
+            .OfType<PinnedNavigationTargetViewModel>()
+            .Select<PinnedNavigationTargetViewModel, PinnedItemState?>(p => p.NavigationTarget switch
+            {
+                KubernetesResourceTypeListViewModel r => new PinnedResourceTypeState
+                {
+                    Kind = r.ResourceType.Kind,
+                    Group = r.ResourceType.Group,
+                    Version = r.ResourceType.Version,
+                    Plural = r.ResourceType.Plural,
+                },
+                ClusterOverviewViewModel => new PinnedClusterOverviewState(),
+                Helm.HelmReleasesViewModel => new PinnedHelmReleasesState(),
+                _ => null,
+            })
+            .Where(p => p != null)
+            .Cast<PinnedItemState>()
+            .ToList();
+        _ = App.ViewStateService.SaveAsync();
+    }
+
+    private void SaveExpandedGroupsState()
+    {
+        var viewState = App.ViewStateService.State;
+        viewState.ExpandedGroups = NavigationGroups
+            .Where(g => g.IsExpanded)
+            .Select(g => g.Name)
+            .ToList();
+        _ = App.ViewStateService.SaveAsync();
+    }
+
+    private void SaveNamespaceFilterState()
+    {
+        if (Cluster == null || SelectedNamespaceFilter == null)
+            return;
+
+        var viewState = App.ViewStateService.State;
+        string? filterName = SelectedNamespaceFilter is NamespaceFilter nf ? nf.Name : null;
+        if (!viewState.ClusterStates.TryGetValue(Cluster.Name, out var clusterState))
+        {
+            clusterState = new ClusterViewState();
+            viewState.ClusterStates[Cluster.Name] = clusterState;
+        }
+        clusterState.LastNamespaceFilter = filterName;
+        _ = App.ViewStateService.SaveAsync();
     }
 
     private static partial class Log

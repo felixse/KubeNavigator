@@ -60,6 +60,12 @@
       >
         <ToggleSwitch IsOn="{x:Bind ViewModel.HideManagedFields, Mode=TwoWay}" />
       </controls:SettingsCard>
+      <controls:SettingsCard
+        Description="Resets pinned items, expanded groups, and last selected namespace filters."
+        Header="Reset View State"
+      >
+        <Button Click="ResetViewState_Click" Content="Reset" />
+      </controls:SettingsCard>
     </StackPanel>
 
     <!--  About tab content  -->

@@ -25,6 +25,8 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
 
     public Func<IReadOnlyList<string>, Task<string?>>? FilePickerHandler { get; set; }
 
+    public Func<string, IReadOnlyList<string>, Task<string?>>? FileSaverHandler { get; set; }
+
     [ObservableProperty]
     public partial string Title { get; set; }
 
@@ -112,6 +114,17 @@ public partial class DetailWindowViewModel : ObservableObject, IShelfHost, IWind
         }
 
         return FilePickerHandler(fileTypes);
+    }
+
+    public Task<string?> SaveFileAsync(string suggestedFileName, IReadOnlyList<string> fileTypes)
+    {
+        if (FileSaverHandler is null)
+        {
+            Log.FilePickerHandlerNotSet(_logger, nameof(DetailWindowViewModel));
+            return Task.FromResult<string?>(null);
+        }
+
+        return FileSaverHandler(suggestedFileName, fileTypes);
     }
 
     private static partial class Log

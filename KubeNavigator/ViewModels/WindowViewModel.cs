@@ -45,6 +45,8 @@ public partial class WindowViewModel : ObservableObject, IWindow
 
     public Func<IReadOnlyList<string>, Task<string?>>? FilePickerHandler { get; set; }
 
+    public Func<string, IReadOnlyList<string>, Task<string?>>? FileSaverHandler { get; set; }
+
     public ObservableCollection<WorkspaceViewModel> Workspaces { get; set; }
 
     public ObservableCollection<NotificationViewModel> Notifications { get; set; }
@@ -187,6 +189,17 @@ public partial class WindowViewModel : ObservableObject, IWindow
         }
 
         return FilePickerHandler(fileTypes);
+    }
+
+    public Task<string?> SaveFileAsync(string suggestedFileName, IReadOnlyList<string> fileTypes)
+    {
+        if (FileSaverHandler is null)
+        {
+            Log.FilePickerHandlerNotSet(_logger, nameof(WindowViewModel));
+            return Task.FromResult<string?>(null);
+        }
+
+        return FileSaverHandler(suggestedFileName, fileTypes);
     }
 
     private static partial class Log

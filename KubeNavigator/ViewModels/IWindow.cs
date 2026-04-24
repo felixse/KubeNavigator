@@ -18,4 +18,6 @@ public interface IWindow
     void DismissNotification(NotificationViewModel notification);
 
     Task<string?> PickFileAsync(IReadOnlyList<string> fileTypes);
+
+    Task<string?> SaveFileAsync(string suggestedFileName, IReadOnlyList<string> fileTypes);
 }

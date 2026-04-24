@@ -258,6 +258,22 @@ public partial class KubernetesService
         }
     }
 
+    public async Task<string> ReadPodLogsAsync(
+        V1Pod pod,
+        CancellationToken cancellationToken = default
+    )
+    {
+        using var stream = await _kubernetes.CoreV1.ReadNamespacedPodLogAsync(
+            pod.Name(),
+            pod.Namespace(),
+            pretty: true,
+            follow: false,
+            cancellationToken: cancellationToken
+        );
+        using var reader = new StreamReader(stream);
+        return await reader.ReadToEndAsync(cancellationToken);
+    }
+
     public async Task<PodExecSession> OpenPodExecSessionAsync(
         V1Pod pod,
         CancellationToken cancellationToken = default

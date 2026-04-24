@@ -234,6 +234,11 @@ public partial class KubernetesContext
         return _kubernetesService.OpenPodLogStreamAsync(pod, cancellationToken);
     }
 
+    public Task<string> ReadPodLogsAsync(V1Pod pod, CancellationToken cancellationToken)
+    {
+        return _kubernetesService.ReadPodLogsAsync(pod, cancellationToken);
+    }
+
     public Task<PodExecSession> ExecAsync(V1Pod pod, CancellationToken cancellationToken)
     {
         return _kubernetesService.OpenPodExecSessionAsync(pod, cancellationToken);

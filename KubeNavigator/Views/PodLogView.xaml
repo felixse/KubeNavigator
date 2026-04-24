@@ -19,7 +19,10 @@
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
-      <Button Grid.Column="0" Click="OnClearButtonClicked" Content="Clear" />
+      <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
+        <Button Click="OnClearButtonClicked" Content="Clear" />
+        <Button Command="{x:Bind ViewModel.SaveLogsCommand}" Content="Save logs" />
+      </StackPanel>
       <TextBox
         Grid.Column="2"
         MinWidth="200"

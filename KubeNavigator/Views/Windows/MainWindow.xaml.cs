@@ -20,6 +20,7 @@ public sealed partial class MainWindow : Window
 
         ViewModel = viewModel;
         ViewModel.FilePickerHandler = PickFileAsync;
+        ViewModel.FileSaverHandler = SaveFileAsync;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
         AppWindow.SetIcon("WindowIcon.ico");
@@ -41,6 +42,26 @@ public sealed partial class MainWindow : Window
         WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
 
         var file = await picker.PickSingleFileAsync();
+        return file?.Path;
+    }
+
+    private async Task<string?> SaveFileAsync(
+        string suggestedFileName,
+        IReadOnlyList<string> fileTypes
+    )
+    {
+        var picker = new FileSavePicker();
+        picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        picker.SuggestedFileName = suggestedFileName;
+        foreach (var fileType in fileTypes)
+        {
+            picker.FileTypeChoices.Add(fileType, [fileType]);
+        }
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+        var file = await picker.PickSaveFileAsync();
         return file?.Path;
     }
 

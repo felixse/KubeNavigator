@@ -3,8 +3,11 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using KubeNavigator.ViewModels.Resources;
 using Microsoft.Extensions.Logging;
+using Microsoft.Windows.AppNotifications;
+using Microsoft.Windows.AppNotifications.Builder;
 
 namespace KubeNavigator.ViewModels.Shelf;
 
@@ -72,6 +75,30 @@ public partial class PodLogsViewModel : ObservableObject, IShelfItem
     public ClusterViewModel Cluster { get; }
 
     public string Title => $"{Pod.Name} Logs";
+
+    [RelayCommand]
+    public async Task SaveLogsAsync()
+    {
+        var path = await Cluster.App.WindowManager.ActiveWindow.SaveFileAsync(
+            $"{Pod.Name}.log",
+            [".log", ".txt"]
+        );
+        if (path != null)
+        {
+            var logs = await Cluster.Context.ReadPodLogsAsync(Pod.Pod, CancellationToken.None);
+            await System.IO.File.WriteAllTextAsync(path, logs);
+
+            var directory = Path.GetDirectoryName(path)!;
+            var notification = new AppNotificationBuilder()
+                .AddText("Logs downloaded")
+                .AddText("Click to open the destination folder.")
+                .AddArgument("action", "openFolder")
+                .AddArgument("path", directory)
+                .BuildNotification();
+
+            AppNotificationManager.Default.Show(notification);
+        }
+    }
 
     [ObservableProperty]
     public partial string? SearchText { get; set; }

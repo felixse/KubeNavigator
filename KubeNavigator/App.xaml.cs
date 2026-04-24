@@ -13,6 +13,9 @@ using KubeNavigator.Windows;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppNotifications;
+
+using Launcher = Windows.System.Launcher;
 
 namespace KubeNavigator;
 
@@ -42,6 +45,25 @@ public partial class App : Application, IWindowManager
         _settingsService = new SettingsService(
             _loggingService.LoggerFactory.CreateLogger<SettingsService>()
         );
+
+        var notificationManager = AppNotificationManager.Default;
+        notificationManager.NotificationInvoked += OnNotificationInvoked;
+        notificationManager.Register();
+    }
+
+    private void OnNotificationInvoked(
+        AppNotificationManager sender,
+        AppNotificationActivatedEventArgs args
+    )
+    {
+        if (
+            args.Arguments.TryGetValue("action", out var action)
+            && action == "openFolder"
+            && args.Arguments.TryGetValue("path", out var path)
+        )
+        {
+            _ = global::Windows.System.Launcher.LaunchFolderPathAsync(path);
+        }
     }
 
     private void App_UnhandledException(
@@ -81,7 +103,12 @@ public partial class App : Application, IWindowManager
         );
         await viewStateService.LoadAsync();
 
-        var settings = new SettingsViewModel(_settingsService, this, _loggingService!, viewStateService);
+        var settings = new SettingsViewModel(
+            _settingsService,
+            this,
+            _loggingService!,
+            viewStateService
+        );
         var app = new AppViewModel(
             () => new ContentDialogService(_themeManager),
             this,

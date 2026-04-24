@@ -58,5 +58,61 @@
       HighlightingLanguage="yaml"
       Visibility="Collapsed"
     />
+    <Border
+      x:Name="SearchOverlay"
+      Grid.Row="1"
+      Margin="8"
+      Padding="8"
+      HorizontalAlignment="Right"
+      VerticalAlignment="Top"
+      Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
+      BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+      BorderThickness="1"
+      CornerRadius="4"
+      Visibility="Collapsed"
+    >
+      <StackPanel Orientation="Horizontal" Spacing="4">
+        <TextBox
+          x:Name="SearchBox"
+          Width="250"
+          PlaceholderText="Find..."
+          TextChanged="SearchBox_TextChanged"
+        >
+          <TextBox.KeyboardAccelerators>
+            <KeyboardAccelerator Key="Enter" Invoked="SearchNextAccelerator_Invoked" />
+            <KeyboardAccelerator
+              Key="Enter"
+              Invoked="SearchPrevAccelerator_Invoked"
+              Modifiers="Shift"
+            />
+            <KeyboardAccelerator Key="Escape" Invoked="CloseSearchAccelerator_Invoked" />
+          </TextBox.KeyboardAccelerators>
+        </TextBox>
+        <Button
+          Background="Transparent"
+          BorderThickness="0"
+          Click="SearchNext_Click"
+          Content="&#xE70E;"
+          FontFamily="{ThemeResource SymbolThemeFontFamily}"
+          ToolTipService.ToolTip="Next (Enter)"
+        />
+        <Button
+          Background="Transparent"
+          BorderThickness="0"
+          Click="SearchPrev_Click"
+          Content="&#xE70D;"
+          FontFamily="{ThemeResource SymbolThemeFontFamily}"
+          ToolTipService.ToolTip="Previous (Shift+Enter)"
+        />
+        <Button
+          Background="Transparent"
+          BorderThickness="0"
+          Click="CloseSearch_Click"
+          Content="&#xE711;"
+          FontFamily="{ThemeResource SymbolThemeFontFamily}"
+          ToolTipService.ToolTip="Close (Escape)"
+        />
+      </StackPanel>
+    </Border>
   </Grid>
 </UserControl>

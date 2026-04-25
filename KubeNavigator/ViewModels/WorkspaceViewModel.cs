@@ -664,9 +664,14 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             )
         )
         {
-            CustomResourcesNavigationGroup.Items.Add(
-                new CustomResourceGroupViewModel(crd.Spec.Group)
-            );
+            var newGroup = new CustomResourceGroupViewModel(crd.Spec.Group);
+
+            // Restore expanded state and listen for changes
+            var viewState = App.ViewStateService.State;
+            newGroup.IsExpanded = viewState.ExpandedGroups.Contains(newGroup.GroupName);
+            newGroup.PropertyChanged += OnCustomResourceGroupPropertyChanged;
+
+            CustomResourcesNavigationGroup.Items.Add(newGroup);
         }
 
         var group =
@@ -910,6 +915,17 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         }
     }
 
+    private void OnCustomResourceGroupPropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e
+    )
+    {
+        if (e.PropertyName == nameof(CustomResourceGroupViewModel.IsExpanded))
+        {
+            SaveExpandedGroupsState();
+        }
+    }
+
     private void SavePinnedState()
     {
         var viewState = App.ViewStateService.State;
@@ -937,10 +953,23 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     private void SaveExpandedGroupsState()
     {
         var viewState = App.ViewStateService.State;
-        viewState.ExpandedGroups = NavigationGroups
+        var expanded = NavigationGroups
             .Where(g => g.IsExpanded)
             .Select(g => g.Name)
             .ToList();
+
+        if (CustomResourcesNavigationGroup != null)
+        {
+            foreach (var item in CustomResourcesNavigationGroup.Items)
+            {
+                if (item is CustomResourceGroupViewModel crg && crg.IsExpanded)
+                {
+                    expanded.Add(crg.GroupName);
+                }
+            }
+        }
+
+        viewState.ExpandedGroups = expanded;
         _ = App.ViewStateService.SaveAsync();
     }
 

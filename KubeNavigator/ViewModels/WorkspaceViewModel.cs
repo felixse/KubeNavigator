@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.Collections;
 using FuseSharp;
 using k8s.Models;
+using KubeNavigator.Helpers;
 using KubeNavigator.Models;
 using KubeNavigator.Services;
 using KubeNavigator.ViewModels.AppCommands;
@@ -682,6 +683,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         if (group != null)
         {
             // todo what if multiple versions?
+            var printerColumns = CrdColumnHelper.GetPrinterColumns(crd);
             var resourceType = new ResourceType(
                 crd.Spec.Names.Kind,
                 crd.Spec.Group,
@@ -689,10 +691,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                 crd.Spec.Names.Plural,
                 crd.Spec.Scope == "Namespaced",
                 crd.Spec.Names.Plural,
-                crd.Spec.Names.Singular
+                crd.Spec.Names.Singular,
+                printerColumns
             );
+            var columns = CrdColumnHelper.BuildColumns(resourceType);
             group.Resources.Add(
-                new KubernetesResourceTypeListViewModel(this, Cluster, resourceType)
+                new KubernetesResourceTypeListViewModel(this, Cluster, resourceType, columns)
             );
             AppCommands.Add(new ViewResourceAppCommand(resourceType, this, crd.Spec.Group));
         }

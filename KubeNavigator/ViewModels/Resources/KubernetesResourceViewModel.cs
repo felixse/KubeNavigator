@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using k8s;
 using k8s.Models;
+using KubeNavigator.Helpers;
 using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Details;
 using KubeNavigator.ViewModels.Shelf;
@@ -30,7 +31,20 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
 
     public static ImmutableArray<ResourceColumn> GetDefaultColumns() => DefaultColumns;
 
-    public virtual ImmutableArray<ResourceColumn> Columns => DefaultColumns;
+    private ImmutableArray<ResourceColumn>? _crdColumns;
+
+    public virtual ImmutableArray<ResourceColumn> Columns
+    {
+        get
+        {
+            if (!ResourceType.AdditionalColumns.IsDefaultOrEmpty)
+            {
+                return _crdColumns ??= CrdColumnHelper.BuildColumns(ResourceType);
+            }
+
+            return DefaultColumns;
+        }
+    }
 
     [ObservableProperty]
     public partial bool IsSelected { get; set; }

@@ -1,6 +1,16 @@
-﻿using k8s.Models;
+﻿using System.Collections.Immutable;
+using k8s.Models;
 
 namespace KubeNavigator.Models;
+
+/// <summary>
+/// Represents an additional printer column defined in a CRD's
+/// <c>additionalPrinterColumns</c> spec, analogous to what <c>kubectl get</c> displays.
+/// </summary>
+/// <param name="Name">Column header.</param>
+/// <param name="JsonPath">JSONPath expression relative to the resource root (e.g. <c>.spec.replicas</c>).</param>
+/// <param name="Type">The column type hint (string, integer, date, …).</param>
+public record CrdPrinterColumn(string Name, string JsonPath, string Type);
 
 public record ResourceType(
     string Kind,
@@ -9,7 +19,8 @@ public record ResourceType(
     string Plural,
     bool IsNamespaceScoped,
     string PluralDisplayName,
-    string SingularDisplayName
+    string SingularDisplayName,
+    ImmutableArray<CrdPrinterColumn> AdditionalColumns = default
 )
 {
     public static ResourceType Node { get; } =

@@ -7,6 +7,7 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:local="using:KubeNavigator.Windows"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:viewmodels="using:KubeNavigator.ViewModels"
   xmlns:views="using:KubeNavigator.Views"
   xmlns:winex="using:WinUIEx"
   Title="{x:Bind ViewModel.Title, Mode=OneWay}"
@@ -21,22 +22,96 @@
   <Grid x:Name="RootGrid">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
-    <TitleBar
+
+    <!--  Row 0: Compact drag region that sits beside the caption buttons  -->
+    <Grid
       x:Name="AppTitleBar"
-      Title="{x:Bind ViewModel.Title, Mode=OneWay}"
-      BackRequested="AppTitleBar_BackRequested"
-      IsBackButtonVisible="{x:Bind ViewModel.Details.CanGoBack, Mode=OneWay}"
-      Subtitle="{x:Bind ViewModel.Details.Cluster.Name, Mode=OneWay}"
+      Height="32"
+      Padding="16,0,0,0"
+      VerticalAlignment="Stretch"
     >
-      <TitleBar.IconSource>
-        <BitmapIconSource
-          ShowAsMonochrome="False"
-          UriSource="ms-appx:///Assets/Square44x44Logo.altform-unplated_targetsize-32.png"
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <Image
+        Width="16"
+        Height="16"
+        VerticalAlignment="Center"
+        Source="ms-appx:///Assets/Square44x44Logo.altform-unplated_targetsize-32.png"
+      />
+    </Grid>
+
+    <!--  Row 1: Title / subtitle / back button / commands – below the caption buttons  -->
+    <Grid Grid.Row="1" Padding="12,0,12,8">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <Button
+        x:Name="BackButton"
+        Width="36"
+        Height="36"
+        Margin="0,0,8,0"
+        Padding="0"
+        VerticalAlignment="Center"
+        Background="Transparent"
+        BorderThickness="0"
+        Click="BackButton_Click"
+        Visibility="{x:Bind ViewModel.Details.CanGoBack, Mode=OneWay}"
+      >
+        <FontIcon FontSize="12" Glyph="&#xE72B;" />
+      </Button>
+      <StackPanel
+        Grid.Column="1"
+        VerticalAlignment="Center"
+      >
+        <TextBlock
+          FontSize="14"
+          FontWeight="SemiBold"
+          Text="{x:Bind ViewModel.Title, Mode=OneWay}"
+          TextTrimming="CharacterEllipsis"
+          TextWrapping="NoWrap"
+          ToolTipService.ToolTip="{x:Bind ViewModel.Title, Mode=OneWay}"
         />
-      </TitleBar.IconSource>
-    </TitleBar>
-    <Frame x:Name="RootFrame" Grid.Row="1" />
+        <TextBlock
+          FontSize="12"
+          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+          Text="{x:Bind ViewModel.Details.Cluster.Name, Mode=OneWay}"
+          TextTrimming="CharacterEllipsis"
+          TextWrapping="NoWrap"
+        />
+      </StackPanel>
+      <ItemsRepeater
+        Grid.Column="2"
+        VerticalAlignment="Center"
+        ItemsSource="{x:Bind ViewModel.Details.SelectedItem.Commands, Mode=OneWay}"
+      >
+        <ItemsRepeater.ItemTemplate>
+          <DataTemplate x:DataType="viewmodels:ItemCommand">
+            <AppBarButton
+              Width="36"
+              Click="AppBarButton_Click"
+              CommandParameter="{x:Bind}"
+              LabelPosition="Collapsed"
+              ToolTipService.ToolTip="{x:Bind Name}"
+            >
+              <AppBarButton.Icon>
+                <SymbolIcon Symbol="{x:Bind Symbol}" />
+              </AppBarButton.Icon>
+            </AppBarButton>
+          </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+        <ItemsRepeater.Layout>
+          <StackLayout Orientation="Horizontal" />
+        </ItemsRepeater.Layout>
+      </ItemsRepeater>
+    </Grid>
+
+    <Frame x:Name="RootFrame" Grid.Row="2" />
   </Grid>
 </winex:WindowEx>

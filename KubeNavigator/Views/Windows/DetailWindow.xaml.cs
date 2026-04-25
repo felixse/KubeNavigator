@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.WinUI.Helpers;
 using KubeNavigator.Pages;
 using KubeNavigator.ViewModels;
+using KubeNavigator.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Storage.Pickers;
@@ -88,7 +89,7 @@ public sealed partial class DetailWindow : WinUIEx.WindowEx
         return file?.Path;
     }
 
-    private async void AppTitleBar_BackRequested(TitleBar sender, object args)
+    private async void BackButton_Click(object sender, RoutedEventArgs e)
     {
         await ViewModel.Details.GoBackAsync();
     }
@@ -96,6 +97,14 @@ public sealed partial class DetailWindow : WinUIEx.WindowEx
     private void AppTitleBar_Loaded(object sender, RoutedEventArgs e)
     {
         ApplySystemThemeToCaptionButtons(this);
+    }
+
+    private void AppBarButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is AppBarButton button && button.CommandParameter is ItemCommand command)
+        {
+            command.Command.Execute(ViewModel);
+        }
     }
 
     private void AppTitleBar_ActualThemeChanged(FrameworkElement sender, object args)

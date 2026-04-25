@@ -22,34 +22,7 @@
       <ColumnDefinition x:Name="ShelfColumn" Width="0" />
     </Grid.ColumnDefinitions>
     <Grid Grid.Column="0">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="*" />
-      </Grid.RowDefinitions>
-      <ItemsRepeater
-        Grid.Column="2"
-        ItemsSource="{x:Bind ViewModel.Details.SelectedItem.Commands, Mode=OneWay}"
-      >
-        <ItemsRepeater.ItemTemplate>
-          <DataTemplate x:DataType="viewmodels:ItemCommand">
-            <AppBarButton
-              Width="36"
-              Click="AppBarButton_Click"
-              CommandParameter="{x:Bind}"
-              LabelPosition="Collapsed"
-              ToolTipService.ToolTip="{x:Bind Name}"
-            >
-              <AppBarButton.Icon>
-                <SymbolIcon Symbol="{x:Bind Symbol}" />
-              </AppBarButton.Icon>
-            </AppBarButton>
-          </DataTemplate>
-        </ItemsRepeater.ItemTemplate>
-        <ItemsRepeater.Layout>
-          <StackLayout Orientation="Horizontal" />
-        </ItemsRepeater.Layout>
-      </ItemsRepeater>
-      <views:ResourceDetailsView Grid.Row="1" ViewModel="{x:Bind ViewModel.Details}" />
+      <views:ResourceDetailsView ViewModel="{x:Bind ViewModel.Details}" />
     </Grid>
     <controls:GridSplitter
       Grid.Column="1"

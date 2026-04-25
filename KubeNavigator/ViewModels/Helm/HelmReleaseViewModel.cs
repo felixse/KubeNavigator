@@ -62,7 +62,10 @@ public partial class HelmReleaseViewModel : ObservableObject, ISelectable, IDeta
     public event EventHandler? DetailsRefreshRequested;
 
     [RelayCommand]
-    public async Task DeleteAsync() { }
+    public async Task DeleteAsync()
+    {
+        await Cluster.DeleteHelmReleasesAsync([this]);
+    }
 
     public Task<List<IDetailsSection>> CreateDetailsAsync()
     {

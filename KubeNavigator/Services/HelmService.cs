@@ -3,7 +3,12 @@ using System.Buffers.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using CliWrap;
+using CliWrap.Buffered;
 using k8s.Models;
 using KubeNavigator.Models.Helm;
 using Microsoft.Extensions.Logging;
@@ -209,8 +214,91 @@ public partial class HelmService
         }
     }
 
+    public async Task<(bool Success, string Output)> UninstallAsync(
+        string releaseName,
+        string releaseNamespace,
+        string kubeContext,
+        string? helmPath = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var tool = string.IsNullOrWhiteSpace(helmPath) ? "helm" : helmPath;
+
+        Log.UninstallingHelmRelease(_logger, releaseName, releaseNamespace, kubeContext);
+
+        try
+        {
+            var result = await Cli.Wrap(tool)
+                .WithArguments(["uninstall", releaseName, "--namespace", releaseNamespace, "--kube-context", kubeContext])
+                .WithValidation(CommandResultValidation.None)
+                .ExecuteBufferedAsync(cancellationToken);
+
+            var output = result.StandardOutput + result.StandardError;
+
+            if (result.ExitCode != 0)
+            {
+                Log.HelmUninstallFailed(_logger, releaseName, releaseNamespace, output);
+                return (false, output.Trim());
+            }
+
+            Log.HelmUninstallSucceeded(_logger, releaseName, releaseNamespace);
+            return (true, output.Trim());
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            Log.HelmUninstallException(_logger, releaseName, releaseNamespace, ex);
+            return (false, ex.Message);
+        }
+    }
+
     private static partial class Log
     {
+        [LoggerMessage(
+            EventId = 3009,
+            Level = LogLevel.Information,
+            Message = "Uninstalling Helm release {ReleaseName} in namespace {Namespace} using context {KubeContext}"
+        )]
+        public static partial void UninstallingHelmRelease(
+            ILogger logger,
+            string releaseName,
+            string @namespace,
+            string kubeContext
+        );
+
+        [LoggerMessage(
+            EventId = 3010,
+            Level = LogLevel.Information,
+            Message = "Successfully uninstalled Helm release {ReleaseName} in namespace {Namespace}"
+        )]
+        public static partial void HelmUninstallSucceeded(
+            ILogger logger,
+            string releaseName,
+            string @namespace
+        );
+
+        [LoggerMessage(
+            EventId = 3011,
+            Level = LogLevel.Error,
+            Message = "Failed to uninstall Helm release {ReleaseName} in namespace {Namespace}: {Output}"
+        )]
+        public static partial void HelmUninstallFailed(
+            ILogger logger,
+            string releaseName,
+            string @namespace,
+            string output
+        );
+
+        [LoggerMessage(
+            EventId = 3012,
+            Level = LogLevel.Error,
+            Message = "Exception while uninstalling Helm release {ReleaseName} in namespace {Namespace}"
+        )]
+        public static partial void HelmUninstallException(
+            ILogger logger,
+            string releaseName,
+            string @namespace,
+            Exception exception
+        );
         [LoggerMessage(
             EventId = 3001,
             Level = LogLevel.Debug,

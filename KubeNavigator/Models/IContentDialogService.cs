@@ -24,6 +24,12 @@ public interface IContentDialogService
         Func<CancellationToken, Task> connectAction
     );
 
+    Task<bool> ConfirmHelmReleaseDeletionAsync(
+        IEnumerable<string> releaseNames,
+        string clusterName,
+        Func<CancellationToken, Task<string?>> uninstallAction
+    );
+
     Task<bool> ShowToolsNotFoundDialogAsync(string message);
 
     Task ShowInfoDialogAsync(string title, string message);

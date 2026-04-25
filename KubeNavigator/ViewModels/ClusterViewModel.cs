@@ -315,6 +315,40 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
         await Context.DeleteResourcesAsync(resourceType, resources.Select(r => r.Resource));
     }
 
+    public async Task DeleteHelmReleasesAsync(
+        IReadOnlyCollection<HelmReleaseViewModel> helmReleases
+    )
+    {
+        var helmPath = App.Settings.HelmPath;
+
+        await App.WindowManager.ActiveWindow.ContentDialogService.ConfirmHelmReleaseDeletionAsync(
+            helmReleases.Select(r => r.Name),
+            Name,
+            async ct =>
+            {
+                foreach (var helmRelease in helmReleases)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    var (success, output) = await App.HelmService.UninstallAsync(
+                        helmRelease.Name,
+                        helmRelease.Namespace,
+                        Name,
+                        helmPath,
+                        ct
+                    );
+
+                    if (!success)
+                    {
+                        return $"Failed to uninstall **{helmRelease.Name}**:\n\n{output}";
+                    }
+                }
+
+                return null;
+            }
+        );
+    }
+
     public async Task OnResourceEvent(
         KubernetesResourceEvent resourceEvent,
         ResourceType resourceType,

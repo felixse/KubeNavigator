@@ -95,6 +95,29 @@ public class ContentDialogService : IContentDialogService
         }
     }
 
+    public async Task<bool> ConfirmHelmReleaseDeletionAsync(
+        IEnumerable<string> releaseNames,
+        string clusterName,
+        Func<CancellationToken, Task<string?>> uninstallAction
+    )
+    {
+        var dialog = new ConfirmHelmReleaseDeletionDialog(releaseNames, clusterName, uninstallAction)
+        {
+            XamlRoot = Page?.XamlRoot,
+            RequestedTheme = GetRequestedTheme(),
+        };
+
+        await dialog.ShowAsync();
+
+        if (dialog.Error is not null)
+        {
+            await ShowInfoDialogAsync("Helm Uninstall Failed", dialog.Error);
+            return false;
+        }
+
+        return true;
+    }
+
     public async Task<bool> ShowToolsNotFoundDialogAsync(string message)
     {
         var dialog = new ContentDialog

@@ -80,9 +80,11 @@ public partial class HelmReleasesViewModel : ListViewModel
         }
     }
 
-    protected override Task DeleteItemsAsync(IReadOnlyCollection<ISelectable> items)
+    protected override async Task DeleteItemsAsync(IReadOnlyCollection<ISelectable> items)
     {
-        throw new NotImplementedException();
+        await Workspace.Cluster.DeleteHelmReleasesAsync(
+            [.. items.Cast<HelmReleaseViewModel>()]
+        );
     }
 
     public override Task OnNavigatedTo()

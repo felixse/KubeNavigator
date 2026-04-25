@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -28,6 +29,9 @@ namespace KubeNavigator.ViewModels
         [ObservableProperty]
         public partial bool IsPinned { get; private set; }
 
+        [ObservableProperty]
+        public partial MetricsState MetricsState { get; private set; }
+
         public ClusterOverviewViewModel(
             ClusterViewModel cluster,
             WorkspaceViewModel workspace,
@@ -49,6 +53,7 @@ namespace KubeNavigator.ViewModels
             Metrics.Add(NodeMetric);
 
             _cluster.Context.NodeMetricsUpdated += OnNodeMetricsUpdated;
+            _cluster.Context.MetricsNotAvailable += OnMetricsNotAvailable;
         }
 
         [RelayCommand]
@@ -75,10 +80,19 @@ namespace KubeNavigator.ViewModels
         {
             _cluster.App.DispatcherQueue.TryEnqueue(() =>
             {
+                MetricsState = MetricsState.Available;
                 foreach (var metric in Metrics)
                 {
                     metric.Update(nodeMetrics);
                 }
+            });
+        }
+
+        private void OnMetricsNotAvailable(object? sender, EventArgs e)
+        {
+            _cluster.App.DispatcherQueue.TryEnqueue(() =>
+            {
+                MetricsState = MetricsState.NotAvailable;
             });
         }
 

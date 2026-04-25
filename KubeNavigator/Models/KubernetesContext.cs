@@ -48,6 +48,7 @@ public partial class KubernetesContext
     public event EventHandler<ClusterStatus>? StatusChanged; // todo change to something that supports async handlers
     public event EventHandler? PodMetricsUpdated;
     public event EventHandler<Services.NodeMetrics>? NodeMetricsUpdated;
+    public event EventHandler? MetricsNotAvailable;
 
     public string Name { get; }
 
@@ -346,6 +347,7 @@ public partial class KubernetesContext
             if (podMetrics == null)
             {
                 Log.MetricsServerNotAvailable(_logger, Name);
+                MetricsNotAvailable?.Invoke(this, EventArgs.Empty);
                 return;
             }
 

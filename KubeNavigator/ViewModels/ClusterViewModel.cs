@@ -291,6 +291,11 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 V1ServiceAccount.KubeApiVersion,
                 V1ServiceAccount.KubePluralName
             ) => new ServiceAccountViewModel((V1ServiceAccount)resource, this),
+            (
+                V1ClusterRole.KubeGroup,
+                V1ClusterRole.KubeApiVersion,
+                V1ClusterRole.KubePluralName
+            ) => new ClusterRoleViewModel((V1ClusterRole)resource, this),
             (V1Secret.KubeGroup, V1Secret.KubeApiVersion, V1Secret.KubePluralName) =>
                 new SecretViewModel((V1Secret)resource, this),
             (Eventsv1Event.KubeGroup, Eventsv1Event.KubeApiVersion, Eventsv1Event.KubePluralName) =>

@@ -252,6 +252,15 @@ public partial class KubernetesContext
                     _loggerFactory
                 ),
                 (
+                    V1ClusterRole.KubeGroup,
+                    V1ClusterRole.KubeApiVersion,
+                    V1ClusterRole.KubePluralName
+                ) => new KubernetesResourceRepository<V1ClusterRole>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
                     Eventsv1Event.KubeGroup,
                     Eventsv1Event.KubeApiVersion,
                     Eventsv1Event.KubePluralName

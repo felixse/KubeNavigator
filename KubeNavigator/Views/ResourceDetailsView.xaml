@@ -537,6 +537,7 @@
                 Background="{ThemeResource ExpanderHeaderBackground}"
                 Orientation="Horizontal"
                 Spacing="8"
+                Visibility="{x:Bind HasHeader}"
               >
                 <FontIcon
                   FontSize="16"
@@ -565,6 +566,7 @@
                 Height="1"
                 BorderBrush="{ThemeResource ExpanderHeaderBorderBrush}"
                 BorderThickness="1"
+                Visibility="{x:Bind HasHeader}"
               />
               <Border Padding="16" Background="{ThemeResource ExpanderContentBackground}">
                 <ItemsControl

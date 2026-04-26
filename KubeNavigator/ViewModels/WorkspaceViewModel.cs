@@ -343,7 +343,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     ResourceType.ClusterRoleBinding,
                     ClusterRoleBindingViewModel.ClusterRoleBindingColumns
                 ),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.RoleBinding),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.RoleBinding,
+                    RoleBindingViewModel.RoleBindingColumns
+                ),
             ]
         );
         CustomResourcesNavigationGroup = new NavigationGroupViewModel(

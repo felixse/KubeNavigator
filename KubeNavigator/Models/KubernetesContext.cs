@@ -306,6 +306,15 @@ public partial class KubernetesContext
                     _loggerFactory
                 ),
                 (
+                    V1NetworkPolicy.KubeGroup,
+                    V1NetworkPolicy.KubeApiVersion,
+                    V1NetworkPolicy.KubePluralName
+                ) => new KubernetesResourceRepository<V1NetworkPolicy>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
                     V1Ingress.KubeGroup,
                     V1Ingress.KubeApiVersion,
                     V1Ingress.KubePluralName

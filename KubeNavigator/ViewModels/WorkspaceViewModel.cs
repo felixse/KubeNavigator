@@ -299,7 +299,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     IngressViewModel.IngressColumns
                 ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.IngressClass),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.NetworkPolicy),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.NetworkPolicy,
+                    NetworkPolicyViewModel.NetworkPolicyColumns
+                ),
             ]
         );
         var storage = new NavigationGroupViewModel(

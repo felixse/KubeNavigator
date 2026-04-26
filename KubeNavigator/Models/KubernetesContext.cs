@@ -315,6 +315,15 @@ public partial class KubernetesContext
                     _loggerFactory
                 ),
                 (
+                    V1PodDisruptionBudget.KubeGroup,
+                    V1PodDisruptionBudget.KubeApiVersion,
+                    V1PodDisruptionBudget.KubePluralName
+                ) => new KubernetesResourceRepository<V1PodDisruptionBudget>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
                     V1Ingress.KubeGroup,
                     V1Ingress.KubeApiVersion,
                     V1Ingress.KubePluralName

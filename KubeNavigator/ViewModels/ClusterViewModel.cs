@@ -321,6 +321,11 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 V1NetworkPolicy.KubeApiVersion,
                 V1NetworkPolicy.KubePluralName
             ) => new NetworkPolicyViewModel((V1NetworkPolicy)resource, this),
+            (
+                V1PodDisruptionBudget.KubeGroup,
+                V1PodDisruptionBudget.KubeApiVersion,
+                V1PodDisruptionBudget.KubePluralName
+            ) => new PodDisruptionBudgetViewModel((V1PodDisruptionBudget)resource, this),
             (Eventsv1Event.KubeGroup, Eventsv1Event.KubeApiVersion, Eventsv1Event.KubePluralName) =>
                 new EventViewModel((Eventsv1Event)resource, this),
             (V1Namespace.KubeGroup, V1Namespace.KubeApiVersion, V1Namespace.KubePluralName) =>

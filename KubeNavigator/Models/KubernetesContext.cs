@@ -183,6 +183,15 @@ public partial class KubernetesContext
                     _loggerFactory
                 ),
                 (
+                    V1DaemonSet.KubeGroup,
+                    V1DaemonSet.KubeApiVersion,
+                    V1DaemonSet.KubePluralName
+                ) => new KubernetesResourceRepository<V1DaemonSet>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
                     V1ReplicaSet.KubeGroup,
                     V1ReplicaSet.KubeApiVersion,
                     V1ReplicaSet.KubePluralName

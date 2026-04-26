@@ -198,7 +198,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     ResourceType.Deployment,
                     DeploymentViewModel.DeploymentColumns
                 ),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.DaemonSet),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.DaemonSet,
+                    DaemonSetViewModel.DaemonSetColumns
+                ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.StatefulSet),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ReplicaSet),
                 new KubernetesResourceTypeListViewModel(

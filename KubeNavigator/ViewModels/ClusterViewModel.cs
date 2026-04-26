@@ -331,6 +331,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 V1PriorityClass.KubeApiVersion,
                 V1PriorityClass.KubePluralName
             ) => new PriorityClassViewModel((V1PriorityClass)resource, this),
+            (V1Lease.KubeGroup, V1Lease.KubeApiVersion, V1Lease.KubePluralName) =>
+                new LeaseViewModel((V1Lease)resource, this),
             (Eventsv1Event.KubeGroup, Eventsv1Event.KubeApiVersion, Eventsv1Event.KubePluralName) =>
                 new EventViewModel((Eventsv1Event)resource, this),
             (V1Namespace.KubeGroup, V1Namespace.KubeApiVersion, V1Namespace.KubePluralName) =>

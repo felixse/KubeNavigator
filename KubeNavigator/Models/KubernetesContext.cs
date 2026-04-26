@@ -333,6 +333,15 @@ public partial class KubernetesContext
                     _loggerFactory
                 ),
                 (
+                    V1Lease.KubeGroup,
+                    V1Lease.KubeApiVersion,
+                    V1Lease.KubePluralName
+                ) => new KubernetesResourceRepository<V1Lease>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
                     V1Ingress.KubeGroup,
                     V1Ingress.KubeApiVersion,
                     V1Ingress.KubePluralName

@@ -298,6 +298,11 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
             ) => new ClusterRoleViewModel((V1ClusterRole)resource, this),
             (V1Role.KubeGroup, V1Role.KubeApiVersion, V1Role.KubePluralName) =>
                 new RoleViewModel((V1Role)resource, this),
+            (
+                V1ClusterRoleBinding.KubeGroup,
+                V1ClusterRoleBinding.KubeApiVersion,
+                V1ClusterRoleBinding.KubePluralName
+            ) => new ClusterRoleBindingViewModel((V1ClusterRoleBinding)resource, this),
             (V1Secret.KubeGroup, V1Secret.KubeApiVersion, V1Secret.KubePluralName) =>
                 new SecretViewModel((V1Secret)resource, this),
             (Eventsv1Event.KubeGroup, Eventsv1Event.KubeApiVersion, Eventsv1Event.KubePluralName) =>

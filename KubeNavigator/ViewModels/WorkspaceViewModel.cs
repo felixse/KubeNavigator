@@ -319,7 +319,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             "Access Control",
             new SymbolNavigationGroupIcon("\uE72E"),
             [
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ServiceAccount),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.ServiceAccount,
+                    ServiceAccountViewModel.ServiceAccountColumns
+                ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.ClusterRole),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Role),
                 new KubernetesResourceTypeListViewModel(

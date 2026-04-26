@@ -30,12 +30,14 @@ public sealed partial class ResourceDetailsView : UserControl
         if (e.OldValue is DetailsViewModel oldVm)
         {
             oldVm.Navigating -= view.OnNavigating;
+            oldVm.Navigated -= view.OnNavigated;
             oldVm.NavigatedBack -= view.OnNavigatedBack;
         }
 
         if (e.NewValue is DetailsViewModel newVm)
         {
             newVm.Navigating += view.OnNavigating;
+            newVm.Navigated += view.OnNavigated;
             newVm.NavigatedBack += view.OnNavigatedBack;
         }
 
@@ -56,19 +58,17 @@ public sealed partial class ResourceDetailsView : UserControl
         }
     }
 
+    private void OnNavigated(object? sender, EventArgs e)
+    {
+        DetailScrollViewer.ChangeView(null, 0, null, disableAnimation: true);
+    }
+
     private void OnNavigatedBack(object? sender, NavigationEntry entry)
     {
         var target = entry.ScrollOffset;
 
-        // Try immediately — works if content is already tall enough
-        DetailScrollViewer.ChangeView(null, target, null, disableAnimation: true);
-
-        if (DetailScrollViewer.ScrollableHeight >= target)
-        {
-            return;
-        }
-
-        // Content isn't tall enough yet — keep retrying as layout progresses
+        // Always wait for layout to settle after the binding update rebuilds content.
+        // An immediate ChangeView would apply against stale content that gets replaced.
         DetailScrollViewer.LayoutUpdated += OnLayoutUpdated;
 
         void OnLayoutUpdated(object? s, object e)

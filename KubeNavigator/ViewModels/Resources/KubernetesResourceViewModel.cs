@@ -111,49 +111,61 @@ public partial class KubernetesResourceViewModel : ObservableObject, ISelectable
     public virtual async Task<List<IDetailsSection>> CreateDetailsAsync()
     {
         var events = await GetEventsSectionAsync();
+        var rows = new List<IDetailsRow>
+        {
+            new HeaderedRow
+            {
+                Header = "Created",
+                Content = new TextContent
+                {
+                    Value = Resource.CreationTimestamp().ToString(),
+                },
+            },
+            new HeaderedRow
+            {
+                Header = "Name",
+                Content = new TextContent { Value = Resource.Name() },
+            },
+            new HeaderedRow
+            {
+                Header = "Namespace",
+                Content = new LinkContent
+                {
+                    ResourceName = Resource.Namespace(),
+                    ResourceType = ResourceType.Namespace,
+                },
+            },
+            new HeaderedRow
+            {
+                Header = "Annotations",
+                Content = new CollectionContent
+                {
+                    Items =
+                    [
+                        .. Resource.Metadata.Annotations?.Select(
+                            a => new TextCollectionElement { Value = $"{a.Key}={a.Value}" }
+                        ) ?? [],
+                    ],
+                },
+            },
+        };
+
+        if (!ResourceType.AdditionalColumns.IsDefaultOrEmpty)
+        {
+            foreach (var col in ResourceType.AdditionalColumns)
+            {
+                var value = Helpers.CrdColumnHelper.ResolveJsonPath(Resource, col.JsonPath);
+                rows.Add(new HeaderedRow
+                {
+                    Header = col.Name,
+                    Content = new TextContent { Value = value ?? string.Empty },
+                });
+            }
+        }
+
         var sections = new List<IDetailsSection>
         {
-            new DetailsSection
-            {
-                Rows =
-                [
-                    new HeaderedRow
-                    {
-                        Header = "Created",
-                        Content = new TextContent
-                        {
-                            Value = Resource.CreationTimestamp().ToString(),
-                        },
-                    },
-                    new HeaderedRow
-                    {
-                        Header = "Name",
-                        Content = new TextContent { Value = Resource.Name() },
-                    },
-                    new HeaderedRow
-                    {
-                        Header = "Namespace",
-                        Content = new LinkContent
-                        {
-                            ResourceName = Resource.Namespace(),
-                            ResourceType = ResourceType.Namespace,
-                        },
-                    },
-                    new HeaderedRow
-                    {
-                        Header = "Annotations",
-                        Content = new CollectionContent
-                        {
-                            Items =
-                            [
-                                .. Resource.Metadata.Annotations?.Select(
-                                    a => new TextCollectionElement { Value = $"{a.Key}={a.Value}" }
-                                ) ?? [],
-                            ],
-                        },
-                    },
-                ],
-            },
+            new DetailsSection { Rows = rows },
         };
 
         if (events is not null)

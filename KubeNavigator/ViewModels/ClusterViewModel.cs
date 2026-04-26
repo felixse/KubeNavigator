@@ -312,6 +312,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 V1EndpointSlice.KubeApiVersion,
                 V1EndpointSlice.KubePluralName
             ) => new EndpointSliceViewModel((V1EndpointSlice)resource, this),
+            (V1Endpoints.KubeGroup, V1Endpoints.KubeApiVersion, V1Endpoints.KubePluralName) =>
+                new EndpointViewModel((V1Endpoints)resource, this),
             (Eventsv1Event.KubeGroup, Eventsv1Event.KubeApiVersion, Eventsv1Event.KubePluralName) =>
                 new EventViewModel((Eventsv1Event)resource, this),
             (V1Namespace.KubeGroup, V1Namespace.KubeApiVersion, V1Namespace.KubePluralName) =>

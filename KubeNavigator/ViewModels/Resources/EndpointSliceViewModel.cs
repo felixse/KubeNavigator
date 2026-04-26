@@ -65,51 +65,57 @@ public partial class EndpointSliceViewModel : KubernetesResourceViewModel
             new DetailsSection { Rows = [.. GetInfoRows()] },
         };
 
-        var addressRows = GetAddressRows();
-        sections.Add(
-            new DetailsSection
-            {
-                Header = "Addresses",
-                Rows =
-                [
-                    new FullWidthRow
-                    {
-                        Content = new TableContent
+        var addressRows = GetAddressRows().ToList();
+        if (addressRows.Count > 0)
+        {
+            sections.Add(
+                new DetailsSection
+                {
+                    Header = "Addresses",
+                    Rows =
+                    [
+                        new FullWidthRow
                         {
-                            Columns =
-                            [
-                                "IP",
-                                "Hostname",
-                                "Node",
-                                "Zone",
-                                "Target",
-                                "Conditions",
-                            ],
-                            Rows = addressRows,
+                            Content = new TableContent
+                            {
+                                Columns =
+                                [
+                                    "IP",
+                                    "Hostname",
+                                    "Node",
+                                    "Zone",
+                                    "Target",
+                                    "Conditions",
+                                ],
+                                Rows = addressRows,
+                            },
                         },
-                    },
-                ],
-            }
-        );
+                    ],
+                }
+            );
+        }
 
-        var portRows = GetPortRows();
-        sections.Add(
-            new DetailsSection
-            {
-                Header = "Ports",
-                Rows =
-                [
-                    new FullWidthRow
-                    {
-                        Content = new TableContent
+        var portRows = GetPortRows().ToList();
+        if (portRows.Count > 0)
+        {
+            sections.Add(
+                new DetailsSection
+                {
+                    Header = "Ports",
+                    Rows =
+                    [
+                        new FullWidthRow
                         {
-                            Columns = ["Port", "Name", "Protocol"],
-                            Rows = portRows,
+                            Content = new TableContent
+                            {
+                                Columns = ["Port", "Name", "Protocol"],
+                                Rows = portRows,
+                            },
                         },
-                    },
-                ],
-            }
-        );
+                    ],
+                }
+            );
+        }
 
         if (events is not null)
         {

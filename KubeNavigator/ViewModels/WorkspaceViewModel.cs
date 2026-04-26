@@ -331,7 +331,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     ResourceType.ClusterRole,
                     ClusterRoleViewModel.ClusterRoleColumns
                 ),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Role),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.Role,
+                    RoleViewModel.RoleColumns
+                ),
                 new KubernetesResourceTypeListViewModel(
                     this,
                     cluster,

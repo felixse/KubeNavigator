@@ -241,6 +241,7 @@
             <HyperlinkButton
               Padding="2"
               Click="HyperlinkButton_Click"
+              Translation="0 -4 0"
               Visibility="{x:Bind ResourceName, Converter={StaticResource NullToCollapsedConverter}}"
             >
               <HyperlinkButton.Content>

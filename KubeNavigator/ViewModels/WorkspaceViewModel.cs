@@ -296,7 +296,8 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                 new KubernetesResourceTypeListViewModel(
                     this,
                     cluster,
-                    ResourceType.PersistentVolume
+                    ResourceType.PersistentVolume,
+                    PersistentVolumeViewModel.PersistentVolumeColumns
                 ),
                 new KubernetesResourceTypeListViewModel(
                     this,

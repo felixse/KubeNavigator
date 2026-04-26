@@ -144,8 +144,10 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         // Check for a saved namespace filter before setting the default,
         // so the initial assignment doesn't overwrite the persisted value.
         var viewState = App.ViewStateService.State;
-        if (viewState.ClusterStates.TryGetValue(cluster.Name, out var clusterState)
-            && clusterState.LastNamespaceFilter != null)
+        if (
+            viewState.ClusterStates.TryGetValue(cluster.Name, out var clusterState)
+            && clusterState.LastNamespaceFilter != null
+        )
         {
             _pendingNamespaceFilter = clusterState.LastNamespaceFilter;
         }
@@ -278,6 +280,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     ResourceType.Service,
                     ServiceViewModel.ServiceColumns
                 ),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.EndpointSlice,
+                    EndpointSliceViewModel.EndpointSliceColumns
+                ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Endpoint),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Ingress),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.IngressClass),
@@ -394,14 +402,20 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         {
             INavigationTarget? target = pin switch
             {
-                PinnedClusterOverviewState => allNavigationTargets.OfType<ClusterOverviewViewModel>().FirstOrDefault(),
-                PinnedHelmReleasesState => allNavigationTargets.OfType<Helm.HelmReleasesViewModel>().FirstOrDefault(),
-                PinnedResourceTypeState rt => allNavigationTargets.OfType<KubernetesResourceTypeListViewModel>()
+                PinnedClusterOverviewState => allNavigationTargets
+                    .OfType<ClusterOverviewViewModel>()
+                    .FirstOrDefault(),
+                PinnedHelmReleasesState => allNavigationTargets
+                    .OfType<Helm.HelmReleasesViewModel>()
+                    .FirstOrDefault(),
+                PinnedResourceTypeState rt => allNavigationTargets
+                    .OfType<KubernetesResourceTypeListViewModel>()
                     .FirstOrDefault(r =>
                         r.ResourceType.Kind == rt.Kind
                         && r.ResourceType.Group == rt.Group
                         && r.ResourceType.Version == rt.Version
-                        && r.ResourceType.Plural == rt.Plural),
+                        && r.ResourceType.Plural == rt.Plural
+                    ),
                 _ => null,
             };
             if (target != null)
@@ -418,7 +432,8 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         if (_pendingNamespaceFilter != null)
         {
             var nsFilter = cluster.NamespaceFilters.FirstOrDefault(f =>
-                f is NamespaceFilter nf && nf.Name == _pendingNamespaceFilter);
+                f is NamespaceFilter nf && nf.Name == _pendingNamespaceFilter
+            );
             if (nsFilter != null)
             {
                 _pendingNamespaceFilter = null;
@@ -981,21 +996,23 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     private void SavePinnedState()
     {
         var viewState = App.ViewStateService.State;
-        viewState.PinnedItems = Pinned.Items
-            .OfType<PinnedNavigationTargetViewModel>()
-            .Select<PinnedNavigationTargetViewModel, PinnedItemState?>(p => p.NavigationTarget switch
-            {
-                KubernetesResourceTypeListViewModel r => new PinnedResourceTypeState
+        viewState.PinnedItems = Pinned
+            .Items.OfType<PinnedNavigationTargetViewModel>()
+            .Select<PinnedNavigationTargetViewModel, PinnedItemState?>(p =>
+                p.NavigationTarget switch
                 {
-                    Kind = r.ResourceType.Kind,
-                    Group = r.ResourceType.Group,
-                    Version = r.ResourceType.Version,
-                    Plural = r.ResourceType.Plural,
-                },
-                ClusterOverviewViewModel => new PinnedClusterOverviewState(),
-                Helm.HelmReleasesViewModel => new PinnedHelmReleasesState(),
-                _ => null,
-            })
+                    KubernetesResourceTypeListViewModel r => new PinnedResourceTypeState
+                    {
+                        Kind = r.ResourceType.Kind,
+                        Group = r.ResourceType.Group,
+                        Version = r.ResourceType.Version,
+                        Plural = r.ResourceType.Plural,
+                    },
+                    ClusterOverviewViewModel => new PinnedClusterOverviewState(),
+                    Helm.HelmReleasesViewModel => new PinnedHelmReleasesState(),
+                    _ => null,
+                }
+            )
             .Where(p => p != null)
             .Cast<PinnedItemState>()
             .ToList();
@@ -1005,10 +1022,7 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
     private void SaveExpandedGroupsState()
     {
         var viewState = App.ViewStateService.State;
-        var expanded = NavigationGroups
-            .Where(g => g.IsExpanded)
-            .Select(g => g.Name)
-            .ToList();
+        var expanded = NavigationGroups.Where(g => g.IsExpanded).Select(g => g.Name).ToList();
 
         if (CustomResourcesNavigationGroup != null)
         {

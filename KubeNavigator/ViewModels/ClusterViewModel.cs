@@ -279,6 +279,11 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 V1PersistentVolume.KubeApiVersion,
                 V1PersistentVolume.KubePluralName
             ) => new PersistentVolumeViewModel((V1PersistentVolume)resource, this),
+            (
+                V1PersistentVolumeClaim.KubeGroup,
+                V1PersistentVolumeClaim.KubeApiVersion,
+                V1PersistentVolumeClaim.KubePluralName
+            ) => new PersistentVolumeClaimViewModel((V1PersistentVolumeClaim)resource, this),
             (V1ConfigMap.KubeGroup, V1ConfigMap.KubeApiVersion, V1ConfigMap.KubePluralName) =>
                 new ConfigMapViewModel((V1ConfigMap)resource, this),
             (V1Secret.KubeGroup, V1Secret.KubeApiVersion, V1Secret.KubePluralName) =>

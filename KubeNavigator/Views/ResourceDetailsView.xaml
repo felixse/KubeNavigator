@@ -548,10 +548,16 @@
                     <TextBlock
                       Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                       Text="{x:Bind Header.Title}"
+                      TextTrimming="CharacterEllipsis"
+                      ToolTipService.ToolTip="{x:Bind Header.Title}"
                     />
                   </controls:Case>
                   <controls:Case IsDefault="True">
-                    <TextBlock Text="{x:Bind Header.Title}" />
+                    <TextBlock
+                      Text="{x:Bind Header.Title}"
+                      TextTrimming="CharacterEllipsis"
+                      ToolTipService.ToolTip="{x:Bind Header.Title}"
+                    />
                   </controls:Case>
                 </controls:SwitchPresenter>
               </StackPanel>

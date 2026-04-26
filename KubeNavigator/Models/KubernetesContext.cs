@@ -210,6 +210,15 @@ public partial class KubernetesContext
                     _loggerFactory
                 ),
                 (
+                    V1PersistentVolumeClaim.KubeGroup,
+                    V1PersistentVolumeClaim.KubeApiVersion,
+                    V1PersistentVolumeClaim.KubePluralName
+                ) => new KubernetesResourceRepository<V1PersistentVolumeClaim>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
                     V1PersistentVolume.KubeGroup,
                     V1PersistentVolume.KubeApiVersion,
                     V1PersistentVolume.KubePluralName

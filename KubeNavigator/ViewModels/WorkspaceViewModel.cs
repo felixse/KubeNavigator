@@ -168,7 +168,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
             new SymbolNavigationGroupIcon("\uE968"),
             [
                 clusterOverview,
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Node),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.Node,
+                    NodeViewModel.NodeColumns
+                ),
                 new KubernetesResourceTypeListViewModel(
                     this,
                     cluster,

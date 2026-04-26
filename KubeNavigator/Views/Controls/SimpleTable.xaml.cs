@@ -115,6 +115,9 @@ public sealed partial class SimpleTable : UserControl
                 button.Click += (_, _) => LinkClicked?.Invoke(this, link);
                 return button;
 
+            case StatusCellContent status:
+                return new StatusTextBlock { Status = status.Value };
+
             case TextContent text:
                 return new TextBlock
                 {

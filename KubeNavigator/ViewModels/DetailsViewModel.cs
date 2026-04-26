@@ -18,6 +18,8 @@ public partial class DetailsViewModel : ObservableObject
 
     public event EventHandler? Navigating;
 
+    public event EventHandler? Navigated;
+
     public event EventHandler<NavigationEntry>? NavigatedBack;
 
     public DetailsViewModel(IDetailsSource source, IShelfHost shelfHost, Action? onClose = null)
@@ -58,6 +60,7 @@ public partial class DetailsViewModel : ObservableObject
             OnPropertyChanged(nameof(SelectedItem));
             OnPropertyChanged(nameof(CanGoBack));
             await UpdateDetailsAsync();
+            Navigated?.Invoke(this, EventArgs.Empty);
         }
         else
         {

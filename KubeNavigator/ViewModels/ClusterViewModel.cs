@@ -91,6 +91,7 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
 
         context.StatusChanged += Context_StatusChanged;
         context.PodMetricsUpdated += OnPodMetricsUpdated;
+        context.NodeMetricsUpdated += OnNodeMetricsUpdated;
     }
 
     private async void Context_StatusChanged(object? sender, ClusterStatus e)
@@ -273,6 +274,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 new EventViewModel((Eventsv1Event)resource, this),
             (V1Namespace.KubeGroup, V1Namespace.KubeApiVersion, V1Namespace.KubePluralName) =>
                 new NamespaceViewModel((V1Namespace)resource, this),
+            (V1Node.KubeGroup, V1Node.KubeApiVersion, V1Node.KubePluralName) =>
+                new NodeViewModel((V1Node)resource, this),
             _ => new KubernetesResourceViewModel(resource, resourceType, this),
         };
     }
@@ -508,6 +511,23 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                     if (pod is PodViewModel podVm)
                     {
                         podVm.RefreshMetrics();
+                    }
+                }
+            }
+        });
+    }
+
+    private void OnNodeMetricsUpdated(object? sender, Services.NodeMetrics e)
+    {
+        App.DispatcherQueue.TryEnqueue(() =>
+        {
+            if (_resources.TryGetValue(ResourceType.Node, out var nodes))
+            {
+                foreach (var node in nodes)
+                {
+                    if (node is NodeViewModel nodeVm)
+                    {
+                        nodeVm.RefreshMetrics();
                     }
                 }
             }

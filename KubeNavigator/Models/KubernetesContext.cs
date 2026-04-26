@@ -167,6 +167,12 @@ public partial class KubernetesContext
                         _kubernetesService,
                         _loggerFactory
                     ),
+                (V1Node.KubeGroup, V1Node.KubeApiVersion, V1Node.KubePluralName) =>
+                    new KubernetesResourceRepository<V1Node>(
+                        resourceType,
+                        _kubernetesService,
+                        _loggerFactory
+                    ),
                 (
                     V1Deployment.KubeGroup,
                     V1Deployment.KubeApiVersion,
@@ -316,6 +322,13 @@ public partial class KubernetesContext
     public ResourceUsage? GetPodMetrics(string podNamespace, string podName)
     {
         return _podMetrics.TryGetValue((podNamespace, podName), out var metrics)
+            ? metrics
+            : null;
+    }
+
+    public ResourceUsage? GetNodeMetrics(string nodeName)
+    {
+        return _nodeMetrics?.NodeUsage.TryGetValue(nodeName, out var metrics) == true
             ? metrics
             : null;
     }

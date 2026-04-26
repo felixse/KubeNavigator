@@ -104,6 +104,25 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
 
         sections.Add(new DetailsSection { Header = "Connection", Rows = [.. GetConnectionRows()] });
 
+        var endpointSliceRows = await GetEndpointSliceRowsAsync();
+        sections.Add(
+            new DetailsSection
+            {
+                Header = "Endpoint Slices",
+                Rows =
+                [
+                    new FullWidthRow
+                    {
+                        Content = new TableContent
+                        {
+                            Columns = ["Name", "Type", "Ports", "Endpoints"],
+                            Rows = endpointSliceRows,
+                        },
+                    },
+                ],
+            }
+        );
+
         if (events is not null)
         {
             sections.Add(events);
@@ -249,5 +268,50 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
                 ],
             },
         };
+    }
+
+    private async Task<IEnumerable<IEnumerable<ITableCellContent>>> GetEndpointSliceRowsAsync()
+    {
+        var slices = await Cluster.GetResourcesAsync(ResourceType.EndpointSlice);
+        var serviceName = Service.Name();
+        var serviceNamespace = Service.Namespace();
+
+        return slices
+            .Where(s =>
+                s.Resource is V1EndpointSlice es
+                && es.Namespace() == serviceNamespace
+                && es.Metadata.Labels?.TryGetValue(
+                    "kubernetes.io/service-name",
+                    out var sn
+                ) == true
+                && sn == serviceName
+            )
+            .Select(s =>
+            {
+                var es = (V1EndpointSlice)s.Resource;
+                var addressType = es.AddressType ?? string.Empty;
+                var ports = es.Ports is { Count: > 0 }
+                    ? string.Join(
+                        ", ",
+                        es.Ports.Select(p =>
+                            p.Port.HasValue ? $"{p.Name}:{p.Port}" : p.Name ?? string.Empty
+                        )
+                    )
+                    : string.Empty;
+                var endpoints = es.Endpoints is { Count: > 0 }
+                    ? string.Join(
+                        ", ",
+                        es.Endpoints.SelectMany(e => e.Addresses ?? [])
+                    )
+                    : string.Empty;
+                return (IEnumerable<ITableCellContent>)
+                    new ITableCellContent[]
+                    {
+                        (TextContent)(es.Name() ?? string.Empty),
+                        (TextContent)addressType,
+                        (TextContent)ports,
+                        (TextContent)endpoints,
+                    };
+            });
     }
 }

@@ -375,6 +375,16 @@ public record ResourceType(
             PluralDisplayName: "Role Bindings",
             SingularDisplayName: "Role Binding"
         );
+    public static ResourceType EndpointSlice { get; } =
+        new(
+            V1EndpointSlice.KubeKind,
+            V1EndpointSlice.KubeGroup,
+            V1EndpointSlice.KubeApiVersion,
+            V1EndpointSlice.KubePluralName,
+            IsNamespaceScoped: true,
+            PluralDisplayName: "Endpoint Slices",
+            SingularDisplayName: "Endpoint Slice"
+        );
     public static ResourceType CustomResourceDefinition { get; } =
         new(
             V1CustomResourceDefinition.KubeKind,

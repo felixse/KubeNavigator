@@ -292,7 +292,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     ResourceType.Endpoint,
                     EndpointViewModel.EndpointColumns
                 ),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Ingress),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.Ingress,
+                    IngressViewModel.IngressColumns
+                ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.IngressClass),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.NetworkPolicy),
             ]

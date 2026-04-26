@@ -87,6 +87,28 @@ internal partial class NamespaceViewModel : KubernetesResourceViewModel
                             },
                         },
                     },
+                    new HeaderedRow
+                    {
+                        Header = "Resource Quotas",
+                        Content = new CollectionContent
+                        {
+                            Items =
+                            [
+                                .. await GetResourceQuotaItemsAsync(),
+                            ],
+                        },
+                    },
+                    new HeaderedRow
+                    {
+                        Header = "Limit Ranges",
+                        Content = new CollectionContent
+                        {
+                            Items =
+                            [
+                                .. await GetLimitRangeItemsAsync(),
+                            ],
+                        },
+                    },
                 ],
             },
         };
@@ -97,5 +119,31 @@ internal partial class NamespaceViewModel : KubernetesResourceViewModel
         }
 
         return sections;
+    }
+
+    private async Task<IEnumerable<IDetailsCollectionElement>> GetResourceQuotaItemsAsync()
+    {
+        var resources = await Cluster.GetResourcesAsync(ResourceType.ResourceQuota);
+        var nsName = Resource.Name();
+        return resources
+            .Where(r => r.Namespace == nsName)
+            .Select(r => new LinkCollectionElement
+            {
+                ResourceName = r.Name,
+                ResourceType = ResourceType.ResourceQuota,
+            });
+    }
+
+    private async Task<IEnumerable<IDetailsCollectionElement>> GetLimitRangeItemsAsync()
+    {
+        var resources = await Cluster.GetResourcesAsync(ResourceType.LimitRange);
+        var nsName = Resource.Name();
+        return resources
+            .Where(r => r.Namespace == nsName)
+            .Select(r => new LinkCollectionElement
+            {
+                ResourceName = r.Name,
+                ResourceType = ResourceType.LimitRange,
+            });
     }
 }

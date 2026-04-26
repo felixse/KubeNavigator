@@ -256,7 +256,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     ResourceType.PodDisruptionBudget,
                     PodDisruptionBudgetViewModel.PodDisruptionBudgetColumns
                 ),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.PriorityClass),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.PriorityClass,
+                    PriorityClassViewModel.PriorityClassColumns
+                ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.RuntimeClass),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Lease),
                 new KubernetesResourceTypeListViewModel(

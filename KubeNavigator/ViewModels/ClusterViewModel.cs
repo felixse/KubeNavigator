@@ -268,6 +268,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 new DeploymentViewModel((V1Deployment)resource, this),
             (V1DaemonSet.KubeGroup, V1DaemonSet.KubeApiVersion, V1DaemonSet.KubePluralName) =>
                 new DaemonSetViewModel((V1DaemonSet)resource, this),
+            (V1ReplicaSet.KubeGroup, V1ReplicaSet.KubeApiVersion, V1ReplicaSet.KubePluralName) =>
+                new ReplicaSetViewModel((V1ReplicaSet)resource, this),
             (V1ConfigMap.KubeGroup, V1ConfigMap.KubeApiVersion, V1ConfigMap.KubePluralName) =>
                 new ConfigMapViewModel((V1ConfigMap)resource, this),
             (V1Secret.KubeGroup, V1Secret.KubeApiVersion, V1Secret.KubePluralName) =>

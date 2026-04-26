@@ -263,14 +263,22 @@ public partial class DeploymentViewModel : KubernetesResourceViewModel
             Content = tolerationsTable,
         };
 
-        var affinityYaml =
-            Deployment.Spec?.Template?.Spec?.Affinity != null
-                ? KubernetesYaml.Serialize(Deployment.Spec.Template.Spec.Affinity)
-                : string.Empty;
+        var affinity = Deployment.Spec?.Template?.Spec?.Affinity;
+        var affinityYaml = affinity != null
+            ? KubernetesYaml.Serialize(affinity)
+            : string.Empty;
 
-        yield return new HeaderedRow
+        yield return new ExpandableRow
         {
             Header = "Affinities",
+            Summary = new object?[]
+            {
+                affinity?.PodAffinity,
+                affinity?.NodeAffinity,
+                affinity?.PodAntiAffinity,
+            }
+                .Count(a => a != null)
+                .ToString(),
             Content = new EditorContent { Value = affinityYaml, IsReadOnly = true },
         };
     }

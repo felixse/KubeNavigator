@@ -35,6 +35,12 @@
         Text="{x:Bind Status, Mode=OneWay}"
       />
     </controls:Case>
+    <controls:Case Value="Bound">
+      <TextBlock
+        Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+        Text="{x:Bind Status, Mode=OneWay}"
+      />
+    </controls:Case>
     <controls:Case Value="Pending">
       <TextBlock
         Foreground="{ThemeResource SystemFillColorCautionBrush}"

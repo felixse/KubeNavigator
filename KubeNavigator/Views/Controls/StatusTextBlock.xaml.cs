@@ -42,6 +42,7 @@ public sealed partial class StatusTextBlock : UserControl
             "running" => "Running",
             "active" => "Active",
             "deployed" => "Deployed",
+            "bound" => "Bound",
             "pending" => "Pending",
             "terminating" => "Terminating",
             _ => status,

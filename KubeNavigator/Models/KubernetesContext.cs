@@ -201,6 +201,24 @@ public partial class KubernetesContext
                     _loggerFactory
                 ),
                 (
+                    V1StorageClass.KubeGroup,
+                    V1StorageClass.KubeApiVersion,
+                    V1StorageClass.KubePluralName
+                ) => new KubernetesResourceRepository<V1StorageClass>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
+                    V1PersistentVolume.KubeGroup,
+                    V1PersistentVolume.KubeApiVersion,
+                    V1PersistentVolume.KubePluralName
+                ) => new KubernetesResourceRepository<V1PersistentVolume>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
                     V1StatefulSet.KubeGroup,
                     V1StatefulSet.KubeApiVersion,
                     V1StatefulSet.KubePluralName

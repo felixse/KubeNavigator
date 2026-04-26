@@ -298,7 +298,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     cluster,
                     ResourceType.PersistentVolume
                 ),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.StorageClass),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.StorageClass,
+                    StorageClassViewModel.StorageClassColumns
+                ),
             ]
         );
         var helm = new NavigationGroupViewModel(

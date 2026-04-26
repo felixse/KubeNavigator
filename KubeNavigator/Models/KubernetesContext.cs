@@ -200,6 +200,15 @@ public partial class KubernetesContext
                     _kubernetesService,
                     _loggerFactory
                 ),
+                (
+                    V1StatefulSet.KubeGroup,
+                    V1StatefulSet.KubeApiVersion,
+                    V1StatefulSet.KubePluralName
+                ) => new KubernetesResourceRepository<V1StatefulSet>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
                 (V1ConfigMap.KubeGroup, V1ConfigMap.KubeApiVersion, V1ConfigMap.KubePluralName) =>
                     new KubernetesResourceRepository<V1ConfigMap>(
                         resourceType,

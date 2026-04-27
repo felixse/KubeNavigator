@@ -282,7 +282,8 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                 new KubernetesResourceTypeListViewModel(
                     this,
                     cluster,
-                    ResourceType.MutatingWebhookConfiguration
+                    ResourceType.MutatingWebhookConfiguration,
+                    MutatingWebhookConfigurationViewModel.MutatingWebhookConfigurationColumns
                 ),
                 new KubernetesResourceTypeListViewModel(
                     this,

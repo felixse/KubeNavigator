@@ -343,6 +343,14 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 new CronJobViewModel((V1CronJob)resource, this),
             (V1RuntimeClass.KubeGroup, V1RuntimeClass.KubeApiVersion, V1RuntimeClass.KubePluralName) =>
                 new RuntimeClassViewModel((V1RuntimeClass)resource, this),
+            (
+                V1MutatingWebhookConfiguration.KubeGroup,
+                V1MutatingWebhookConfiguration.KubeApiVersion,
+                V1MutatingWebhookConfiguration.KubePluralName
+            ) => new MutatingWebhookConfigurationViewModel(
+                (V1MutatingWebhookConfiguration)resource,
+                this
+            ),
             _ => new KubernetesResourceViewModel(resource, resourceType, this),
         };
     }

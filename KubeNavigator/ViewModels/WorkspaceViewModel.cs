@@ -267,7 +267,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     ResourceType.PriorityClass,
                     PriorityClassViewModel.PriorityClassColumns
                 ),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.RuntimeClass),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.RuntimeClass,
+                    RuntimeClassViewModel.RuntimeClassColumns
+                ),
                 new KubernetesResourceTypeListViewModel(
                     this,
                     cluster,

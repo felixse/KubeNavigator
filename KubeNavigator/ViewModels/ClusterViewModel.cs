@@ -351,6 +351,14 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 (V1MutatingWebhookConfiguration)resource,
                 this
             ),
+            (
+                V1ValidatingWebhookConfiguration.KubeGroup,
+                V1ValidatingWebhookConfiguration.KubeApiVersion,
+                V1ValidatingWebhookConfiguration.KubePluralName
+            ) => new ValidatingWebhookConfigurationViewModel(
+                (V1ValidatingWebhookConfiguration)resource,
+                this
+            ),
             _ => new KubernetesResourceViewModel(resource, resourceType, this),
         };
     }

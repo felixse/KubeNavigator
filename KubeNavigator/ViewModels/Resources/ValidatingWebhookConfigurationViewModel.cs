@@ -9,30 +9,30 @@ using KubeNavigator.ViewModels.Details;
 
 namespace KubeNavigator.ViewModels.Resources;
 
-public partial class MutatingWebhookConfigurationViewModel : KubernetesResourceViewModel
+public partial class ValidatingWebhookConfigurationViewModel : KubernetesResourceViewModel
 {
-    public MutatingWebhookConfigurationViewModel(
-        V1MutatingWebhookConfiguration resource,
+    public ValidatingWebhookConfigurationViewModel(
+        V1ValidatingWebhookConfiguration resource,
         ClusterViewModel cluster
     )
-        : base(resource, ResourceType.MutatingWebhookConfiguration, cluster) { }
+        : base(resource, ResourceType.ValidatingWebhookConfiguration, cluster) { }
 
-    public V1MutatingWebhookConfiguration WebhookConfig =>
-        (V1MutatingWebhookConfiguration)Resource;
+    public V1ValidatingWebhookConfiguration WebhookConfig =>
+        (V1ValidatingWebhookConfiguration)Resource;
 
-    public static readonly ImmutableArray<ResourceColumn> MutatingWebhookConfigurationColumns =
+    public static readonly ImmutableArray<ResourceColumn> ValidatingWebhookConfigurationColumns =
     [
         new("Name", vm => vm.Name, PropertyName: nameof(Name)),
         new(
             "Webhooks",
-            vm => ((MutatingWebhookConfigurationViewModel)vm).WebhookCount,
+            vm => ((ValidatingWebhookConfigurationViewModel)vm).WebhookCount,
             PropertyName: nameof(WebhookCount)
         ),
         new("Age", vm => vm.Age, ResourceColumnType.Age, nameof(Age)),
     ];
 
     public override ImmutableArray<ResourceColumn> Columns =>
-        MutatingWebhookConfigurationColumns;
+        ValidatingWebhookConfigurationColumns;
 
     public int WebhookCount => WebhookConfig.Webhooks?.Count ?? 0;
 
@@ -159,14 +159,6 @@ public partial class MutatingWebhookConfigurationViewModel : KubernetesResourceV
                             Value = wh.AdmissionReviewVersions is { Count: > 0 }
                                 ? string.Join(", ", wh.AdmissionReviewVersions)
                                 : string.Empty,
-                        },
-                    },
-                    new HeaderedRow
-                    {
-                        Header = "Reinvocation Policy",
-                        Content = new TextContent
-                        {
-                            Value = wh.ReinvocationPolicy ?? string.Empty,
                         },
                     },
                     new HeaderedRow

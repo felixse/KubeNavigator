@@ -387,6 +387,15 @@ public partial class KubernetesContext
                     _loggerFactory
                 ),
                 (
+                    V1ValidatingWebhookConfiguration.KubeGroup,
+                    V1ValidatingWebhookConfiguration.KubeApiVersion,
+                    V1ValidatingWebhookConfiguration.KubePluralName
+                ) => new KubernetesResourceRepository<V1ValidatingWebhookConfiguration>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
                     V1CustomResourceDefinition.KubeGroup,
                     V1CustomResourceDefinition.KubeApiVersion,
                     V1CustomResourceDefinition.KubePluralName

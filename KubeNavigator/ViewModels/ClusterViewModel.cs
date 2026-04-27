@@ -339,6 +339,8 @@ public partial class ClusterViewModel : ObservableObject, IKubernetesResourceEve
                 new NamespaceViewModel((V1Namespace)resource, this),
             (V1Node.KubeGroup, V1Node.KubeApiVersion, V1Node.KubePluralName) =>
                 new NodeViewModel((V1Node)resource, this),
+            (V1CronJob.KubeGroup, V1CronJob.KubeApiVersion, V1CronJob.KubePluralName) =>
+                new CronJobViewModel((V1CronJob)resource, this),
             _ => new KubernetesResourceViewModel(resource, resourceType, this),
         };
     }

@@ -224,7 +224,12 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                     ResourceType.ReplicationController
                 ),
                 new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.Job),
-                new KubernetesResourceTypeListViewModel(this, cluster, ResourceType.CronJob),
+                new KubernetesResourceTypeListViewModel(
+                    this,
+                    cluster,
+                    ResourceType.CronJob,
+                    CronJobViewModel.CronJobColumns
+                ),
             ]
         );
         var config = new NavigationGroupViewModel(

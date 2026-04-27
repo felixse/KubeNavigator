@@ -360,6 +360,15 @@ public partial class KubernetesContext
                     _loggerFactory
                 ),
                 (
+                    V1CronJob.KubeGroup,
+                    V1CronJob.KubeApiVersion,
+                    V1CronJob.KubePluralName
+                ) => new KubernetesResourceRepository<V1CronJob>(
+                    resourceType,
+                    _kubernetesService,
+                    _loggerFactory
+                ),
+                (
                     V1CustomResourceDefinition.KubeGroup,
                     V1CustomResourceDefinition.KubeApiVersion,
                     V1CustomResourceDefinition.KubePluralName

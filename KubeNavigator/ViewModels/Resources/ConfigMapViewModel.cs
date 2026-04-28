@@ -70,13 +70,18 @@ internal partial class ConfigMapViewModel : KubernetesResourceViewModel
         var sections = new List<IDetailsSection>
         {
             new DetailsSection { Rows = [.. GetConfigMapRows()] },
-            new DetailsSection
+        };
+
+        var dataRows = GetDataRows().ToList();
+        if (dataRows.Count > 0)
+        {
+            sections.Add(new DetailsSection
             {
                 Header = "Data",
-                Rows = [.. GetDataRows()],
+                Rows = dataRows,
                 SaveCommand = SaveCommand,
-            },
-        };
+            });
+        }
 
         if (events is not null)
         {

@@ -40,9 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\Square150x150Logo.scale-200.png" />
@@ -167,6 +164,9 @@
       <Generator>MSBuild:Compile</Generator>
     </None>
     <None Update="Views\ConfirmHelmReleaseDeletionDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Views\Controls\PortForwardsPopupButton.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
     <None Update="Views\Controls\SimpleTable.xaml">

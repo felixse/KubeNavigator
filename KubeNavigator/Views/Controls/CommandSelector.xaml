@@ -33,7 +33,7 @@
         Width="600"
         HorizontalAlignment="Stretch"
         Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-        BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+        BorderBrush="{ThemeResource ComboBoxPopupBorderThemeBrush}"
         BorderThickness="1"
         CornerRadius="4"
         Translation="0,0,32"

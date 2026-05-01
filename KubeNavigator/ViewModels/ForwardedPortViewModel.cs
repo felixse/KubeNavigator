@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using k8s;
 using k8s.Models;
+using KubeNavigator.Models;
 using KubeNavigator.ViewModels.Resources;
 using Windows.System;
 
@@ -26,10 +27,21 @@ public partial class ForwardedPortViewModel : ObservableObject, ISelectable
 
     public int LocalPort { get; set; }
 
+    public string DisplayText => $"localhost:{LocalPort} → {Resource.Name}:{TargetPort}";
+
     public string? Protocol { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsActive))]
     public partial ForwardedPortStatus Status { get; set; }
+
+    public bool IsActive => Status == ForwardedPortStatus.Active;
+
+    public static Microsoft.UI.Xaml.Visibility Active(bool isActive) =>
+        isActive ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
+
+    public static Microsoft.UI.Xaml.Visibility NotActive(bool isActive) =>
+        isActive ? Microsoft.UI.Xaml.Visibility.Collapsed : Microsoft.UI.Xaml.Visibility.Visible;
 
     public ClusterViewModel Cluster { get; }
     public KubernetesResourceViewModel Resource { get; }
@@ -71,6 +83,32 @@ public partial class ForwardedPortViewModel : ObservableObject, ISelectable
     {
         _cancellationTokenSource?.Cancel();
         Status = ForwardedPortStatus.Disabled;
+    }
+
+    [RelayCommand]
+    public async Task EditAsync()
+    {
+        var currentOptions = new PortForwardOptions { Port = LocalPort };
+        var options =
+            await Cluster.App.WindowManager.ActiveWindow.ContentDialogService.GetPortForwardOptionsAsync(
+                Resource,
+                currentOptions
+            );
+
+        if (options == null)
+        {
+            return;
+        }
+
+        Stop();
+        LocalPort = options.Port;
+        OnPropertyChanged(nameof(DisplayText));
+        Start();
+
+        if (options.OpenInBrowser)
+        {
+            await OpenInBrowserAsync();
+        }
     }
 
     [RelayCommand]

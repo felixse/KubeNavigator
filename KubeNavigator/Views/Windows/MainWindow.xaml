@@ -32,7 +32,10 @@
         />
       </TitleBar.IconSource>
       <TitleBar.Content>
-        <controls:CommandSelector ViewModel="{x:Bind ViewModel}" />
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <controls:CommandSelector ViewModel="{x:Bind ViewModel}" />
+          <controls:PortForwardsPopupButton ViewModel="{x:Bind ViewModel}" />
+        </StackPanel>
       </TitleBar.Content>
     </TitleBar>
     <Frame x:Name="RootFrame" Grid.Row="1" />

@@ -93,20 +93,6 @@ public partial class NavigationTargetToViewConverter : IValueConverter
             clusterList.OnNavigatedTo();
             return view;
         }
-        else if (value is PortForwardsViewModel portForwards)
-        {
-            if (!_views.TryGetValue(portForwards, out UserControl? view))
-            {
-                view = new PortForwardsView { ViewModel = portForwards };
-                _views.Add(portForwards, view);
-            }
-
-            _current?.OnNavigatedFrom();
-            _current = portForwards;
-            portForwards.OnNavigatedTo();
-            return view;
-        }
-
         return null!;
     }
 

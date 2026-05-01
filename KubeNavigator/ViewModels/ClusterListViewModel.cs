@@ -13,7 +13,7 @@ public partial class ClusterListViewModel : ObservableObject, INavigationTarget
     public ObservableCollection<ClusterViewModel> Clusters { get; set; }
     public WorkspaceViewModel Workspace { get; }
 
-    public ClusterListViewModel(WorkspaceViewModel workspace, PortForwardsViewModel portForwards)
+    public ClusterListViewModel(WorkspaceViewModel workspace)
     {
         Workspace = workspace;
         Clusters = workspace.Window.App.Clusters;

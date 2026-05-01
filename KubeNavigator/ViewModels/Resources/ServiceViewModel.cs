@@ -250,8 +250,9 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
             Content = new TextContent { Value = string.Join(", ", Service.Spec.IpFamilies ?? []) },
         };
 
-        yield return new FullWidthRow
+        yield return new HeaderedRow
         {
+            Header = "Ports",
             Content = new PortsContent
             {
                 Ports =
@@ -280,10 +281,7 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
             .Where(s =>
                 s.Resource is V1EndpointSlice es
                 && es.Namespace() == serviceNamespace
-                && es.Metadata.Labels?.TryGetValue(
-                    "kubernetes.io/service-name",
-                    out var sn
-                ) == true
+                && es.Metadata.Labels?.TryGetValue("kubernetes.io/service-name", out var sn) == true
                 && sn == serviceName
             )
             .Select(s =>
@@ -299,10 +297,7 @@ public partial class ServiceViewModel : KubernetesResourceViewModel
                     )
                     : string.Empty;
                 var endpoints = es.Endpoints is { Count: > 0 }
-                    ? string.Join(
-                        ", ",
-                        es.Endpoints.SelectMany(e => e.Addresses ?? [])
-                    )
+                    ? string.Join(", ", es.Endpoints.SelectMany(e => e.Addresses ?? []))
                     : string.Empty;
                 return (IEnumerable<ITableCellContent>)
                     new ITableCellContent[]

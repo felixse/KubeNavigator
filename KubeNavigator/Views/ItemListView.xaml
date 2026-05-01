@@ -30,33 +30,8 @@
         </DataTemplate>
       </templateselectors:NamespaceFilterTemplateSelector.NamespaceTemplate>
     </templateselectors:NamespaceFilterTemplateSelector>
-    <templateselectors:TableTemplateSelector x:Key="TableTemplateSelector">
-      <templateselectors:TableTemplateSelector.ForwardedPortTemplate>
-        <DataTemplate x:DataType="viewmodels:ForwardedPortViewModel">
-          <controls:DataRow HorizontalAlignment="Left" Background="Transparent">
-            <CheckBox MinWidth="36" IsChecked="{x:Bind IsSelected, Mode=TwoWay}" />
-            <TextBlock VerticalAlignment="Center" Text="{x:Bind Resource.Name}" />
-          </controls:DataRow>
-        </DataTemplate>
-      </templateselectors:TableTemplateSelector.ForwardedPortTemplate>
-    </templateselectors:TableTemplateSelector>
-    <templateselectors:TableHeaderTemplateSelector x:Key="TableHeaderTemplateSelector">
-      <templateselectors:TableHeaderTemplateSelector.ForwardedPortTemplate>
-        <DataTemplate x:DataType="viewmodels:PortForwardsViewModel">
-          <controls:DataTable ColumnSpacing="16">
-            <controls:DataColumn Margin="12,0,0,0" DesiredWidth="Auto">
-              <CheckBox MinWidth="36" IsChecked="{x:Bind IsAllSelected, Mode=TwoWay}" />
-            </controls:DataColumn>
-            <controls:DataColumn
-              CanResize="True"
-              Content="Pod Name"
-              DesiredWidth="Auto"
-              FontWeight="SemiBold"
-            />
-          </controls:DataTable>
-        </DataTemplate>
-      </templateselectors:TableHeaderTemplateSelector.ForwardedPortTemplate>
-    </templateselectors:TableHeaderTemplateSelector>
+    <templateselectors:TableTemplateSelector x:Key="TableTemplateSelector" />
+    <templateselectors:TableHeaderTemplateSelector x:Key="TableHeaderTemplateSelector" />
   </UserControl.Resources>
   <Grid>
     <Grid.RowDefinitions>

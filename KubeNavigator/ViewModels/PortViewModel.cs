@@ -117,12 +117,25 @@ public partial class PortViewModel : ObservableObject
 
         if (ForwardedPort == null)
         {
-            var (targetPort, targetResource) = await TargetPort.GetPortAndResourceAsync();
+            (int targetPort, k8s.IKubernetesObject<k8s.Models.V1ObjectMeta> targetResource) result;
+            try
+            {
+                result = await TargetPort.GetPortAndResourceAsync();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Cluster.App.WindowManager.ActiveWindow.ShowMessage(
+                    "Port Forward Error",
+                    ex.Message,
+                    NotificationSeverity.Error
+                );
+                return;
+            }
 
             ForwardedPort = Cluster.CreateForwardedPort(
                 Resource,
-                targetResource,
-                targetPort,
+                result.targetResource,
+                result.targetPort,
                 options.Port,
                 Protocol
             );
@@ -168,12 +181,25 @@ public partial class PortViewModel : ObservableObject
                     .Any(x => x.Port == randomPort)
             );
 
-            var (targetPort, targetResource) = await TargetPort.GetPortAndResourceAsync();
+            (int targetPort, k8s.IKubernetesObject<k8s.Models.V1ObjectMeta> targetResource) result;
+            try
+            {
+                result = await TargetPort.GetPortAndResourceAsync();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Cluster.App.WindowManager.ActiveWindow.ShowMessage(
+                    "Port Forward Error",
+                    ex.Message,
+                    NotificationSeverity.Error
+                );
+                return;
+            }
 
             ForwardedPort = Cluster.CreateForwardedPort(
                 Resource,
-                targetResource,
-                targetPort,
+                result.targetResource,
+                result.targetPort,
                 randomPort,
                 Protocol
             );

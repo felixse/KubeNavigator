@@ -15,8 +15,6 @@ public partial class NavigationViewMenuItemTemplateSelector : DataTemplateSelect
 
     public DataTemplate? SettingsTemplate { get; set; }
 
-    public DataTemplate? PortForwardsTemplate { get; set; }
-
     public DataTemplate? ClusterListTemplate { get; set; }
 
     public DataTemplate? CustomResourceGroupTemplate { get; set; }
@@ -42,10 +40,6 @@ public partial class NavigationViewMenuItemTemplateSelector : DataTemplateSelect
         else if (item is SettingsViewModel && SettingsTemplate != null)
         {
             return SettingsTemplate;
-        }
-        else if (item is PortForwardsViewModel && PortForwardsTemplate != null)
-        {
-            return PortForwardsTemplate;
         }
         else if (item is ClusterListViewModel && ClusterListTemplate != null)
         {

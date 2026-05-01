@@ -91,12 +91,9 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         );
         // todo load pinned from settings
 
-        var portForwards = new PortForwardsViewModel(this, window.App.ForwardedPorts);
-
         FooterItems =
         [
-            portForwards,
-            new ClusterListViewModel(this, portForwards),
+            new ClusterListViewModel(this),
             window.App.Settings,
         ];
 

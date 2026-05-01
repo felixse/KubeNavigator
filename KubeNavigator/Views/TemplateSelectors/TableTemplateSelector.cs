@@ -8,8 +8,6 @@ namespace KubeNavigator.TemplateSelectors;
 
 public partial class TableTemplateSelector : DataTemplateSelector
 {
-    public DataTemplate? ForwardedPortTemplate { get; set; }
-
     protected override DataTemplate SelectTemplateCore(object item)
     {
         if (item is KubernetesResourceViewModel)
@@ -19,10 +17,6 @@ public partial class TableTemplateSelector : DataTemplateSelector
         else if (item is HelmReleaseViewModel)
         {
             return (DataTemplate)Application.Current.Resources["HelmReleaseTableRow"];
-        }
-        else if (item is ForwardedPortViewModel && ForwardedPortTemplate != null)
-        {
-            return ForwardedPortTemplate;
         }
 
         return base.SelectTemplateCore(item);

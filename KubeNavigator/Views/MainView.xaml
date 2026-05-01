@@ -123,21 +123,6 @@
             <NavigationViewItem Content="{x:Bind Title}" Icon="Setting" Tag="{x:Bind}" />
           </DataTemplate>
         </templateselectors:NavigationViewMenuItemTemplateSelector.SettingsTemplate>
-        <templateselectors:NavigationViewMenuItemTemplateSelector.PortForwardsTemplate>
-          <DataTemplate x:DataType="viewmodels:PortForwardsViewModel">
-            <NavigationViewItem Content="{x:Bind Title}" Tag="{x:Bind}">
-              <NavigationViewItem.Icon>
-                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE704;" />
-              </NavigationViewItem.Icon>
-              <NavigationViewItem.InfoBadge>
-                <InfoBadge
-                  Visibility="{x:Bind ForwardedPorts.Count, Mode=OneWay, Converter={StaticResource CountToVisibilityConverter}}"
-                  Value="{x:Bind ForwardedPorts.Count, Mode=OneWay}"
-                />
-              </NavigationViewItem.InfoBadge>
-            </NavigationViewItem>
-          </DataTemplate>
-        </templateselectors:NavigationViewMenuItemTemplateSelector.PortForwardsTemplate>
         <templateselectors:NavigationViewMenuItemTemplateSelector.ClusterListTemplate>
           <DataTemplate x:DataType="viewmodels:ClusterListViewModel">
             <NavigationViewItem Content="{x:Bind Title}" Tag="{x:Bind}">

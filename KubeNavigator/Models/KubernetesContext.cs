@@ -608,14 +608,21 @@ public partial class KubernetesContext
         Log.PortForwardListenerStarting(_logger, resource.Name(), localPort, targetPort, Name);
         listener.Start();
 
-        while (!cancellationToken.IsCancellationRequested)
+        try
         {
-            var socket = await listener.AcceptSocketAsync(cancellationToken);
-            Log.PortForwardSocketAccepted(_logger, resource.Name(), localPort, Name);
-            Task.Run(
-                async () => await RunSocketAsync(socket, resource, targetPort, cancellationToken),
-                cancellationToken
-            );
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var socket = await listener.AcceptSocketAsync(cancellationToken);
+                Log.PortForwardSocketAccepted(_logger, resource.Name(), localPort, Name);
+                Task.Run(
+                    async () => await RunSocketAsync(socket, resource, targetPort, cancellationToken),
+                    cancellationToken
+                );
+            }
+        }
+        finally
+        {
+            listener.Stop();
         }
     }
 

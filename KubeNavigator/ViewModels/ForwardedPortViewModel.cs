@@ -19,7 +19,7 @@ public enum ForwardedPortStatus
     Error,
 }
 
-public partial class ForwardedPortViewModel : ObservableObject, ISelectable
+public partial class ForwardedPortViewModel : ObservableObject
 {
     private CancellationTokenSource? _cancellationTokenSource;
 
@@ -46,7 +46,6 @@ public partial class ForwardedPortViewModel : ObservableObject, ISelectable
     public ClusterViewModel Cluster { get; }
     public KubernetesResourceViewModel Resource { get; }
     public IKubernetesObject<V1ObjectMeta> TargetResource { get; }
-    public bool IsSelected { get; set; }
 
     public List<ItemCommand> Commands { get; } = [];
 
@@ -112,10 +111,17 @@ public partial class ForwardedPortViewModel : ObservableObject, ISelectable
     }
 
     [RelayCommand]
-    public void Delete()
+    public async Task DeleteAsync()
     {
-        // todo show confirmation dialog
-        Cluster.DeleteForwardedPort(this, Resource);
+        var confirmed = await Cluster.App.WindowManager.ActiveWindow.ContentDialogService.ConfirmAsync(
+            "Delete Port Forward",
+            $"Are you sure you want to delete the port forward for {Resource.Name} (localhost:{LocalPort})?"
+        );
+
+        if (confirmed)
+        {
+            Cluster.DeleteForwardedPort(this, Resource);
+        }
     }
 
     [RelayCommand]

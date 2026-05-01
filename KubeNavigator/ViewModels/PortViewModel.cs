@@ -90,11 +90,15 @@ public partial class PortViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public void DeleteForwardedPort()
+    public async Task DeleteForwardedPortAsync()
     {
-        ForwardedPort?.Delete();
-        ForwardedPort = null;
-        OnPropertyChanged(nameof(Link));
+        if (ForwardedPort == null) return;
+        await ForwardedPort.DeleteAsync();
+        if (!Cluster.App.ForwardedPorts.Contains(ForwardedPort))
+        {
+            ForwardedPort = null;
+            OnPropertyChanged(nameof(Link));
+        }
     }
 
     [RelayCommand]
@@ -122,7 +126,7 @@ public partial class PortViewModel : ObservableObject
             {
                 result = await TargetPort.GetPortAndResourceAsync();
             }
-            catch (InvalidOperationException ex)
+            catch (PortForwardException ex)
             {
                 Cluster.App.WindowManager.ActiveWindow.ShowMessage(
                     "Port Forward Error",

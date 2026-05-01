@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
@@ -31,7 +30,7 @@ internal class ServiceTargetPod : ITargetPort
         var selector = _service.Service.Spec.Selector;
         if (selector == null || !selector.Any())
         {
-            throw new InvalidOperationException("Service does not have a selector");
+            throw new PortForwardException("Service does not have a selector");
         }
 
         var targetPod = pods.FirstOrDefault(pod =>
@@ -49,7 +48,7 @@ internal class ServiceTargetPod : ITargetPort
 
         if (targetPod == null)
         {
-            throw new InvalidOperationException($"No pod found matching service selector");
+            throw new PortForwardException("No pod found matching service selector");
         }
 
         IKubernetesObject<V1ObjectMeta> resource = targetPod;
@@ -70,7 +69,7 @@ internal class ServiceTargetPod : ITargetPort
                 }
             }
 
-            throw new InvalidOperationException(
+            throw new PortForwardException(
                 $"No container port with name '{namedPort}' found in pod {targetPod.Metadata.Name}"
             );
         }

@@ -33,4 +33,6 @@ public interface IContentDialogService
     Task<bool> ShowToolsNotFoundDialogAsync(string message);
 
     Task ShowInfoDialogAsync(string title, string message);
+
+    Task<bool> ConfirmAsync(string title, string message);
 }

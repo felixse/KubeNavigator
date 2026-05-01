@@ -150,6 +150,23 @@ public class ContentDialogService : IContentDialogService
         await dialog.ShowAsync();
     }
 
+    public async Task<bool> ConfirmAsync(string title, string message)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = message,
+            PrimaryButtonText = "Yes",
+            CloseButtonText = "No",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = Page?.XamlRoot,
+            RequestedTheme = GetRequestedTheme(),
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
+    }
+
     private ElementTheme GetRequestedTheme()
     {
         return _themeManager.GetEffectiveTheme() == ThemeManager.EffectiveTheme.Dark

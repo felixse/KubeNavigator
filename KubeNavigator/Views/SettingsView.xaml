@@ -76,7 +76,10 @@
         </Style>
       </ScrollViewer.Resources>
       <StackPanel Spacing="4">
-        <controls:SettingsExpander Description="© 2026. All rights reserved." Header="KubeNavigator">
+        <controls:SettingsExpander
+          Description="© 2026. All rights reserved."
+          Header="KubeNavigator"
+        >
           <controls:SettingsExpander.HeaderIcon>
             <BitmapIcon
               ShowAsMonochrome="False"
@@ -105,8 +108,28 @@
             >
               <StackPanel>
                 <HyperlinkButton
+                  Content="CliWrap"
+                  NavigateUri="https://github.com/Tyrrrz/CliWrap"
+                />
+                <HyperlinkButton
+                  Content="FuseSharp"
+                  NavigateUri="https://github.com/felixse/FuseSharp"
+                />
+                <HyperlinkButton
                   Content="KubernetesClient"
                   NavigateUri="https://github.com/kubernetes-client/csharp"
+                />
+                <HyperlinkButton
+                  Content="Nito.AsyncEx"
+                  NavigateUri="https://github.com/StephenCleary/AsyncEx"
+                />
+                <HyperlinkButton
+                  Content="Serilog"
+                  NavigateUri="https://github.com/serilog/serilog"
+                />
+                <HyperlinkButton
+                  Content="SystemTextJson.JsonDiffPatch"
+                  NavigateUri="https://github.com/weichch/system-text-json-jsondiffpatch"
                 />
                 <HyperlinkButton
                   Content="Windows App SDK"
@@ -116,8 +139,14 @@
                   Content="Windows Community Toolkit"
                   NavigateUri="https://github.com/CommunityToolkit/Windows"
                 />
-                <HyperlinkButton Content="CliWrap" NavigateUri="https://github.com/Tyrrrz/CliWrap" />
-                <HyperlinkButton Content="Serilog" NavigateUri="https://github.com/serilog/serilog" />
+                <HyperlinkButton
+                  Content="WinUIEdit"
+                  NavigateUri="https://github.com/BreeceW/WinUIEdit"
+                />
+                <HyperlinkButton
+                  Content="WinUIEx"
+                  NavigateUri="https://github.com/dotMorten/WinUIEx"
+                />
               </StackPanel>
             </controls:SettingsCard>
             <controls:SettingsCard
@@ -138,11 +167,11 @@
             </controls:SettingsCard>
           </controls:SettingsExpander.Items>
         </controls:SettingsExpander>
-        <controls:SettingsCard
-          Description="{x:Bind ViewModel.LogDirectory}"
-          Header="Log Files"
-        >
-          <HyperlinkButton Command="{x:Bind ViewModel.OpenLogDirectoryCommand}" Content="Open log directory" />
+        <controls:SettingsCard Description="{x:Bind ViewModel.LogDirectory}" Header="Log Files">
+          <HyperlinkButton
+            Command="{x:Bind ViewModel.OpenLogDirectoryCommand}"
+            Content="Open log directory"
+          />
         </controls:SettingsCard>
       </StackPanel>
     </ScrollViewer>

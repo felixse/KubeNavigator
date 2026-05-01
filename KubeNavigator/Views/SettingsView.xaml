@@ -97,7 +97,7 @@
               Header="License"
             >
               <HyperlinkButton
-                Content="MIT License"
+                Content="GNU General Public License v3.0"
                 NavigateUri="https://github.com/felixse/KubeNavigator/blob/main/LICENSE"
               />
             </controls:SettingsCard>
@@ -132,6 +132,10 @@
                   NavigateUri="https://github.com/weichch/system-text-json-jsondiffpatch"
                 />
                 <HyperlinkButton
+                  Content="ts-pattern"
+                  NavigateUri="https://github.com/gvergnaud/ts-pattern"
+                />
+                <HyperlinkButton
                   Content="Windows App SDK"
                   NavigateUri="https://github.com/microsoft/WindowsAppSDK"
                 />
@@ -146,6 +150,10 @@
                 <HyperlinkButton
                   Content="WinUIEx"
                   NavigateUri="https://github.com/dotMorten/WinUIEx"
+                />
+                <HyperlinkButton
+                  Content="xterm.js"
+                  NavigateUri="https://github.com/xtermjs/xterm.js"
                 />
               </StackPanel>
             </controls:SettingsCard>

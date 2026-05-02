@@ -1,7 +1,7 @@
 ﻿# KubeNavigator
 
 <p align="center">
-  <img src="KubeNavigator/Assets/Square44x44Logo.altform-lightunplated_targetsize-256.png" alt="KubeNavigator Logo" width="150" height="150">
+  <img src="app-icon.png" alt="KubeNavigator Logo" width="150">
 </p>
 
 <p align="center">

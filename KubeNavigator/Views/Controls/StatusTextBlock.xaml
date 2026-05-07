@@ -11,6 +11,12 @@
         Text="{x:Bind Status, Mode=OneWay}"
       />
     </controls:Case>
+    <controls:Case Value="Succeeded">
+        <TextBlock
+        Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+        Text="{x:Bind Status, Mode=OneWay}"
+        />
+    </controls:Case>
     <controls:Case Value="Active">
       <TextBlock
         Foreground="{ThemeResource SystemFillColorSuccessBrush}"

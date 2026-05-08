@@ -12,7 +12,7 @@ public class HelmRelease
 
     public JsonElement? Config { get; set; }
 
-    public required string Manifest { get; set; }
+    public string? Manifest { get; set; }
 
     public required int Version { get; set; }
 

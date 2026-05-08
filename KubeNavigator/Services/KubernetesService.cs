@@ -130,6 +130,7 @@ public partial class KubernetesService
 
     public Watcher<T> WatchResources<T>(
         ResourceType resourceType,
+        string? resourceVersion,
         Action<WatchEventType, T> onEvent,
         Action<Exception>? onError = null,
         Action? onClosed = null
@@ -137,13 +138,51 @@ public partial class KubernetesService
         where T : IKubernetesObject<V1ObjectMeta>
     {
         Log.StartingWatcher(_logger, resourceType.Plural, _contextName);
-        var client = new GenericClient(
-            _kubernetes,
-            resourceType.Group,
-            resourceType.Version,
-            resourceType.Plural
+
+        var k8s = (Kubernetes)_kubernetes!;
+
+        // Build the watch URL:
+        //   core group  → /api/{version}/{plural}
+        //   named group → /apis/{group}/{version}/{plural}
+        var basePath = string.IsNullOrEmpty(resourceType.Group)
+            ? $"api/{resourceType.Version}/{resourceType.Plural}"
+            : $"apis/{resourceType.Group}/{resourceType.Version}/{resourceType.Plural}";
+
+        var query = "watch=true&allowWatchBookmarks=true&timeoutSeconds=300";
+        if (!string.IsNullOrEmpty(resourceVersion))
+        {
+            query += $"&resourceVersion={Uri.EscapeDataString(resourceVersion)}";
+        }
+
+        var watchUri = new Uri(k8s.BaseUri, $"{basePath}?{query}");
+
+        return new Watcher<T>(
+            async () =>
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, watchUri);
+                if (k8s.Credentials is not null)
+                {
+                    await k8s.Credentials.ProcessHttpRequestAsync(request, CancellationToken.None);
+                }
+
+                // ResponseHeadersRead is critical: without it, SendAsync buffers
+                // the entire response body before returning, which for a long-lived
+                // streaming watch means the Watcher only sees events after the
+                // server closes the connection — defeating the purpose of watching.
+                var response = await k8s.HttpClient.SendAsync(
+                    request,
+                    HttpCompletionOption.ResponseHeadersRead,
+                    CancellationToken.None
+                );
+                response.EnsureSuccessStatusCode();
+
+                var stream = await response.Content.ReadAsStreamAsync();
+                return new StreamReader(stream);
+            },
+            onEvent,
+            onError,
+            onClosed
         );
-        return client.Watch(onEvent, onError, onClosed);
     }
 
     public async Task<IEnumerable<(string ResourceName, string Error)>> DeleteResourcesAsync(
@@ -697,10 +736,10 @@ public partial class KubernetesService
             }
 
             var pods = podsTask.Result;
-            var totalPods = pods.Items.Count;
-            var requestedPods = pods.Items.Count(p =>
-                p.Status?.Phase is not ("Succeeded" or "Failed")
+            var totalPods = pods.Items.Count(p =>
+                p.Status?.Phase is not "Failed"
             );
+            var requestedPods = pods.Items.Count;
 
             Log.NodeMetricsFetched(_logger, metrics.Count, _contextName);
             return new NodeMetrics(

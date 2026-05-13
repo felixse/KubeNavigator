@@ -14,6 +14,8 @@ public abstract partial class ListViewModel : ObservableObject, INavigationTarge
 {
     public string Title { get; }
 
+    public string? Subtitle { get; init; }
+
     [ObservableProperty]
     public partial bool IsPinned { get; private set; }
 

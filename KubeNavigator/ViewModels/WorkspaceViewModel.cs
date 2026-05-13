@@ -788,13 +788,16 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
                 crd.Spec.Versions.First().Name,
                 crd.Spec.Names.Plural,
                 crd.Spec.Scope == "Namespaced",
-                crd.Spec.Names.Plural,
-                crd.Spec.Names.Singular,
+                crd.Spec.Names.Kind,
+                crd.Spec.Names.Kind,
                 printerColumns
             );
             var columns = CrdColumnHelper.BuildColumns(resourceType);
             group.Resources.Add(
                 new KubernetesResourceTypeListViewModel(this, Cluster, resourceType, columns)
+                {
+                    Subtitle = crd.Spec.Group,
+                }
             );
             AppCommands.Add(new ViewResourceAppCommand(resourceType, this, crd.Spec.Group));
         }

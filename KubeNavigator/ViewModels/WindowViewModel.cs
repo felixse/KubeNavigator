@@ -121,7 +121,11 @@ public partial class WindowViewModel : ObservableObject, IWindow
                         ? crg.Resources.Cast<INavigationTarget>()
                         : [item]
                 )
-                .FirstOrDefault(r => r.Title == navigationTarget.Title);
+                .FirstOrDefault(r =>
+                    r is KubernetesResourceTypeListViewModel rl
+                    && navigationTarget is KubernetesResourceTypeListViewModel sourceRl
+                        ? rl.ResourceType == sourceRl.ResourceType
+                        : r.Title == navigationTarget.Title);
         }
     }
 

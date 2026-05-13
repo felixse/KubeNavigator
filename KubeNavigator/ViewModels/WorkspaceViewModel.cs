@@ -1001,9 +1001,11 @@ public partial class WorkspaceViewModel : ObservableObject, IShelfHost
         {
             if (item is NamespaceFilter nf && nf.Name == _pendingNamespaceFilter)
             {
-                SelectedNamespaceFilter = item;
                 _pendingNamespaceFilter = null;
                 Cluster.NamespaceFilters.CollectionChanged -= OnNamespaceFiltersCollectionChanged;
+                // Defer selection so the UI has processed the collection change
+                // before the binding tries to set SelectedItem on the Selector.
+                App.DispatcherQueue.TryEnqueue(() => SelectedNamespaceFilter = item);
                 return;
             }
         }

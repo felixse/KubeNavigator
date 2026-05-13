@@ -26,46 +26,76 @@ public partial class PodLogsViewModel : ObservableObject, IShelfItem
 
     public ThemeManager ThemeManager { get; }
 
+    private const int MaxRetryDelaySeconds = 30;
+
     public void Start()
     {
         Log.LogStreamStarting(_logger, Pod.Name, Pod.Namespace);
         _cts = new CancellationTokenSource();
-        Task.Run(
-            async () =>
-            {
-                try
-                {
-                    using var stream = await Cluster.Context.OpenLogStreamAsync(
-                        Pod.Pod,
-                        _cts.Token
-                    );
-                    using var reader = new StreamReader(stream);
-                    Log.LogStreamConnected(_logger, Pod.Name, Pod.Namespace);
+        Task.Run(() => StreamWithReconnectAsync(_cts.Token), cancellationToken: _cts.Token);
+    }
 
-                    while (!_cts.IsCancellationRequested)
+    private async Task StreamWithReconnectAsync(CancellationToken cancellationToken)
+    {
+        var retryDelay = TimeSpan.FromSeconds(1);
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                using var stream = await Cluster.Context.OpenLogStreamAsync(
+                    Pod.Pod,
+                    cancellationToken
+                );
+                using var reader = new StreamReader(stream);
+                Log.LogStreamConnected(_logger, Pod.Name, Pod.Namespace);
+
+                retryDelay = TimeSpan.FromSeconds(1); // reset on successful connection
+
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    var line = await reader.ReadLineAsync(cancellationToken);
+                    if (line != null)
                     {
-                        var line = await reader.ReadLineAsync(cancellationToken: _cts.Token);
-                        if (line != null)
-                        {
-                            LineReceived?.Invoke(this, line);
-                        }
-                        else
-                        {
-                            await Task.Delay(1000);
-                        }
+                        LineReceived?.Invoke(this, line);
+                    }
+                    else
+                    {
+                        // End of stream — break to reconnect
+                        Log.LogStreamDisconnected(_logger, Pod.Name, Pod.Namespace);
+                        break;
                     }
                 }
-                catch (OperationCanceledException)
-                {
-                    Log.LogStreamCancelled(_logger, Pod.Name, Pod.Namespace);
-                }
-                catch (Exception ex)
-                {
-                    Log.LogStreamFailed(_logger, Pod.Name, Pod.Namespace, ex);
-                }
-            },
-            cancellationToken: _cts.Token
-        );
+            }
+            catch (OperationCanceledException)
+            {
+                Log.LogStreamCancelled(_logger, Pod.Name, Pod.Namespace);
+                return;
+            }
+            catch (Exception ex)
+            {
+                Log.LogStreamFailed(_logger, Pod.Name, Pod.Namespace, ex);
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            Log.LogStreamReconnecting(_logger, Pod.Name, Pod.Namespace, (int)retryDelay.TotalSeconds);
+            try
+            {
+                await Task.Delay(retryDelay, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            retryDelay = TimeSpan.FromSeconds(
+                Math.Min(retryDelay.TotalSeconds * 2, MaxRetryDelaySeconds)
+            );
+        }
     }
 
     public event EventHandler<string>? LineReceived;
@@ -169,6 +199,29 @@ public partial class PodLogsViewModel : ObservableObject, IShelfItem
             string podName,
             string? @namespace,
             Exception exception
+        );
+
+        [LoggerMessage(
+            EventId = 9006,
+            Level = LogLevel.Warning,
+            Message = "Log stream disconnected for pod {PodName} in namespace {Namespace}, end of stream reached"
+        )]
+        public static partial void LogStreamDisconnected(
+            ILogger logger,
+            string podName,
+            string? @namespace
+        );
+
+        [LoggerMessage(
+            EventId = 9007,
+            Level = LogLevel.Information,
+            Message = "Reconnecting log stream for pod {PodName} in namespace {Namespace} in {DelaySeconds}s"
+        )]
+        public static partial void LogStreamReconnecting(
+            ILogger logger,
+            string podName,
+            string? @namespace,
+            int delaySeconds
         );
     }
 }
